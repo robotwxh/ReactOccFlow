@@ -1,0 +1,40 @@
+{
+  "complete": true,
+  "not_planning_results": true,
+  "metric_protocol_version": 2,
+  "rows": [
+    {
+      "variant": "history",
+      "windows": 4219,
+      "camera_standard_pooled_miou": 0.3281336254598147,
+      "camera_standard_mean_of_horizons": 0.33153848739875985,
+      "legacy_unmasked_mean_of_horizons": 0.26596649576287135,
+      "per_time_camera_standard": [
+        0.5459221637436674,
+        0.4113929736015742,
+        0.3284495867780446,
+        0.2730849514864711,
+        0.23122416851055463,
+        0.19915708027224702
+      ],
+      "metrics_sha256": "4de2a7c7d14776df4b98c91aa1e2fe38cc6a9489d44632075a03627138ec9ef5"
+    },
+    {
+      "variant": "future",
+      "windows": 4219,
+      "camera_standard_pooled_miou": 0.38052406869179267,
+      "camera_standard_mean_of_horizons": 0.38159954689452635,
+      "legacy_unmasked_mean_of_horizons": 0.3088474598297392,
+      "per_time_camera_standard": [
+        0.5468101992622465,
+        0.4411450587197429,
+        0.3829350194606566,
+        0.34130077901000266,
+        0.30481769557590227,
+        0.2725885293386071
+      ],
+      "metrics_sha256": "648bd595e942e7738eddc6f3101a4f345017e39eb329ce541ea8fba97cc9c100"
+    }
+  ],
+  "performance_note": "Times include concurrent development/QA workloads; not isolated T16 performance comparisons."
+}

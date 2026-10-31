@@ -1,0 +1,145 @@
+{
+  "version": 1,
+  "source_search_before_implementation": true,
+  "searches": [
+    {
+      "repository": "OccFM",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "queries": [
+        "ConsistencyLosses",
+        "training_loss",
+        "optimizer.step",
+        "collision_loss",
+        "kinematic",
+        "flow_matching",
+        "interaction_loss",
+        "clip_grad_norm_",
+        "train_model"
+      ],
+      "result": "Existing OccFM optimizer loop was already copied before adaptation for T3; this task reuses that owned helper unchanged. No occupancy-actor endpoint adapter supplied."
+    },
+    {
+      "repository": "IR-WM",
+      "commit": "94dbbf44d6c22e50db4080e986b3675eadbb4497",
+      "queries": [
+        "ConsistencyLosses",
+        "training_loss",
+        "optimizer.step",
+        "collision_loss",
+        "kinematic",
+        "flow_matching",
+        "interaction_loss",
+        "clip_grad_norm_",
+        "train_model"
+      ],
+      "result": "OpenMMLab training wrappers, no standalone ReactFlow joint endpoint/consistency acceptance adapter. No new source copy necessary."
+    }
+  ],
+  "existing_copied_dependencies": [
+    {
+      "snapshot": "reactoccflow/training/source_snapshots/occfm_train_utils.py.txt",
+      "sha256": "16e7ea88467b3db368a8836a9fad9f910d2e164ca620bec7b9e53f2c1766c7ee",
+      "provenance": "docs/provenance/training_sources.json",
+      "role": "Documentation only; never imported or executed."
+    }
+  ],
+  "owned_runtime_dependencies": [
+    {
+      "path": "scripts/train_smoke.py",
+      "sha256_before": "dec2387c67c59a7ab9840a6c09a5af2054ff73324bf8b40b8ec3f6e8b5125594",
+      "sha256_after": "dec2387c67c59a7ab9840a6c09a5af2054ff73324bf8b40b8ec3f6e8b5125594",
+      "unchanged_by_task": true
+    },
+    {
+      "path": "reactoccflow/models/react_flow.py",
+      "sha256_before": "b6fc66e2338788fcf25207591d13e0d15b31063edccd77101aabe2a48bce656c",
+      "sha256_after": "b6fc66e2338788fcf25207591d13e0d15b31063edccd77101aabe2a48bce656c",
+      "unchanged_by_task": true
+    },
+    {
+      "path": "reactoccflow/models/joint_transition.py",
+      "sha256_before": "d4caa91385be57d4b9cbfeada00090ca2ec404cd0cb742106d7303dd5101b3b6",
+      "sha256_after": "d4caa91385be57d4b9cbfeada00090ca2ec404cd0cb742106d7303dd5101b3b6",
+      "unchanged_by_task": true
+    },
+    {
+      "path": "reactoccflow/models/codec.py",
+      "sha256_before": "cc3b760e8dba4a435b4c5cf2e517561263d6b005074361d9299039fd375cc441",
+      "sha256_after": "cc3b760e8dba4a435b4c5cf2e517561263d6b005074361d9299039fd375cc441",
+      "unchanged_by_task": true
+    },
+    {
+      "path": "reactoccflow/losses/consistency.py",
+      "sha256_before": "4820591ae261c042ab0d8ccc190d0f5a4c31ef60251961e6215e69735ab9335e",
+      "sha256_after": "4820591ae261c042ab0d8ccc190d0f5a4c31ef60251961e6215e69735ab9335e",
+      "unchanged_by_task": true
+    }
+  ],
+  "existing_component_provenance": [
+    "docs/provenance/model_sources.json",
+    "docs/provenance/react_flow_sources.json",
+    "docs/provenance/consistency_sources.json",
+    "docs/provenance/full_cache_sources.json"
+  ],
+  "new_after_search": [
+    "Training-only nn.Module adapter combining ReactFlow FM/existence scalar total with differentiable decoded endpoint consistency total",
+    "E0 cache selection/fingerprint/partial-cache-aware runner using unchanged owned T3 finite-step and fixed-probe helpers"
+  ],
+  "license": "Preserves existing source snapshots and notices. Unresolved OccFM upstream redistribution terms remain explicit in THIRD_PARTY_NOTICES.md.",
+  "owned_deliverables": [
+    {
+      "path": "scripts/train_joint_smoke.py",
+      "sha256": "697fd6235dd77642f2f668a524b2d0ebbaafa57de72e7896ed449ee1d04c6724"
+    },
+    {
+      "path": "reactoccflow/training/joint.py",
+      "sha256": "7c9a3c16343d0853db6b26cb1aceafe9f9e4e731d6577c58e983bc88b205b13c"
+    },
+    {
+      "path": "reactoccflow/training/__init__.py",
+      "sha256": "720b9156397b56691ff987b663a5200247c17e6fc5f66c3b14701ec7a042b732"
+    },
+    {
+      "path": "tests/test_joint_training.py",
+      "sha256": "010d3cc29d23df7592e97d43938b41ee94a1ac4cfc6a1aaa7f10ccf0489fb2f0"
+    },
+    {
+      "path": "scripts/train_react_flow.py",
+      "sha256": "9122e706fc474f35be0cdd4ce12c547a509ba9b9cb9e467c1ab3ddc42edc97fa"
+    },
+    {
+      "path": "reactoccflow/training/engine.py",
+      "sha256": "02e3a3113ec1dc0281ef680c9dd0619a5a039c5b077939e1b07c6ac4579d097f"
+    },
+    {
+      "path": "tests/test_train_react_flow.py",
+      "sha256": "808e4875125c2b841d48d74978ea759d0a64f5ec39b0503ba2c433b5e24eafc7"
+    },
+    {
+      "path": "tests/test_training_engine.py",
+      "sha256": "ff0e382993bac37e5864d1dd70883878793be6e970d96de3f187d6834d3c8e20"
+    }
+  ],
+  "validation": {
+    "red": "Two failing tests before adapter implementation: standalone joint endpoint adapter missing.",
+    "green": "2 adapter tests passed in1.58s.",
+    "actual_run": "Completed authorized200-step run on cuda:1 with explicit --allow-incomplete; no additional optimization run.",
+    "stable_cli": "/home/lthpc/wxh/envs/ReactOccFlow/bin/python -m scripts.train_joint_smoke --cache outputs/full_e0_pilot_v2 --allow-incomplete --device cuda:1 --windows 32 --batch-size 1 --steps 200 --lr 0.0001 --threads 4",
+    "combined_tests": "28 passed in2.16s: tests/test_joint_training.py tests/test_training.py tests/test_consistency.py",
+    "results": "outputs/joint_training_acceptance/results.json",
+    "verification": "outputs/joint_training_acceptance/verification.json",
+    "optimizer_steps": 200,
+    "selected_windows": 32,
+    "selected_scenes": 2,
+    "initial_probe": 4.589984495192766,
+    "final_probe": 3.097132347524166,
+    "relative_probe_decrease": 0.3252412179675358,
+    "frozen_hashes_unchanged": true,
+    "frozen_checks": 264,
+    "weights_only_checkpoint_tensors": 280,
+    "strict_roundtrip": true,
+    "all_consumed_file_hashes_verified": 75,
+    "all_array_fingerprints_verified": 960,
+    "formal_runner_validation": "330 CPU tests passed. Complete train17468/tune2176 payload/rank/settings audits; fullsize CUDA batch2,200step32window fit, isolated wheel and real two-rank NCCL resume accepted. Formal seed2026 running; see docs/implementation/2026-10-29-training-acceptance.md. Historical frozen-trunk diagnostic above remains unchanged."
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "edges": 33299,
+  "quantiles": [
+    0.394377,
+    0.399787,
+    0.499883,
+    0.599967,
+    0.750945
+  ],
+  "anomalies": [
+    {
+      "scene": "scene-0994",
+      "token": "6b05de2a752e4abcb3c2487c08b53bbb",
+      "next": "d1ea6f7d23c14c2789b7357683dcf54a",
+      "gap_s": 0.750945,
+      "reciprocal": true,
+      "same_scene": true
+    }
+  ]
+}

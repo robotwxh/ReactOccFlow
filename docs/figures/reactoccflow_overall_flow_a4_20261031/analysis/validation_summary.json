@@ -1,0 +1,11 @@
+{
+  "svg_quality_checker_errors": 0,
+  "spec_lock_drift": false,
+  "text_overlap_candidates": 0,
+  "connector_text_crossing_candidates": 0,
+  "unresolved_marker_references": 0,
+  "notes_split": "passed",
+  "finalize_svg": "passed",
+  "final_xml": "passed",
+  "warning": "PPTX font resolver unavailable; PPTX export was not requested or performed."
+}

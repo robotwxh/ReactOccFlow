@@ -1,0 +1,12 @@
+{
+  "status": "passed",
+  "batch_size": 2,
+  "optimizer_updates": 1,
+  "trunk_trainable": true,
+  "vae_frozen": true,
+  "loss": 6.002012729644775,
+  "seconds": 2.008211737993406,
+  "peak_cuda_bytes": 13432840704,
+  "trainable_parameter_tensors": 276,
+  "missing_gradients": []
+}

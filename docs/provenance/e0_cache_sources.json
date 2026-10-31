@@ -1,0 +1,93 @@
+{
+  "version": 1,
+  "component": "E0 occupancy posterior-mean encoding bridge",
+  "sources": [
+    {
+      "repository": "OccFM",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "source": "OccFM/tools/cache_vae.py",
+      "sha256": "c1a9272bbd66b4ea9a37740d86e2884ceceb0d037d5236a60fa1a56d87f0713b",
+      "snapshot": "reactoccflow/data/source_snapshots/occfm_cache_vae.py.txt",
+      "snapshot_sha256": "c1a9272bbd66b4ea9a37740d86e2884ceceb0d037d5236a60fa1a56d87f0713b",
+      "snapshot_scope": "complete file copied before adaptation",
+      "destination": [
+        "reactoccflow/data/e0_cache.py"
+      ],
+      "adaptation": "Reuse no-grad encoding and detached CPU NumPy cache boundary; invoke independent posterior-mean codec only after project-owned raw 3D E0 warp. Remove distributed buffers, progress UI, pickle export, wrapper model dependency and latent sampling.",
+      "license": "No explicit upstream license found; unresolved use noted in THIRD_PARTY_NOTICES.md"
+    }
+  ],
+  "search": {
+    "repositories": [
+      "OccFM",
+      "IR-WM"
+    ],
+    "terms": [
+      "cache_model",
+      "encode",
+      "latent_cache",
+      "mu_sigma",
+      "sampled_features",
+      "ego2global",
+      "lidar2ego",
+      "mask_lidar",
+      "mask_camera"
+    ],
+    "inspected": [
+      "OccFM/tools/cache_vae.py",
+      "OccFM/forecast/datasets/nuscenes_dataset.py",
+      "OccFM/forecast/models/compressors/occfm_vae.py",
+      "IR-WM/projects/mmdet3d_plugin/datasets/trajectory_api.py",
+      "IR-WM/projects/mmdet3d_plugin/datasets/pipelines/loading_occupancy.py"
+    ],
+    "found": "OccFM no-grad latent-cache conversion and copied independent codec; existing project-owned E0 geometry/label index derives from prior reference snapshots.",
+    "not_found": [
+      "Observation-only E0 history posterior-mean encoding with no future traversal",
+      "Separate E0 future latent targets retaining explicit unknown voxel validity and scene-tail masks"
+    ],
+    "new_implementation": "Independent bridge validation, history-slot alignment, separate observation/training APIs, and target known masks."
+  },
+  "dependency_closure": {
+    "runtime": [
+      "numpy",
+      "torch",
+      "reactoccflow.geometry.GridSpec",
+      "project-owned index.load_occupancy_e0 and codec.encode interfaces"
+    ],
+    "existing_owned_dependencies": "docs/provenance/model_sources.json and docs/provenance/research_sources.json",
+    "removed_upstream_dependencies": [
+      "forecast.utils.eval_utils.DistributedListBuffer",
+      "rich",
+      "model_func wrapper",
+      "pickle cache output"
+    ],
+    "snapshots_are_audit_data_only": true,
+    "reference_imports_or_runtime_paths": false
+  },
+  "extensions": [
+    {
+      "date": "2026-10-28",
+      "function": "encode_e0_training_sample(include_future_semantics=False)",
+      "search": {
+        "repositories": [
+          "OccFM",
+          "IR-WM"
+        ],
+        "terms": [
+          "semantics",
+          "semantic_occ",
+          "cache_model",
+          "mask_lidar",
+          "255"
+        ],
+        "inspected": [
+          "OccFM/tools/cache_vae.py",
+          "OccFM/forecast/datasets/nuscenes_dataset.py",
+          "IR-WM/projects/mmdet3d_plugin/datasets/pipelines/loading_occupancy.py"
+        ],
+        "result": "Existing copied semantic loader/grid warp already returns raw semantic IDs; no reference provides this observation-independent optional E0 target export contract."
+      },
+      "implementation": "Retain optional uint8 raw semantics from the same private encode-grid load and warp; no new source code copied, dependencies or reference paths introduced. Default API outputs unchanged; missing target frames retain unknown255 and false known masks."
+    }
+  ]
+}

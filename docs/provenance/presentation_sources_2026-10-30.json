@@ -1,0 +1,105 @@
+{
+  "generated_at": "2026-10-30T11:23:15.554429+08:00",
+  "log_cutoff": "2026-10-30 11:23:01 UTC+8",
+  "log_snapshot_sha256": "3a1de3f00bd7e6af975f71e02ad4459818b4fced1cd4423484016546a5d37605",
+  "skills_used": [],
+  "source_commits": {
+    "OccFM": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+    "IR-WM": "94dbbf44d6c22e50db4080e986b3675eadbb4497"
+  },
+  "reference_usage": "read-only text search and filesystem metadata; no reference scripts or imports",
+  "sources": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "bfa3f953a63ba29bf0399f20097c4bad08313bab79ed1fff854811428cb70fd8"
+    },
+    {
+      "path": "docs/superpowers/plans/2026-10-27-reactoccflow-implementation-plan.md",
+      "sha256": "c76e1bc98b79a5750b0d168f4c32c01073427bf4490c8a31d7bbe0d0cf675b10"
+    },
+    {
+      "path": "docs/implementation/progress.md",
+      "sha256": "1c771fce55fa9f3e13e5601967d47695d1fa423965cfc3b23949dc8b3dd014fb"
+    },
+    {
+      "path": "docs/implementation/2026-10-29-training-acceptance.md",
+      "sha256": "b49e847834db5268924ba93b25a494debab84f60bf4a5018564ffcc266560aff"
+    },
+    {
+      "path": "ReactOccFlow方案.md",
+      "sha256": "d1861bb354f7406d1e8bef5569c6c6f7500d1663ef942b354a630f5e997d179c"
+    },
+    {
+      "path": "ReactOccFlow科学问题与解决机制.md",
+      "sha256": "57e93467f51c92114e8df65e1222ae0bb9d49d14b315cea9a9546c00a44f07eb"
+    },
+    {
+      "path": "ReactOccFlow参考文献.md",
+      "sha256": "c83e1bb198e0dfcf0783790dc77b77cb397c780f7c0e7e3f0f158574d426048f"
+    },
+    {
+      "path": "README.md",
+      "sha256": "a0a779bc3dd3d231a95c3d3996976fd29b0f984de5cd0fd275559ad2c2518d50"
+    },
+    {
+      "path": "configs/react_flow_joint.yaml",
+      "sha256": "99bb903071b9674a135bc44f015c46155d7c96abae7a48e802fd705d08644368"
+    },
+    {
+      "path": "reactoccflow/models/react_flow.py",
+      "sha256": "07bb8b6da4d0f98eda59537fee093fdd5f4561541621dbf8e2885c4bba346212"
+    },
+    {
+      "path": "reactoccflow/models/joint_transition.py",
+      "sha256": "d4caa91385be57d4b9cbfeada00090ca2ec404cd0cb742106d7303dd5101b3b6"
+    },
+    {
+      "path": "reactoccflow/models/modules/base/dit.py",
+      "sha256": "4d8f7e7f70601afc7f0149e2a1d38b40ab6bec3e59c9eed9193d6333925f419b"
+    },
+    {
+      "path": "reactoccflow/models/modules/base/attn_base.py",
+      "sha256": "4fac2f147c9e80c7dc26d3e48be24a68dd5485ef52ae6ca985a19795e1bcd761"
+    },
+    {
+      "path": "reactoccflow/models/modules/transition_models/FlowMatchingV2.py",
+      "sha256": "e6d21e220cd9302916f773d7b2e6e6d3f5c338a5f66ef2ebd2696821c737810e"
+    },
+    {
+      "path": "reactoccflow/models/flow.py",
+      "sha256": "f1e63d7b8786ca271a186153dee9d7fb87b5670ba5f338f0ec716b39492ddde0"
+    },
+    {
+      "path": "reactoccflow/losses/consistency.py",
+      "sha256": "ce5927f6adc249ca8ffc97d3f3e1382fcd14b58f7ca932abb7ff1290aab110e7"
+    },
+    {
+      "path": "reactoccflow/training/joint.py",
+      "sha256": "7c9a3c16343d0853db6b26cb1aceafe9f9e4e731d6577c58e983bc88b205b13c"
+    },
+    {
+      "path": "scripts/train_react_flow.py",
+      "sha256": "9122e706fc474f35be0cdd4ce12c547a509ba9b9cb9e467c1ab3ddc42edc97fa"
+    },
+    {
+      "path": "docs/references/05_DOME_2410.10429.pdf",
+      "sha256": "512b700e790315e1b4a54f52d71b00e91659f81699bc0454eb323a68778ccbe7"
+    },
+    {
+      "path": "docs/references/01_OccFM_2506.23434.pdf",
+      "sha256": "690c42bb96ea951c449171379d6367329a20a9f0e4c315942d322e11efc7638a"
+    },
+    {
+      "path": "docs/references/07_IR-WM_2510.16729.pdf",
+      "sha256": "ad7429f776a5c4c1ef7250a7f57e3b2cdcba1e32a0ed6f6006828296b9b5d6cf"
+    },
+    {
+      "path": "outputs/research_qa/scene-0002.png",
+      "sha256": "9f343669075594885cd1cad24fafba6f0a4dcf96eac53ac2dcb1ac15d65bfb82"
+    },
+    {
+      "path": "docs/implementation/training_runner_acceptance.json",
+      "sha256": "0a801601f4c34358ecf3ac6e5c24a5ecc1871c288773c341c86c19e5873f4187"
+    }
+  ]
+}

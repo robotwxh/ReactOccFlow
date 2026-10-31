@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "task": "T9/T11",
+  "date": "2026-10-28",
+  "searches": [
+    {
+      "repositories": [
+        "OccFM",
+        "IR-WM"
+      ],
+      "queries": [
+        "response",
+        "risk",
+        "collision",
+        "calibrat",
+        "TTC",
+        "planning_metrics"
+      ],
+      "result": "References contain planning collision losses and point/grid collision helpers, but no implementation satisfying same-origin counterfactual response pairing, measured-time TTC, footprint area overlap, multi-world smoothing, independent-origin calibration, or threshold contracts. No reusable implementation copied; reference repositories were not executed or modified."
+    }
+  ],
+  "new_implementation": [
+    "reactoccflow/evaluation/reaction.py",
+    "reactoccflow/evaluation/risk.py"
+  ],
+  "runtime_reference_imports": false,
+  "research_results": false,
+  "notes": "Synthetic unit tests validate equations and rejection behavior only. No CARLA rollouts, labels, or calibration claims are included. T9/T11 blockers fixed: polygon cell overlap, E0 alignment, validity masks, status retention, strict future cutoff, brake fallback, frozen artifacts, and SHA-256 split fingerprints.",
+  "owned_files": [
+    {
+      "path": "reactoccflow/evaluation/reaction.py",
+      "sha256": "eb29b822c0c19e5941877a146a2021469e090fe128114c07e765b262d38edbf4"
+    },
+    {
+      "path": "reactoccflow/evaluation/risk.py",
+      "sha256": "410314eff28dc75d28e6d762d2c05582a24f735f90800649872ce3c97851b857"
+    },
+    {
+      "path": "tests/test_reaction_risk.py",
+      "sha256": "1430c2b1d8056264753d4eebdea42f0f79167ab1f6a16ed4d9090a023c663a6e"
+    },
+    {
+      "path": "configs/risk.yaml",
+      "sha256": "a3796cb4dabf89d4a91d4219d0fad144bb85807fd58243827a0e4912832d4b4d"
+    },
+    {
+      "path": ".superpowers/sdd/2026-10-27-reactoccflow-implementation-plan/t9-risk-fix-report.md",
+      "sha256": "4cb21acb31a1708122ae8ddd9422f56e782fbd51841881b7431762653f7dd646"
+    }
+  ]
+}

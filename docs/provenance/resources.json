@@ -1,0 +1,51 @@
+[
+  {
+    "source": "OccFM/logs/occfm_vae/100ep_3docc_sem_voxel/ckpt/epoch=000100.ckpt",
+    "destination": "assets/checkpoints/occfm_vae.ckpt",
+    "size": 231758209,
+    "sha256": "85c5a2566b3fa8a1ebb785af3113c6674fe9811e5eda2402b1959ce6cd66ef10",
+    "verified": true
+  },
+  {
+    "source": "OccFM/logs/occfm/2s_3s_nusc_hist_traj/ckpt/epoch=000199.ckpt",
+    "destination": "assets/checkpoints/occfm_history.ckpt",
+    "size": 353386281,
+    "sha256": "1a9002f9a9ac74948dd69dd34277a867c98d3ac551087d554bd2732c8b26ac59",
+    "verified": true
+  },
+  {
+    "source": "OccFM/logs/occfm_fut/2s_3s_nusc_fut_traj/ckpt/epoch=000196.ckpt",
+    "destination": "assets/checkpoints/occfm_future.ckpt",
+    "size": 353779497,
+    "sha256": "b1ada765a3991d1011ebe259db55dcb69a37a3a8c4ad92187c67a8f684a5bd4b",
+    "verified": true
+  },
+  {
+    "source": "OccFM/data/nusc_latent_vae/x16/nus_sem_occ_validation.pkl",
+    "destination": "data/imported/validation_latents.pkl",
+    "size": 940283223,
+    "sha256": "39f20210b2d3c6d0e0fb0fae0a434802ca0a7304b7d4eb807b038b0a1880ca9a",
+    "verified": true
+  },
+  {
+    "source": "OccFM/data/nusc_latent_vae/x16/nus_sem_occ_training.pkl",
+    "destination": "data/imported/training_latents.pkl",
+    "size": 4393861087,
+    "sha256": "f6cd4facbcbd5b2156b9c85d8b6bcaf36c35f001a2e9f370947bc99d5d034ff4",
+    "verified": true
+  },
+  {
+    "source": "OccFM/data/nuscenes_infos_val_temporal_v3_scene.pkl",
+    "destination": "data/imported/validation_infos.pkl",
+    "size": 144186540,
+    "sha256": "d174b9563adcfc2b0450d164dce108b11742197208436f70781d4187251da566",
+    "verified": true
+  },
+  {
+    "source": "OccFM/data/nuscenes_infos_train_temporal_v3_scene.pkl",
+    "destination": "data/imported/training_infos.pkl",
+    "size": 702727848,
+    "sha256": "119f1cebc6362d5f26a6974b36f1307eb34105ff899b1d49ee2bf0febb47c1f5",
+    "verified": true
+  }
+]

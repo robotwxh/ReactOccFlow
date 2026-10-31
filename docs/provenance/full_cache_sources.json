@@ -1,0 +1,114 @@
+{
+  "version": 1,
+  "date": "2026-10-28",
+  "component": "Complete E0 research cache generator and independent numeric loader",
+  "owned_files": [
+    "scripts/cache_research.py",
+    "reactoccflow/data/e0_dataset.py",
+    "tests/test_e0_dataset.py"
+  ],
+  "search": {
+    "repositories": [
+      "OccFM",
+      "IR-WM"
+    ],
+    "terms": [
+      "class .*Dataset",
+      "savez_compressed",
+      "manifest",
+      "resume",
+      "flock",
+      "atomic",
+      "savez",
+      "sha256",
+      "allow_pickle",
+      "os.replace"
+    ],
+    "found": "Upstream pickle VAE cache and fixed sequence selectors exist, but not an atomic per-anchor hashed cache, rank-disjoint resumable publication, full official linked-keyframe census or independent numeric E0 observation-target loader.",
+    "new_implementation": "Project-owned standard-library atomic IO/flock/JSON metadata and NumPy numeric NPZ interface. Reuses the already copied/adapted E0 encoder, official label index, geometry and codec; none of the upstream dataset/pickle implementations is adapted."
+  },
+  "inspected_sources": [
+    {
+      "repository": "OccFM",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "path": "OccFM/tools/cache_vae.py",
+      "sha256": "c1a9272bbd66b4ea9a37740d86e2884ceceb0d037d5236a60fa1a56d87f0713b",
+      "decision": "Inspected read-only; no code copied for the new resumable numeric NPZ/JSON protocol."
+    },
+    {
+      "repository": "OccFM",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "path": "OccFM/forecast/datasets/nuscenes_dataset.py",
+      "sha256": "11133c58522f5c3b2ed1b2fbffb8ff230d93bf74e2984135183bd4ad723957f0",
+      "decision": "Inspected read-only; no code copied for the new resumable numeric NPZ/JSON protocol."
+    },
+    {
+      "repository": "IR-WM",
+      "commit": "94dbbf44d6c22e50db4080e986b3675eadbb4497",
+      "path": "IR-WM/projects/mmdet3d_plugin/datasets/nuscenes_world_dataset_template.py",
+      "sha256": "5e18951f2c3b4572bfe66cf0736a699a744521cbfcab7a77a7a1220c30434ce9",
+      "decision": "Inspected read-only; no code copied for the new resumable numeric NPZ/JSON protocol."
+    },
+    {
+      "repository": "IR-WM",
+      "commit": "94dbbf44d6c22e50db4080e986b3675eadbb4497",
+      "path": "IR-WM/projects/mmdet3d_plugin/datasets/nuscenes_world_dataset_v1.py",
+      "sha256": "7a3bd37788873859b3bdaf1103ff6dafaefcffed9fa447f4497bb413a3e24fe4",
+      "decision": "Inspected read-only; no code copied for the new resumable numeric NPZ/JSON protocol."
+    }
+  ],
+  "source_copy_required": false,
+  "existing_owned_dependency_provenance": [
+    "docs/provenance/e0_cache_sources.json",
+    "docs/provenance/research_sources.json",
+    "docs/provenance/model_sources.json",
+    "docs/provenance/split_sources.json"
+  ],
+  "runtime_dependencies": {
+    "loader": [
+      "numpy",
+      "Python standard library"
+    ],
+    "generator": [
+      "numpy",
+      "torch",
+      "project-owned e0_cache/research/codec/geometry"
+    ]
+  },
+  "license": "No new reference source was copied. Existing OccFM unresolved upstream terms and IR-WM/file-level terms remain in THIRD_PARTY_NOTICES.md.",
+  "reference_runtime_access": false,
+  "reference_scripts_executed": false,
+  "reference_paths_documentation_only": true,
+  "extensions": [
+    {
+      "date": "2026-10-28",
+      "review_round": 1,
+      "search": {
+        "repositories": [
+          "OccFM",
+          "IR-WM"
+        ],
+        "terms": [
+          "actor_existence_mask",
+          "actor_future_exists",
+          "actor_velocity_mask",
+          "actor_size",
+          "sha256",
+          "flock"
+        ],
+        "scope": [
+          "OccFM/forecast/datasets",
+          "IR-WM/projects/mmdet3d_plugin/datasets"
+        ],
+        "result": "No resumable E0 numeric-record schema validator or source-occupancy fingerprint protocol found. Existing independent research.py supplies the authoritative complete array names/shapes; no new upstream adaptation or copying required."
+      },
+      "changes": [
+        "Require exactly all 30 encoded observation/target array fields with shapes and boolean mask dtypes. Validate encoded-sample format, source convention, oracle status, timestamp and eight unique/padded actor identities.",
+        "Reuse independent read_record(verify_checksum=True) for both resume skips and completion assembly, enforcing the same full payload and metadata contract as training reads.",
+        "Fingerprint every selected-group source occupancy NPZ byte size/SHA-256 before each invocation, including scene-edge context frames. Store sorted per-file identities and aggregate checksum/count in shared settings, rejecting source mutations on resume."
+      ],
+      "new_reference_code_copied": false,
+      "pilot_v1_artifacts_untouched": true
+    }
+  ]
+}

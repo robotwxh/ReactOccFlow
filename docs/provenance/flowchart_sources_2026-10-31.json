@@ -1,0 +1,126 @@
+{
+  "generated_date": "2026-10-31",
+  "task": "用户参考样式的单张可编辑SVG总体流程图",
+  "skill": "/home/lthpc/.codex/skills/ppt-master/SKILL.md",
+  "project": "docs/figures/reactoccflow_overall_flow_a4_20261031",
+  "author_source": "docs/figures/reactoccflow_overall_flow_a4_20261031/svg_output/01_reactoccflow_overall.svg",
+  "deliverable": "docs/figures/reactoccflow_overall_flow_a4_20261031/exports/ReactOccFlow_总体流程图.svg",
+  "sha256": "2c829583284462cc4d00f62083d99f2d6f974f3891500c60680b465cf1392c48",
+  "canvas": [
+    2480,
+    3508
+  ],
+  "editable_text_elements": 216,
+  "external_images": 0,
+  "validation": {
+    "svg_quality_checker_errors": 0,
+    "spec_lock_drift": false,
+    "text_overlap_candidates": 0,
+    "connector_text_crossing_candidates": 0,
+    "unresolved_marker_references": 0,
+    "notes_split": "passed",
+    "finalize_svg": "passed",
+    "final_xml": "passed",
+    "warning": "PPTX font resolver unavailable; PPTX export was not requested or performed."
+  },
+  "reference_usage": "Only read-only text searches in OccFM/forecast and IR-WM. No reference scripts executed, code imported, files modified, or program functions copied. Upstream commits are documentation-only source context.",
+  "reference_search": {
+    "query": "FLOW_MATCHING_DOWN_X4_DiT|cross.attention|PlanFlow|isotonic",
+    "scope": [
+      "OccFM/forecast",
+      "IR-WM"
+    ],
+    "purpose": "核对已有组件与方法边界，不实施模型功能"
+  },
+  "reference_commits_documented_in_authoritative_plan": {
+    "OccFM": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+    "IR-WM": "94dbbf44d6c22e50db4080e986b3675eadbb4497"
+  },
+  "environment": "/home/lthpc/wxh/envs/ReactOccFlow",
+  "sources": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "bfa3f953a63ba29bf0399f20097c4bad08313bab79ed1fff854811428cb70fd8"
+    },
+    {
+      "path": "README.md",
+      "sha256": "a0a779bc3dd3d231a95c3d3996976fd29b0f984de5cd0fd275559ad2c2518d50"
+    },
+    {
+      "path": "docs/superpowers/plans/2026-10-27-reactoccflow-implementation-plan.md",
+      "sha256": "c76e1bc98b79a5750b0d168f4c32c01073427bf4490c8a31d7bbe0d0cf675b10"
+    },
+    {
+      "path": "docs/implementation/progress.md",
+      "sha256": "1c771fce55fa9f3e13e5601967d47695d1fa423965cfc3b23949dc8b3dd014fb"
+    },
+    {
+      "path": "docs/implementation/perception.md",
+      "sha256": "860e09ebfcd69ca8c668438b3b34c5fca715afdc13795c601d8fbc2ffd47ccaa"
+    },
+    {
+      "path": "docs/implementation/bridge.md",
+      "sha256": "3bddb001fefd22cc220238e7e3d93a87fb3b7be7d3fb392b795176313013b7db"
+    },
+    {
+      "path": "configs/react_flow_joint.yaml",
+      "sha256": "99bb903071b9674a135bc44f015c46155d7c96abae7a48e802fd705d08644368"
+    },
+    {
+      "path": "configs/occfm_vae.yaml",
+      "sha256": "19bb340a62dd1106129bce6843ed8b17da1351c1541cf5cd2b5c5ea74cc26f2b"
+    },
+    {
+      "path": "configs/planflow.yaml",
+      "sha256": "e41f7b2de8f8ce46835529f0999fab0546404758dd7e464a3de27868f1368496"
+    },
+    {
+      "path": "configs/risk.yaml",
+      "sha256": "a3796cb4dabf89d4a91d4219d0fad144bb85807fd58243827a0e4912832d4b4d"
+    },
+    {
+      "path": "reactoccflow/models/codec.py",
+      "sha256": "cc3b760e8dba4a435b4c5cf2e517561263d6b005074361d9299039fd375cc441"
+    },
+    {
+      "path": "reactoccflow/models/react_flow.py",
+      "sha256": "07bb8b6da4d0f98eda59537fee093fdd5f4561541621dbf8e2885c4bba346212"
+    },
+    {
+      "path": "reactoccflow/models/joint_transition.py",
+      "sha256": "d4caa91385be57d4b9cbfeada00090ca2ec404cd0cb742106d7303dd5101b3b6"
+    },
+    {
+      "path": "reactoccflow/models/modules/base/dit.py",
+      "sha256": "4d8f7e7f70601afc7f0149e2a1d38b40ab6bec3e59c9eed9193d6333925f419b"
+    },
+    {
+      "path": "reactoccflow/models/modules/base/attn_base.py",
+      "sha256": "4fac2f147c9e80c7dc26d3e48be24a68dd5485ef52ae6ca985a19795e1bcd761"
+    },
+    {
+      "path": "reactoccflow/models/modules/transition_models/FlowMatchingV2.py",
+      "sha256": "e6d21e220cd9302916f773d7b2e6e6d3f5c338a5f66ef2ebd2696821c737810e"
+    },
+    {
+      "path": "reactoccflow/models/modules/encoders/SwinSingleFrameDownV2.py",
+      "sha256": "f8c02831de05a7971160542e78ee57076c8986d398964e2cfbfa1c43c76fdaaa"
+    },
+    {
+      "path": "reactoccflow/models/modules/decoders/SwinSingleFrameUpV2.py",
+      "sha256": "5bd3729defe6310d703d082aebd87d394a49ca950baf829030e922bafbdd076c"
+    },
+    {
+      "path": "reactoccflow/models/modules/embedding/voxel_height_sem_embed.py",
+      "sha256": "7b430041a5b9fd563e70a2d3318fe6c4df787b46871cefdf4ecd2bc1b04016b5"
+    },
+    {
+      "path": "reactoccflow/planning/planflow.py",
+      "sha256": "7c72bef37bbd3a573f90c1fb3584fe098a1ebda3c980aa35135c8159499f60f0"
+    },
+    {
+      "path": "docs/figures/reactoccflow_overall_flow_a4_20261031/sources/source_intake.md",
+      "sha256": "7e1cdd46d67e15f13df9439b9023bbc49e0387bdae084549dffaa2114eb59ba8"
+    }
+  ]
+}

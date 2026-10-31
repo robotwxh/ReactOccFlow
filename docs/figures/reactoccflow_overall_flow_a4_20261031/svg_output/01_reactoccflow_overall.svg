@@ -1,0 +1,511 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="2480" height="3508" viewBox="0 0 2480 3508" role="img" aria-labelledby="diagram-title diagram-description">
+  <title id="diagram-title">ReactOccFlow 总体流程图：候选动作条件下的 occupancy–actor 联合 Flow Matching 与风险规划</title>
+  <desc id="diagram-description">六区详细总图，包含观测边界、Swin occupancy VAE、双模态线性流训练、时空 DiT U-Net、两层双向 cross-attention、Transformer 内部计算、多世界 ODE 采样、事件级风险与校准、轨迹选择、控制以及数据验证。实线表示已实现结构或接口，红色虚线框表示待完成模块或实验。图形为方法示意。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#102A43"/></marker>
+    <marker id="arrow-blue" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#087FCD"/></marker>
+    <marker id="arrow-purple" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#7C3AC9"/></marker>
+    <marker id="arrow-orange" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#E8750B"/></marker>
+    <marker id="arrow-green" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#0A8F66"/></marker>
+    <marker id="arrow-teal" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#078780"/></marker>
+    <marker id="arrow-red" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#C74A52"/></marker>
+  </defs>
+  <rect x="0" y="0" width="2480" height="3508" fill="#FFFFFF"/>
+
+  <g id="title-and-legend" font-family="Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif" fill="#102A43">
+    <text x="1240" y="72" text-anchor="middle" font-size="58" font-weight="700">ReactOccFlow 总体流程图</text>
+    <text x="1240" y="115" text-anchor="middle" font-size="32">候选自车动作 → occupancy–actor 联合 Flow Matching → 多世界事件风险 → 轨迹选择与控制</text>
+    <text x="48" y="153" font-size="24" font-weight="700">目标分布：pθ(O₁:₆, A₁:₆ | 历史观测 h, 候选轨迹 τₖ)</text>
+    <line x1="1370" y1="145" x2="1420" y2="145" stroke="#102A43" stroke-width="3" marker-end="url(#arrow)"/>
+    <text x="1434" y="153" font-size="22">已有结构／接口</text>
+    <rect x="1660" y="132" width="54" height="25" rx="5" fill="#FFF0F1" stroke="#C74A52" stroke-width="2" stroke-dasharray="8 5"/>
+    <text x="1728" y="153" font-size="22">待完成／待实验</text>
+    <text x="2030" y="153" font-size="22" fill="#486581">B：batch；F：时间槽；N：空间tokens</text>
+  </g>
+
+  <g id="section-1-input-task" font-family="Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif" fill="#102A43">
+    <rect x="28" y="174" width="2424" height="350" rx="14" fill="#EEF8FF" stroke="#087FCD" stroke-width="3"/>
+    <rect x="28" y="174" width="2424" height="56" rx="14" fill="#087FCD"/>
+    <text x="54" y="215" font-size="40" font-weight="700" fill="#FFFFFF">1. 输入、输出与任务：同一观测，不同候选动作，对应不同的联合未来</text>
+
+    <rect x="50" y="246" width="770" height="212" rx="10" fill="#FFFFFF" stroke="#087FCD" stroke-width="2"/>
+    <text x="70" y="281" font-size="30" font-weight="700">当前／过去观测 h（推理可用）</text>
+    <g id="observed-bev-sketch">
+      <rect x="72" y="299" width="208" height="126" rx="6" fill="#EFFBF5" stroke="#BDD1DF" stroke-width="2"/>
+      <path d="M73,343 H279 V391 H73 Z" fill="#DDEFFF"/>
+      <path d="M155,300 H204 V425 H155 Z" fill="#DDEFFF"/>
+      <path d="M76,366 H277 M179,302 V424" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-dasharray="12 9"/>
+      <rect x="158" y="356" width="39" height="22" rx="4" fill="#102A43"/>
+      <rect x="218" y="348" width="36" height="20" rx="4" fill="#087FCD"/>
+      <rect x="137" y="402" width="31" height="18" rx="4" fill="#7C3AC9"/>
+      <circle cx="100" cy="324" r="8" fill="#E8750B"/>
+      <path d="M175,356 C176,330 188,326 218,322" fill="none" stroke="#C74A52" stroke-width="3" stroke-dasharray="6 4"/>
+      <text x="176" y="450" font-size="20" text-anchor="middle" fill="#486581">E0 场景示意</text>
+    </g>
+    <text x="304" y="320" font-size="28">Occupancy：6 槽历史，默认 4 槽有效</text>
+    <text x="304" y="357" font-size="28">Actors：当前最近 8 个 × 4 个历史时刻</text>
+    <text x="304" y="393" font-size="24">ego 状态、观测／速度 mask、尺寸、类别</text>
+    <text x="304" y="432" font-size="24" fill="#087FCD">LiDAR／检测／关联；研究阶段用 oracle</text>
+
+    <path d="M822,350 H847" fill="none" stroke="#087FCD" stroke-width="4" marker-end="url(#arrow-blue)"/>
+    <rect x="850" y="246" width="730" height="212" rx="10" fill="#FFFFFF" stroke="#087FCD" stroke-width="2"/>
+    <text x="1215" y="281" font-size="30" text-anchor="middle" font-weight="700">候选 ego 轨迹 τₖ（计划控制量）</text>
+    <rect x="874" y="331" width="55" height="31" rx="7" fill="#102A43"/>
+    <path d="M930,347 C980,302 1034,299 1085,304" fill="none" stroke="#087FCD" stroke-width="4" marker-end="url(#arrow-blue)"/>
+    <path d="M930,347 C995,346 1040,346 1085,346" fill="none" stroke="#7C3AC9" stroke-width="4" marker-end="url(#arrow-purple)"/>
+    <path d="M930,347 C980,386 1025,394 1085,394" fill="none" stroke="#C74A52" stroke-width="4" marker-end="url(#arrow-red)"/>
+    <text x="1110" y="323" font-size="28">K=8 条 + 1 条刹停</text>
+    <text x="1110" y="361" font-size="28">每条 6×2 waypoint</text>
+    <text x="1110" y="400" font-size="24">当前：局部候选 + 运动学检查</text>
+    <rect x="875" y="416" width="680" height="31" rx="6" fill="#FFF0F1" stroke="#C74A52" stroke-width="2" stroke-dasharray="8 5"/>
+    <text x="1215" y="439" font-size="22" text-anchor="middle" fill="#C74A52">learned PlanFlow 轨迹 head 待完成；导航作为规划条件</text>
+
+    <path d="M1582,350 H1607" fill="none" stroke="#087FCD" stroke-width="4" marker-end="url(#arrow-blue)"/>
+    <rect x="1610" y="246" width="820" height="212" rx="10" fill="#FFFFFF" stroke="#087FCD" stroke-width="2"/>
+    <text x="2020" y="281" font-size="30" text-anchor="middle" font-weight="700">每个候选下的多世界联合预测</text>
+    <rect x="1635" y="303" width="156" height="101" rx="7" fill="#DDEFFF" stroke="#087FCD" stroke-width="2"/>
+    <path d="M1650,322 H1776 M1650,345 H1776 M1650,368 H1776 M1670,311 V394 M1708,311 V394 M1746,311 V394" stroke="#FFFFFF" stroke-width="3" fill="none"/>
+    <rect x="1670" y="345" width="38" height="23" fill="#087FCD"/>
+    <rect x="1746" y="322" width="30" height="23" fill="#7C3AC9"/>
+    <text x="1814" y="327" font-size="28">Ô：6×200×200×16 语义网格</text>
+    <text x="1814" y="367" font-size="28">Â：8×6×6 动态状态 + 存在性</text>
+    <text x="1814" y="405" font-size="24">[x, y, sinψ, cosψ, vₓ, vᵧ]；M 个世界</text>
+    <text x="1636" y="441" font-size="24" fill="#087FCD">6 个未来时刻：标称 0.5–3 s；评价使用实测时间</text>
+
+    <text x="54" y="495" font-size="24" font-weight="700">空间：E0 固定当前自车坐标（x 前／y 左／z 上）；200×200×16，0.4 m，80×80×6.4 m。</text>
+    <text x="1460" y="495" font-size="24" fill="#C74A52" font-weight="700">未来 GT 仅在训练 target；actor 选择只依赖当前观测。</text>
+  </g>
+
+  <g id="section-2-occupancy-vae" font-family="Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif" fill="#102A43">
+    <rect x="28" y="540" width="2424" height="410" rx="14" fill="#EFFBF5" stroke="#0A8F66" stroke-width="3"/>
+    <rect x="28" y="540" width="2424" height="56" rx="14" fill="#0A8F66"/>
+    <text x="54" y="581" font-size="40" font-weight="700" fill="#FFFFFF">2. Occ-VAE：3D 语义网格 ↔ 连续 BEV latent（联合流训练中冻结）</text>
+
+    <rect x="50" y="614" width="260" height="250" rx="10" fill="#FFFFFF" stroke="#0A8F66" stroke-width="2"/>
+    <text x="180" y="650" text-anchor="middle" font-size="30" font-weight="700">语义 occupancy</text>
+    <path d="M82,710 L137,677 H270 L215,710 Z" fill="#DAF2E4" stroke="#0A8F66" stroke-width="2"/>
+    <path d="M82,710 H215 V791 H82 Z" fill="#DDEFFF" stroke="#087FCD" stroke-width="2"/>
+    <path d="M215,710 L270,677 V758 L215,791 Z" fill="#EBDDFB" stroke="#7C3AC9" stroke-width="2"/>
+    <path d="M82,737 H215 M82,764 H215 M126,710 V791 M170,710 V791 M215,737 L270,704 M215,764 L270,731 M126,710 L181,677 M170,710 L225,677" fill="none" stroke="#FFFFFF" stroke-width="2"/>
+    <text x="180" y="830" text-anchor="middle" font-size="24">200×200×16，18 类</text>
+
+    <path d="M312,739 H337" stroke="#0A8F66" stroke-width="3" fill="none" marker-end="url(#arrow-green)"/>
+    <rect x="340" y="614" width="310" height="250" rx="10" fill="#FFFFFF" stroke="#0A8F66" stroke-width="2"/>
+    <text x="495" y="650" text-anchor="middle" font-size="30" font-weight="700">语义／高度嵌入</text>
+    <rect x="360" y="672" width="270" height="55" rx="7" fill="#DAF2E4" stroke="#0A8F66" stroke-width="2"/>
+    <text x="495" y="706" text-anchor="middle" font-size="24">类别 18→8 + 高度 4</text>
+    <path d="M495,728 V746" fill="none" stroke="#102A43" stroke-width="3" marker-end="url(#arrow)"/>
+    <rect x="360" y="750" width="270" height="55" rx="7" fill="#DDEFFF" stroke="#087FCD" stroke-width="2"/>
+    <text x="495" y="784" text-anchor="middle" font-size="24">高度折叠 → Conv2D</text>
+    <text x="495" y="840" text-anchor="middle" font-size="24">192→128 通道 BEV</text>
+
+    <path d="M652,739 H677" stroke="#0A8F66" stroke-width="3" fill="none" marker-end="url(#arrow-green)"/>
+    <rect x="680" y="614" width="500" height="250" rx="10" fill="#FFFFFF" stroke="#0A8F66" stroke-width="2"/>
+    <text x="930" y="650" text-anchor="middle" font-size="30" font-weight="700">Swin Encoder qφ(z|O)</text>
+    <rect x="700" y="669" width="460" height="49" rx="7" fill="#DAF2E4" stroke="#0A8F66" stroke-width="2"/>
+    <text x="930" y="701" text-anchor="middle" font-size="24">Swin×2 → Res → Down：200→100</text>
+    <path d="M930,719 V734" fill="none" stroke="#102A43" stroke-width="3" marker-end="url(#arrow)"/>
+    <rect x="700" y="737" width="460" height="49" rx="7" fill="#DAF2E4" stroke="#0A8F66" stroke-width="2"/>
+    <text x="930" y="769" text-anchor="middle" font-size="24">Swin×6 → Res → Down：100→50</text>
+    <text x="930" y="820" text-anchor="middle" font-size="24">Conv reduce → Res–Attn–Res → Norm</text>
+    <text x="930" y="850" text-anchor="middle" font-size="22" fill="#486581">patch=1；window=5；heads=8；Conv→32</text>
+
+    <path d="M1182,739 H1207" stroke="#0A8F66" stroke-width="3" fill="none" marker-end="url(#arrow-green)"/>
+    <rect x="1210" y="614" width="300" height="250" rx="10" fill="#FFFFFF" stroke="#0A8F66" stroke-width="2"/>
+    <text x="1360" y="650" text-anchor="middle" font-size="30" font-weight="700">连续 latent</text>
+    <text x="1360" y="693" text-anchor="middle" font-size="28">μ, log σ²</text>
+    <rect x="1260" y="729" width="143" height="83" fill="#EBDDFB" stroke="#7C3AC9" stroke-width="2"/>
+    <rect x="1277" y="717" width="143" height="83" fill="#DDEFFF" stroke="#087FCD" stroke-width="2"/>
+    <rect x="1294" y="705" width="143" height="83" fill="#DAF2E4" stroke="#0A8F66" stroke-width="2"/>
+    <path d="M1294,733 H1437 M1294,760 H1437 M1330,705 V788 M1366,705 V788 M1402,705 V788" fill="none" stroke="#FFFFFF" stroke-width="2"/>
+    <text x="1360" y="840" text-anchor="middle" font-size="24">z=μ：16×50×50</text>
+
+    <path d="M1512,739 H1537" stroke="#0A8F66" stroke-width="3" fill="none" marker-end="url(#arrow-green)"/>
+    <rect x="1540" y="614" width="480" height="250" rx="10" fill="#FFFFFF" stroke="#0A8F66" stroke-width="2"/>
+    <text x="1780" y="650" text-anchor="middle" font-size="30" font-weight="700">Swin Decoder pψ(O|z)</text>
+    <text x="1780" y="692" text-anchor="middle" font-size="24">Conv → Res–Attn–Res</text>
+    <rect x="1560" y="712" width="440" height="49" rx="7" fill="#DAF2E4" stroke="#0A8F66" stroke-width="2"/>
+    <text x="1780" y="744" text-anchor="middle" font-size="24">Swin×6 → Res → Up：50→100</text>
+    <path d="M1780,762 V777" fill="none" stroke="#102A43" stroke-width="3" marker-end="url(#arrow)"/>
+    <rect x="1560" y="780" width="440" height="49" rx="7" fill="#DAF2E4" stroke="#0A8F66" stroke-width="2"/>
+    <text x="1780" y="812" text-anchor="middle" font-size="24">Swin×2 → Res → Up：100→200</text>
+    <text x="1780" y="852" text-anchor="middle" font-size="22" fill="#486581">Norm → Conv：输出 128 通道</text>
+
+    <path d="M2022,739 H2047" stroke="#0A8F66" stroke-width="3" fill="none" marker-end="url(#arrow-green)"/>
+    <rect x="2050" y="614" width="380" height="250" rx="10" fill="#FFFFFF" stroke="#0A8F66" stroke-width="2"/>
+    <text x="2240" y="650" text-anchor="middle" font-size="30" font-weight="700">恢复 3D 类别</text>
+    <text x="2240" y="705" text-anchor="middle" font-size="28">每高度层 8 维特征</text>
+    <text x="2240" y="745" text-anchor="middle" font-size="28">× 类别 embeddingᵀ</text>
+    <path d="M2240,758 V779" fill="none" stroke="#102A43" stroke-width="3" marker-end="url(#arrow)"/>
+    <rect x="2072" y="783" width="336" height="59" rx="7" fill="#DDEFFF" stroke="#087FCD" stroke-width="2"/>
+    <text x="2240" y="819" text-anchor="middle" font-size="24">18 类 logits → argmax Ô</text>
+
+    <rect x="50" y="885" width="2380" height="45" rx="8" fill="#DAF2E4"/>
+    <text x="70" y="916" font-size="24" font-weight="700">表示约定：缓存使用后验均值 μ；ReactFlow 入口 z×10，解码前 ÷10。连续 logits 用于一致性反传，argmax 仅用于语义输出。</text>
+  </g>
+
+  <g id="section-3-training" font-family="Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif" fill="#102A43">
+    <rect x="28" y="966" width="2424" height="380" rx="14" fill="#F7F1FF" stroke="#7C3AC9" stroke-width="3"/>
+    <rect x="28" y="966" width="2424" height="56" rx="14" fill="#7C3AC9"/>
+    <text x="54" y="1007" font-size="40" font-weight="700" fill="#FFFFFF">3. 联合 Flow Matching 训练：独立模态噪声、共享流时间、连续端点一致性</text>
+
+    <rect x="50" y="1038" width="490" height="142" rx="10" fill="#FFFFFF" stroke="#7C3AC9" stroke-width="2"/>
+    <text x="295" y="1074" text-anchor="middle" font-size="30" font-weight="700">源噪声 + 干净未来 target</text>
+    <text x="295" y="1112" text-anchor="middle" font-size="28">εZ ⟂ εA，均为 N(0,I)</text>
+    <text x="295" y="1152" text-anchor="middle" font-size="24" fill="#C74A52">x₁=(10z_future, normalized A_future)</text>
+    <path d="M542,1110 H567" fill="none" stroke="#7C3AC9" stroke-width="3" marker-end="url(#arrow-purple)"/>
+
+    <rect x="570" y="1038" width="600" height="142" rx="10" fill="#FFFFFF" stroke="#7C3AC9" stroke-width="2"/>
+    <text x="870" y="1074" text-anchor="middle" font-size="30" font-weight="700">双分支同一线性概率路径</text>
+    <text x="870" y="1114" text-anchor="middle" font-size="28">xₜ=(1−t)ε+t x₁；u*=x₁−ε</text>
+    <text x="870" y="1154" text-anchor="middle" font-size="24">t=sigmoid(N(0,1))；t ≠ 物理未来时刻 s</text>
+    <path d="M1172,1110 H1197" fill="none" stroke="#7C3AC9" stroke-width="3" marker-end="url(#arrow-purple)"/>
+
+    <rect x="1200" y="1038" width="500" height="142" rx="10" fill="#EBDDFB" stroke="#7C3AC9" stroke-width="2"/>
+    <text x="1450" y="1074" text-anchor="middle" font-size="30" font-weight="700">ReactFlow 向量场 vθ</text>
+    <text x="1450" y="1114" text-anchor="middle" font-size="28">输入：xₜ、h、τₖ、t</text>
+    <text x="1450" y="1154" text-anchor="middle" font-size="24">输出：vZ、vA、actor existence logits</text>
+    <path d="M1702,1110 H1727" fill="none" stroke="#7C3AC9" stroke-width="3" marker-end="url(#arrow-purple)"/>
+
+    <rect x="1730" y="1038" width="700" height="142" rx="10" fill="#FFFFFF" stroke="#7C3AC9" stroke-width="2"/>
+    <text x="2080" y="1074" text-anchor="middle" font-size="30" font-weight="700">有效元素监督（各模态单独归一）</text>
+    <text x="2080" y="1114" text-anchor="middle" font-size="28">L_occ_fm + L_actor_fm：masked MSE(vθ,u*)</text>
+    <text x="2080" y="1154" text-anchor="middle" font-size="24">L_exist：BCE；未来存在性／target mask 只用于损失</text>
+
+    <path d="M1450,1182 V1192 H400 V1201" fill="none" stroke="#7C3AC9" stroke-width="2" marker-end="url(#arrow-purple)"/>
+    <rect x="50" y="1203" width="700" height="79" rx="8" fill="#FFFFFF" stroke="#7C3AC9" stroke-width="2"/>
+    <text x="400" y="1235" text-anchor="middle" font-size="28">连续端点：x̂₁=xₜ+(1−t)vθ</text>
+    <text x="400" y="1266" text-anchor="middle" font-size="24">occupancy 端点 → 冻结 VAE decoder → 连续 logits</text>
+    <path d="M752,1242 H777" fill="none" stroke="#7C3AC9" stroke-width="3" marker-end="url(#arrow-purple)"/>
+    <rect x="780" y="1203" width="1010" height="79" rx="8" fill="#FFF0CA" stroke="#E8750B" stroke-width="2"/>
+    <text x="1285" y="1235" text-anchor="middle" font-size="28">局部 occupancy–actor 几何一致性 + 静态时序一致性 + 类别运动学</text>
+    <text x="1285" y="1266" text-anchor="middle" font-size="24">只在有效 actor 局部支持域施加约束；保留未显式选中目标与危险未来</text>
+    <rect x="1814" y="1203" width="616" height="79" rx="8" fill="#FFFFFF" stroke="#BDD1DF" stroke-width="2"/>
+    <text x="2122" y="1235" text-anchor="middle" font-size="24">VAE 冻结；新 actor／interaction 分支训练</text>
+    <text x="2122" y="1266" text-anchor="middle" font-size="24">预训练主干：冻结热身／低学习率微调</text>
+
+    <text x="1240" y="1324" text-anchor="middle" font-size="28" font-weight="700" fill="#7C3AC9">L = L_occ_fm + L_actor_fm + 0.1 L_exist + 0.1 L_occ_actor + 0.05 L_temporal + 0.01 L_kinematics</text>
+  </g>
+
+  <g id="section-4-core-network" font-family="Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif" fill="#102A43">
+    <rect x="28" y="1362" width="2424" height="1350" rx="14" fill="#FFF8ED" stroke="#E8750B" stroke-width="3"/>
+    <rect x="28" y="1362" width="2424" height="56" rx="14" fill="#E8750B"/>
+    <text x="54" y="1403" font-size="40" font-weight="700" fill="#FFFFFF">4. 核心网络展开：时空 DiT U-Net + 显式 actor tokens + 双向中层交互</text>
+
+    <g id="occupancy-backbone">
+      <rect x="50" y="1434" width="1610" height="438" rx="10" fill="#FFFFFF" stroke="#087FCD" stroke-width="2"/>
+      <text x="70" y="1471" font-size="30" font-weight="700" fill="#087FCD">4.1 Occupancy 主干：12 时间槽，空间 50→25→50，历史条件保持固定</text>
+      <rect x="70" y="1508" width="225" height="218" rx="8" fill="#EEF8FF" stroke="#087FCD" stroke-width="2"/>
+      <text x="182" y="1544" text-anchor="middle" font-size="28" font-weight="700">输入／Stem</text>
+      <text x="182" y="1582" text-anchor="middle" font-size="24">[10z_hist ; zₜ]</text>
+      <text x="182" y="1618" text-anchor="middle" font-size="24">Conv3D 16→64</text>
+      <text x="182" y="1653" text-anchor="middle" font-size="24">核 1×7×7</text>
+      <text x="182" y="1688" text-anchor="middle" font-size="24">初始时间注意力</text>
+      <path d="M297,1618 H317" stroke="#087FCD" stroke-width="3" fill="none" marker-end="url(#arrow-blue)"/>
+
+      <rect x="320" y="1508" width="240" height="218" rx="8" fill="#EEF8FF" stroke="#087FCD" stroke-width="2"/>
+      <text x="440" y="1544" text-anchor="middle" font-size="28" font-weight="700">Down 1</text>
+      <text x="440" y="1582" text-anchor="middle" font-size="24">ResNet ×2</text>
+      <text x="440" y="1618" text-anchor="middle" font-size="24">Spatial → Temporal</text>
+      <text x="440" y="1653" text-anchor="middle" font-size="24">DiT，C=128</text>
+      <text x="440" y="1688" text-anchor="middle" font-size="24">50×50 → 25×25</text>
+      <path d="M562,1618 H582" stroke="#087FCD" stroke-width="3" fill="none" marker-end="url(#arrow-blue)"/>
+
+      <rect x="585" y="1508" width="250" height="218" rx="8" fill="#EEF8FF" stroke="#087FCD" stroke-width="2"/>
+      <text x="710" y="1544" text-anchor="middle" font-size="28" font-weight="700">Down 2</text>
+      <text x="710" y="1582" text-anchor="middle" font-size="24">ResNet ×2</text>
+      <text x="710" y="1618" text-anchor="middle" font-size="24">Spatial → Temporal</text>
+      <text x="710" y="1653" text-anchor="middle" font-size="24">DiT，C=256</text>
+      <text x="710" y="1688" text-anchor="middle" font-size="24">25×25；不再下采样</text>
+      <path d="M837,1618 H857" stroke="#087FCD" stroke-width="3" fill="none" marker-end="url(#arrow-blue)"/>
+
+      <rect x="860" y="1508" width="290" height="218" rx="8" fill="#FFF0CA" stroke="#E8750B" stroke-width="3"/>
+      <text x="1005" y="1544" text-anchor="middle" font-size="28" font-weight="700">Middle + 交互</text>
+      <text x="1005" y="1582" text-anchor="middle" font-size="24">Res → Spatial Attn</text>
+      <text x="1005" y="1618" text-anchor="middle" font-size="24">→ Temporal Attn → Res</text>
+      <text x="1005" y="1653" text-anchor="middle" font-size="24" font-weight="700">occ ↔ actor，×2</text>
+      <text x="1005" y="1688" text-anchor="middle" font-size="24">Δtokens 回投并加回</text>
+      <path d="M1152,1618 H1172" stroke="#087FCD" stroke-width="3" fill="none" marker-end="url(#arrow-blue)"/>
+
+      <rect x="1175" y="1508" width="240" height="218" rx="8" fill="#EEF8FF" stroke="#087FCD" stroke-width="2"/>
+      <text x="1295" y="1544" text-anchor="middle" font-size="28" font-weight="700">Up 2 → Up 1</text>
+      <text x="1295" y="1582" text-anchor="middle" font-size="24">Concat 对应 skip</text>
+      <text x="1295" y="1618" text-anchor="middle" font-size="24">Res×2 → S/T DiT</text>
+      <text x="1295" y="1653" text-anchor="middle" font-size="24">C：256→128→64</text>
+      <text x="1295" y="1688" text-anchor="middle" font-size="24">25×25 → 50×50</text>
+      <path d="M1417,1618 H1437" stroke="#087FCD" stroke-width="3" fill="none" marker-end="url(#arrow-blue)"/>
+
+      <rect x="1440" y="1508" width="200" height="218" rx="8" fill="#DDEFFF" stroke="#087FCD" stroke-width="2"/>
+      <text x="1540" y="1544" text-anchor="middle" font-size="28" font-weight="700">输出 vZ</text>
+      <text x="1540" y="1582" text-anchor="middle" font-size="24">Stem skip</text>
+      <text x="1540" y="1618" text-anchor="middle" font-size="24">Res → Conv1³</text>
+      <text x="1540" y="1653" text-anchor="middle" font-size="24">取未来 6 槽</text>
+      <text x="1540" y="1688" text-anchor="middle" font-size="24">6×16×50×50</text>
+
+      <path d="M440,1728 V1750 H1295 V1728" fill="none" stroke="#087FCD" stroke-width="2" marker-end="url(#arrow-blue)"/>
+      <path d="M710,1728 V1768 H1270 V1728" fill="none" stroke="#087FCD" stroke-width="2" marker-end="url(#arrow-blue)"/>
+      <text x="70" y="1775" font-size="22" fill="#087FCD">多尺度 skip →</text>
+      <text x="70" y="1813" font-size="24">中层 x：B×256×12×25×25 → 7500 tokens → Linear(256→128)</text>
+      <text x="70" y="1850" font-size="24" fill="#486581">条件 c = MLP(time embedding) + MLP(Fourier(τₖ))；位置／时间 embedding</text>
+    </g>
+
+    <g id="actor-branch">
+      <rect x="1690" y="1434" width="740" height="438" rx="10" fill="#FFFFFF" stroke="#7C3AC9" stroke-width="2"/>
+      <text x="1710" y="1471" font-size="30" font-weight="700" fill="#7C3AC9">Actor 分支：48 tokens，hidden=128</text>
+      <rect x="1710" y="1490" width="700" height="73" rx="8" fill="#F7F1FF" stroke="#7C3AC9" stroke-width="2"/>
+      <text x="2060" y="1521" text-anchor="middle" font-size="24">4×(6 状态 + 2 masks) + size₃ + class embed₁₆</text>
+      <text x="2060" y="1551" text-anchor="middle" font-size="24">51 维历史特征 → MLP → 每 actor 条件 128 维</text>
+      <path d="M2060,1565 V1580" fill="none" stroke="#7C3AC9" stroke-width="3" marker-end="url(#arrow-purple)"/>
+      <rect x="1710" y="1584" width="700" height="91" rx="8" fill="#EBDDFB" stroke="#7C3AC9" stroke-width="2"/>
+      <text x="2060" y="1616" text-anchor="middle" font-size="28">Linear(Aₜ) + 历史条件 + future-slot embedding</text>
+      <text x="2060" y="1653" text-anchor="middle" font-size="24">+ shared-time embedding + Fourier(τₖ)→MLP</text>
+      <path d="M2060,1677 V1692" fill="none" stroke="#7C3AC9" stroke-width="3" marker-end="url(#arrow-purple)"/>
+      <rect x="1710" y="1696" width="700" height="49" rx="8" fill="#FFF0CA" stroke="#E8750B" stroke-width="2"/>
+      <text x="2060" y="1728" text-anchor="middle" font-size="28">8 actors × 6 future slots = B×48×128</text>
+      <path d="M1710,1720 H1675 V1788 H1005 V1728" fill="none" stroke="#E8750B" stroke-width="3" marker-end="url(#arrow-orange)"/>
+      <path d="M1132,1728 V1779 H1665 V1761 H2060 V1801" fill="none" stroke="#7C3AC9" stroke-width="3" marker-end="url(#arrow-purple)"/>
+      <text x="1710" y="1788" font-size="22" fill="#7C3AC9">交互后 actor tokens</text>
+      <rect x="1710" y="1805" width="700" height="50" rx="8" fill="#F7F1FF" stroke="#7C3AC9" stroke-width="2"/>
+      <text x="2060" y="1837" text-anchor="middle" font-size="24">LN→Linear₆：vA　|　LN→Linear₁：existence logits</text>
+    </g>
+
+    <g id="dit-block-detail">
+      <rect x="50" y="1892" width="720" height="708" rx="10" fill="#FFFFFF" stroke="#087FCD" stroke-width="2"/>
+      <text x="70" y="1931" font-size="30" font-weight="700" fill="#087FCD">4.2 Spatial／Temporal DiT Block</text>
+      <text x="410" y="1968" text-anchor="middle" font-size="24">S：(B·F,N,C)　↔　T：(B·N,F,C)，8 heads</text>
+      <rect x="91" y="1987" width="578" height="50" rx="8" fill="#FFF0CA" stroke="#E8750B" stroke-width="2"/>
+      <text x="380" y="2019" text-anchor="middle" font-size="24">条件 c → SiLU → Linear → β₁,γ₁,α₁,β₂,γ₂,α₂</text>
+      <path d="M670,2012 H732 V2483 H515" fill="none" stroke="#E8750B" stroke-width="2" stroke-dasharray="7 5" marker-end="url(#arrow-orange)"/>
+      <path d="M732,2124 H571 M732,2263 H511 M732,2354 H571" fill="none" stroke="#E8750B" stroke-width="2" stroke-dasharray="7 5" marker-end="url(#arrow-orange)"/>
+
+      <rect x="185" y="2053" width="350" height="38" rx="6" fill="#EEF8FF" stroke="#087FCD" stroke-width="2"/>
+      <text x="360" y="2080" text-anchor="middle" font-size="24">输入 tokens X</text>
+      <path d="M360,2093 V2102" fill="none" stroke="#102A43" stroke-width="3" marker-end="url(#arrow)"/>
+      <rect x="150" y="2106" width="420" height="48" rx="8" fill="#DAF2E4" stroke="#0A8F66" stroke-width="2"/>
+      <text x="360" y="2138" text-anchor="middle" font-size="28">LayerNorm → AdaLN(β₁,γ₁)</text>
+      <path d="M360,2156 V2171" fill="none" stroke="#102A43" stroke-width="3" marker-end="url(#arrow)"/>
+      <rect x="150" y="2175" width="420" height="64" rx="8" fill="#DDEFFF" stroke="#087FCD" stroke-width="2"/>
+      <text x="360" y="2203" text-anchor="middle" font-size="28" font-weight="700">Multi-Head Self-Attention</text>
+      <text x="360" y="2228" text-anchor="middle" font-size="22">Q=XWQ　K=XWK　V=XWV</text>
+      <path d="M360,2241 V2252" fill="none" stroke="#102A43" stroke-width="3" marker-end="url(#arrow)"/>
+      <rect x="210" y="2256" width="300" height="36" rx="6" fill="#FFF0CA" stroke="#E8750B" stroke-width="2"/>
+      <text x="360" y="2282" text-anchor="middle" font-size="24">× gate α₁</text>
+      <path d="M360,2294 V2300" fill="none" stroke="#102A43" stroke-width="3" marker-end="url(#arrow)"/>
+      <path d="M535,2072 H690 V2314 H381" fill="none" stroke="#102A43" stroke-width="2" marker-end="url(#arrow)"/>
+      <circle cx="360" cy="2314" r="17" fill="#FFFFFF" stroke="#102A43" stroke-width="2"/>
+      <text x="360" y="2323" text-anchor="middle" font-size="28">+</text>
+      <text x="92" y="2322" font-size="22" fill="#486581">Residual 1</text>
+      <path d="M360,2332 V2340" fill="none" stroke="#102A43" stroke-width="3" marker-end="url(#arrow)"/>
+      <rect x="150" y="2344" width="420" height="48" rx="8" fill="#DAF2E4" stroke="#0A8F66" stroke-width="2"/>
+      <text x="360" y="2376" text-anchor="middle" font-size="28">LayerNorm → AdaLN(β₂,γ₂)</text>
+      <path d="M360,2394 V2403" fill="none" stroke="#102A43" stroke-width="3" marker-end="url(#arrow)"/>
+      <rect x="150" y="2407" width="420" height="54" rx="8" fill="#EBDDFB" stroke="#7C3AC9" stroke-width="2"/>
+      <text x="360" y="2442" text-anchor="middle" font-size="28">FFN：Linear C→4C→C，GELU</text>
+      <path d="M360,2463 V2472" fill="none" stroke="#102A43" stroke-width="3" marker-end="url(#arrow)"/>
+      <rect x="210" y="2476" width="300" height="36" rx="6" fill="#FFF0CA" stroke="#E8750B" stroke-width="2"/>
+      <text x="360" y="2502" text-anchor="middle" font-size="24">× gate α₂</text>
+      <path d="M360,2514 V2522" fill="none" stroke="#102A43" stroke-width="3" marker-end="url(#arrow)"/>
+      <path d="M379,2314 H670 V2537 H381" fill="none" stroke="#102A43" stroke-width="2" marker-end="url(#arrow)"/>
+      <circle cx="360" cy="2537" r="17" fill="#FFFFFF" stroke="#102A43" stroke-width="2"/>
+      <text x="360" y="2546" text-anchor="middle" font-size="28">+</text>
+      <text x="92" y="2545" font-size="22" fill="#486581">Residual 2</text>
+      <path d="M360,2556 V2564" fill="none" stroke="#102A43" stroke-width="3" marker-end="url(#arrow)"/>
+      <text x="410" y="2587" text-anchor="middle" font-size="24" fill="#087FCD">恢复 (B,C,F,H,W)；空间／时间块交替</text>
+    </g>
+
+    <g id="bidirectional-interaction-detail">
+      <rect x="795" y="1892" width="960" height="708" rx="10" fill="#FFFFFF" stroke="#E8750B" stroke-width="2"/>
+      <text x="815" y="1931" font-size="30" font-weight="700" fill="#E8750B">4.3 Middle Interaction ×2（hidden=128，4 heads）</text>
+      <rect x="825" y="1960" width="390" height="49" rx="8" fill="#DDEFFF" stroke="#087FCD" stroke-width="2"/>
+      <text x="1020" y="1992" text-anchor="middle" font-size="24">H_Z：B×7500×128</text>
+      <rect x="1260" y="1960" width="465" height="49" rx="8" fill="#EBDDFB" stroke="#7C3AC9" stroke-width="2"/>
+      <text x="1492" y="1992" text-anchor="middle" font-size="24">H_A：B×48×128</text>
+
+      <path d="M1492,2011 V2026" fill="none" stroke="#102A43" stroke-width="3" marker-end="url(#arrow)"/>
+      <rect x="1260" y="2030" width="465" height="59" rx="8" fill="#EBDDFB" stroke="#7C3AC9" stroke-width="2"/>
+      <text x="1492" y="2056" text-anchor="middle" font-size="24">LN → masked Actor Self-Attention</text>
+      <text x="1492" y="2080" text-anchor="middle" font-size="20">仅当前选中 actor；全空 mask 使用 null key</text>
+      <path d="M1492,2091 V2105" fill="none" stroke="#102A43" stroke-width="3" marker-end="url(#arrow)"/>
+      <path d="M1725,1984 H1739 V2123 H1512" fill="none" stroke="#102A43" stroke-width="2" marker-end="url(#arrow)"/>
+      <circle cx="1492" cy="2123" r="17" fill="#FFFFFF" stroke="#102A43" stroke-width="2"/>
+      <text x="1492" y="2132" text-anchor="middle" font-size="28">+</text>
+      <path d="M1492,2142 V2153" fill="none" stroke="#102A43" stroke-width="3" marker-end="url(#arrow)"/>
+      <path d="M1020,2011 V2153" fill="none" stroke="#087FCD" stroke-width="3" marker-end="url(#arrow-blue)"/>
+      <text x="1038" y="2070" font-size="22" fill="#087FCD">保留原中层场景</text>
+
+      <rect x="825" y="2157" width="390" height="45" rx="8" fill="#DAF2E4" stroke="#0A8F66" stroke-width="2"/>
+      <text x="1020" y="2187" text-anchor="middle" font-size="24">LN(H_Z)</text>
+      <rect x="1260" y="2157" width="465" height="45" rx="8" fill="#DAF2E4" stroke="#0A8F66" stroke-width="2"/>
+      <text x="1492" y="2187" text-anchor="middle" font-size="24">LN(H_A)</text>
+      <path d="M965,2204 V2245" fill="none" stroke="#087FCD" stroke-width="3" marker-end="url(#arrow-blue)"/>
+      <path d="M1545,2204 V2245" fill="none" stroke="#7C3AC9" stroke-width="3" marker-end="url(#arrow-purple)"/>
+      <path d="M1130,2204 V2219 H1370 V2245" fill="none" stroke="#087FCD" stroke-width="2" marker-end="url(#arrow-blue)"/>
+      <path d="M1370,2204 V2231 H1130 V2245" fill="none" stroke="#7C3AC9" stroke-width="2" marker-end="url(#arrow-purple)"/>
+
+      <rect x="825" y="2249" width="390" height="78" rx="8" fill="#DDEFFF" stroke="#087FCD" stroke-width="2"/>
+      <text x="1020" y="2280" text-anchor="middle" font-size="28" font-weight="700">Actor → Occupancy</text>
+      <text x="1020" y="2310" text-anchor="middle" font-size="24">Q=H_Z；K,V=H_A</text>
+      <rect x="1260" y="2249" width="465" height="78" rx="8" fill="#EBDDFB" stroke="#7C3AC9" stroke-width="2"/>
+      <text x="1492" y="2280" text-anchor="middle" font-size="28" font-weight="700">Occupancy → Actor</text>
+      <text x="1492" y="2310" text-anchor="middle" font-size="24">Q=H_A；K,V=H_Z</text>
+
+      <path d="M1020,2329 V2341 M1492,2329 V2341" fill="none" stroke="#102A43" stroke-width="3" marker-end="url(#arrow)"/>
+      <rect x="900" y="2345" width="240" height="36" rx="6" fill="#FFF0CA" stroke="#E8750B" stroke-width="2"/>
+      <text x="1020" y="2371" text-anchor="middle" font-size="24">× g_Z</text>
+      <rect x="1372" y="2345" width="240" height="36" rx="6" fill="#FFF0CA" stroke="#E8750B" stroke-width="2"/>
+      <text x="1492" y="2371" text-anchor="middle" font-size="24">× g_A</text>
+      <path d="M1020,2383 V2393 M1492,2383 V2393" fill="none" stroke="#102A43" stroke-width="3" marker-end="url(#arrow)"/>
+      <path d="M825,1984 H811 V2411 H1000" fill="none" stroke="#087FCD" stroke-width="2" marker-end="url(#arrow-blue)"/>
+      <path d="M1511,2123 H1737 V2411 H1512" fill="none" stroke="#7C3AC9" stroke-width="2" marker-end="url(#arrow-purple)"/>
+      <circle cx="1020" cy="2411" r="17" fill="#FFFFFF" stroke="#087FCD" stroke-width="2"/>
+      <text x="1020" y="2420" text-anchor="middle" font-size="28">+</text>
+      <circle cx="1492" cy="2411" r="17" fill="#FFFFFF" stroke="#7C3AC9" stroke-width="2"/>
+      <text x="1492" y="2420" text-anchor="middle" font-size="28">+</text>
+
+      <path d="M1020,2430 V2441 M1492,2430 V2441" fill="none" stroke="#102A43" stroke-width="3" marker-end="url(#arrow)"/>
+      <rect x="825" y="2445" width="390" height="84" rx="8" fill="#EEF8FF" stroke="#087FCD" stroke-width="2"/>
+      <text x="1020" y="2478" text-anchor="middle" font-size="24">两层交互完成后：仅提取 ΔH_Z</text>
+      <text x="1020" y="2510" text-anchor="middle" font-size="24">Linear(128→256) → 加回原 x</text>
+      <rect x="1260" y="2445" width="465" height="62" rx="8" fill="#EBDDFB" stroke="#7C3AC9" stroke-width="2"/>
+      <text x="1492" y="2472" text-anchor="middle" font-size="24">LN → FFN(128→512→128)</text>
+      <text x="1492" y="2497" text-anchor="middle" font-size="22">GELU；有效 actor mask</text>
+      <path d="M1492,2509 V2521" fill="none" stroke="#102A43" stroke-width="3" marker-end="url(#arrow)"/>
+      <path d="M1512,2411 H1737 V2539 H1512" fill="none" stroke="#7C3AC9" stroke-width="2" marker-end="url(#arrow-purple)"/>
+      <circle cx="1492" cy="2539" r="17" fill="#FFFFFF" stroke="#7C3AC9" stroke-width="2"/>
+      <text x="1492" y="2548" text-anchor="middle" font-size="28">+</text>
+      <text x="1020" y="2567" text-anchor="middle" font-size="22" fill="#087FCD">occupancy decoder ↑</text>
+      <text x="1492" y="2582" text-anchor="middle" font-size="22" fill="#7C3AC9">下一交互层／actor 输出头 ↑</text>
+    </g>
+
+    <g id="swin-and-attention-detail">
+      <rect x="1780" y="1892" width="650" height="708" rx="10" fill="#FFFFFF" stroke="#0A8F66" stroke-width="2"/>
+      <text x="1800" y="1931" font-size="30" font-weight="700" fill="#0A8F66">4.4 Occ-VAE 的 Swin 单元</text>
+      <text x="2105" y="1967" text-anchor="middle" font-size="24">局部窗口交替；window=5，8 heads</text>
+      <rect x="1905" y="1985" width="350" height="40" rx="6" fill="#EFFBF5" stroke="#0A8F66" stroke-width="2"/>
+      <text x="2080" y="2013" text-anchor="middle" font-size="24">BEV tokens X</text>
+      <path d="M2080,2027 V2042" fill="none" stroke="#102A43" stroke-width="3" marker-end="url(#arrow)"/>
+      <rect x="1870" y="2046" width="420" height="45" rx="8" fill="#DAF2E4" stroke="#0A8F66" stroke-width="2"/>
+      <text x="2080" y="2077" text-anchor="middle" font-size="28">LayerNorm</text>
+      <path d="M2080,2093 V2108" fill="none" stroke="#102A43" stroke-width="3" marker-end="url(#arrow)"/>
+      <rect x="1870" y="2112" width="420" height="70" rx="8" fill="#DDEFFF" stroke="#087FCD" stroke-width="2"/>
+      <text x="2080" y="2143" text-anchor="middle" font-size="28" font-weight="700">W-MSA / SW-MSA</text>
+      <text x="2080" y="2171" text-anchor="middle" font-size="24">窗口划分 → QKV → 合并窗口</text>
+      <path d="M2080,2184 V2201" fill="none" stroke="#102A43" stroke-width="3" marker-end="url(#arrow)"/>
+      <path d="M2255,2005 H2365 V2219 H2101" fill="none" stroke="#102A43" stroke-width="2" marker-end="url(#arrow)"/>
+      <circle cx="2080" cy="2219" r="17" fill="#FFFFFF" stroke="#102A43" stroke-width="2"/>
+      <text x="2080" y="2228" text-anchor="middle" font-size="28">+</text>
+      <path d="M2080,2238 V2253" fill="none" stroke="#102A43" stroke-width="3" marker-end="url(#arrow)"/>
+      <rect x="1870" y="2257" width="420" height="45" rx="8" fill="#DAF2E4" stroke="#0A8F66" stroke-width="2"/>
+      <text x="2080" y="2288" text-anchor="middle" font-size="28">LayerNorm</text>
+      <path d="M2080,2304 V2319" fill="none" stroke="#102A43" stroke-width="3" marker-end="url(#arrow)"/>
+      <rect x="1870" y="2323" width="420" height="55" rx="8" fill="#FFF0CA" stroke="#E8750B" stroke-width="2"/>
+      <text x="2080" y="2358" text-anchor="middle" font-size="28">MLP：C→4C→C，GELU</text>
+      <path d="M2080,2380 V2397" fill="none" stroke="#102A43" stroke-width="3" marker-end="url(#arrow)"/>
+      <path d="M2099,2219 H2345 V2415 H2101" fill="none" stroke="#102A43" stroke-width="2" marker-end="url(#arrow)"/>
+      <circle cx="2080" cy="2415" r="17" fill="#FFFFFF" stroke="#102A43" stroke-width="2"/>
+      <text x="2080" y="2424" text-anchor="middle" font-size="28">+</text>
+      <path d="M2080,2434 V2450" fill="none" stroke="#102A43" stroke-width="3" marker-end="url(#arrow)"/>
+      <text x="2105" y="2476" text-anchor="middle" font-size="24">下一单元交替窗口位移 → 跨窗口信息交换</text>
+      <line x1="1804" y1="2500" x2="2406" y2="2500" stroke="#BDD1DF" stroke-width="2"/>
+      <text x="2105" y="2534" text-anchor="middle" font-size="24" font-weight="700">Attention(Q,K,V) = softmax(QKᵀ / √d) V</text>
+      <text x="2105" y="2574" text-anchor="middle" font-size="22" fill="#486581">多头并行 → concat → output projection</text>
+    </g>
+
+    <rect x="50" y="2618" width="2380" height="74" rx="8" fill="#FFF0CA" stroke="#E8750B" stroke-width="2"/>
+    <text x="70" y="2648" font-size="24" font-weight="700">交互语义：双向 cross-attention 从同一轮归一化状态同时计算；g_Z / g_A 为可学习门控（初始 0.05）。</text>
+    <text x="70" y="2679" font-size="24">消融：joint 开启双向交换；parallel 保留 actor 自注意力与 FFN、关闭交换；occupancy_only 仅 occupancy 主干。</text>
+  </g>
+
+  <g id="section-5-sampling-risk-control" font-family="Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif" fill="#102A43">
+    <rect x="28" y="2728" width="2424" height="440" rx="14" fill="#EFFAF9" stroke="#078780" stroke-width="3"/>
+    <rect x="28" y="2728" width="2424" height="56" rx="14" fill="#078780"/>
+    <text x="54" y="2769" font-size="40" font-weight="700" fill="#FFFFFF">5. 推理与规划：每候选多世界采样 → 事件级风险 → 校准与筛选 → 控制反馈</text>
+
+    <rect x="50" y="2801" width="330" height="169" rx="10" fill="#FFFFFF" stroke="#078780" stroke-width="2"/>
+    <text x="215" y="2838" text-anchor="middle" font-size="30" font-weight="700">候选 τₖ + 观测 h</text>
+    <text x="215" y="2878" text-anchor="middle" font-size="28">总计 9 条候选</text>
+    <text x="215" y="2915" text-anchor="middle" font-size="24">每条 M=8 世界</text>
+    <text x="215" y="2950" text-anchor="middle" font-size="24">概率研究增至 M=32</text>
+    <path d="M382,2886 H407" fill="none" stroke="#078780" stroke-width="3" marker-end="url(#arrow-teal)"/>
+
+    <rect x="410" y="2801" width="420" height="169" rx="10" fill="#FFFFFF" stroke="#078780" stroke-width="2"/>
+    <text x="620" y="2838" text-anchor="middle" font-size="30" font-weight="700">联合 ODE 积分</text>
+    <text x="620" y="2878" text-anchor="middle" font-size="28">t=0 噪声 → t=1 未来</text>
+    <text x="620" y="2915" text-anchor="middle" font-size="24">shifted Euler；默认 NFE=8</text>
+    <text x="620" y="2950" text-anchor="middle" font-size="24">仅 future 更新；历史固定</text>
+    <path d="M832,2886 H857" fill="none" stroke="#078780" stroke-width="3" marker-end="url(#arrow-teal)"/>
+
+    <rect x="860" y="2801" width="390" height="169" rx="10" fill="#FFFFFF" stroke="#078780" stroke-width="2"/>
+    <text x="1055" y="2838" text-anchor="middle" font-size="30" font-weight="700">联合世界样本</text>
+    <text x="1055" y="2878" text-anchor="middle" font-size="28">ẑ ÷10 → VAE Decode</text>
+    <text x="1055" y="2915" text-anchor="middle" font-size="24">occupancy + actor 运动／存在性</text>
+    <text x="1055" y="2950" text-anchor="middle" font-size="24">流式解码、及时汇总事件</text>
+    <path d="M1252,2886 H1277" fill="none" stroke="#078780" stroke-width="3" marker-end="url(#arrow-teal)"/>
+
+    <rect x="1280" y="2801" width="390" height="169" rx="10" fill="#FFFFFF" stroke="#078780" stroke-width="2"/>
+    <text x="1475" y="2838" text-anchor="middle" font-size="30" font-weight="700">3 s 碰撞事件</text>
+    <text x="1475" y="2878" text-anchor="middle" font-size="24">ego 车体 ∩ 障碍网格／actor 车体</text>
+    <text x="1475" y="2915" text-anchor="middle" font-size="24">尺寸、朝向、高度、实测时间</text>
+    <text x="1475" y="2950" text-anchor="middle" font-size="24" font-weight="700">r=(碰撞数+0.5)/(M+1)</text>
+    <path d="M1672,2886 H1697" fill="none" stroke="#078780" stroke-width="3" marker-end="url(#arrow-teal)"/>
+
+    <rect x="1700" y="2801" width="360" height="169" rx="10" fill="#FFF0F1" stroke="#C74A52" stroke-width="2" stroke-dasharray="9 6"/>
+    <text x="1880" y="2838" text-anchor="middle" font-size="30" font-weight="700">风险校准器</text>
+    <text x="1880" y="2878" text-anchor="middle" font-size="28">isotonic：r → p̂</text>
+    <text x="1880" y="2915" text-anchor="middle" font-size="24">独立执行候选的事件标签</text>
+    <text x="1880" y="2950" text-anchor="middle" font-size="24" fill="#C74A52">接口已有；真实拟合待完成</text>
+    <path d="M2062,2886 H2087" fill="none" stroke="#078780" stroke-width="3" marker-end="url(#arrow-teal)"/>
+
+    <rect x="2090" y="2801" width="340" height="169" rx="10" fill="#FFFFFF" stroke="#078780" stroke-width="2"/>
+    <text x="2260" y="2838" text-anchor="middle" font-size="30" font-weight="700">Planner.select</text>
+    <text x="2260" y="2878" text-anchor="middle" font-size="28">运动学有效 + p̂≤δ</text>
+    <text x="2260" y="2915" text-anchor="middle" font-size="24">风险／进度／舒适性排序</text>
+    <text x="2260" y="2950" text-anchor="middle" font-size="24">无可行候选 → 显式刹停</text>
+
+    <text x="58" y="3006" font-size="24" fill="#078780" font-weight="700">采样约定：终点归一化 actor 航向；existence 独立预测；越界单独标记。阈值 δ 在 tune 选择 0.05 / 0.10 / 0.20，评测时冻结。</text>
+    <path d="M2260,2972 V3026 H420 V3041" fill="none" stroke="#078780" stroke-width="3" marker-end="url(#arrow-teal)"/>
+
+    <rect x="50" y="3045" width="740" height="96" rx="8" fill="#FFFFFF" stroke="#078780" stroke-width="2"/>
+    <text x="420" y="3078" text-anchor="middle" font-size="28" font-weight="700">Bridge／Controller：按实测时间插值跟踪轨迹</text>
+    <text x="420" y="3115" text-anchor="middle" font-size="24">episode／时间戳／序号校验 → throttle／steer／brake</text>
+    <rect x="820" y="3045" width="730" height="96" rx="8" fill="#FFF0F1" stroke="#C74A52" stroke-width="2"/>
+    <text x="1185" y="3078" text-anchor="middle" font-size="28" font-weight="700">故障减速：超时、缺失传感器、旧 episode</text>
+    <text x="1185" y="3115" text-anchor="middle" font-size="24">无候选／非有限输出 → 保留 fallback 原因</text>
+    <path d="M818,3093 H793" fill="none" stroke="#C74A52" stroke-width="3" marker-end="url(#arrow-red)"/>
+    <rect x="1580" y="3045" width="850" height="96" rx="8" fill="#FFF0F1" stroke="#C74A52" stroke-width="2" stroke-dasharray="9 6"/>
+    <text x="2005" y="3078" text-anchor="middle" font-size="28" font-weight="700">CARLA／Bench2Drive 闭环（待运行）</text>
+    <text x="2005" y="3115" text-anchor="middle" font-size="24">目标：规划 2 Hz／控制 20 Hz → 新观测 → 回到 ①</text>
+    <path d="M420,3143 V3154 H2005 V3143" fill="none" stroke="#078780" stroke-width="2" stroke-dasharray="8 5" marker-end="url(#arrow-teal)"/>
+  </g>
+
+  <g id="section-6-data-validation" font-family="Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif" fill="#102A43">
+    <rect x="28" y="3184" width="2424" height="262" rx="14" fill="#F1F4FD" stroke="#4058A8" stroke-width="3"/>
+    <rect x="28" y="3184" width="2424" height="56" rx="14" fill="#4058A8"/>
+    <text x="54" y="3225" font-size="40" font-weight="700" fill="#FFFFFF">6. 数据、动作干预与验证：观测边界固定，研究结果分阶段建立</text>
+    <line x1="806" y1="3261" x2="806" y2="3391" stroke="#BDD1DF" stroke-width="2"/>
+    <line x1="1610" y1="3261" x2="1610" y2="3391" stroke="#BDD1DF" stroke-width="2"/>
+
+    <text x="54" y="3278" font-size="30" font-weight="700" fill="#4058A8">数据与 oracle 表示实验</text>
+    <text x="54" y="3315" font-size="24">nuScenes：560 train / 70 tune / 70 calibration / 150 eval</text>
+    <text x="54" y="3350" font-size="24">train-only 统计；E0 3D warp 后重编码；history／target 分离</text>
+    <text x="54" y="3385" font-size="24" fill="#C74A52">实际 LiDAR latent 学习／训练后感知仍待完成</text>
+
+    <text x="832" y="3278" font-size="30" font-weight="700" fill="#4058A8">动作干预与反应性证据（待采集）</text>
+    <text x="832" y="3315" font-size="24">固定公共历史／环境／NPC策略 → 改变 ego 动作 → rollout</text>
+    <text x="832" y="3350" font-size="24">记录实际执行、邻居响应、碰撞；按初始 origin 分组划分</text>
+    <text x="832" y="3385" font-size="24">比较加速／让行／TTC 等响应；日志未来不充当反事实真值</text>
+
+    <text x="1636" y="3278" font-size="30" font-weight="700" fill="#4058A8">评价维度与关键消融</text>
+    <text x="1636" y="3315" font-size="24">occ mIoU；actor 运动／存在性；几何／时序一致性</text>
+    <text x="1636" y="3350" font-size="24">Brier / NLL / ECE / risk–coverage；闭环碰撞、完成度、时延</text>
+    <text x="1636" y="3385" font-size="24">joint / parallel / occ-only；ego条件；K / M / NFE</text>
+
+    <text x="54" y="3424" font-size="22" fill="#486581">状态边界：结构／接口可运行 ≠ 质量结论；预训练 OccFM 见过官方 700 训练场景，新划 tune／calibration 不自动具有预训练未见性。</text>
+  </g>
+
+  <g id="source-footer" font-family="Arial, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif" fill="#486581">
+    <text x="48" y="3476" font-size="22">依据：2026-10-27 实施计划 + ReactFlow / JointTransition / DiT / Codec 源码；方法与状态详见随附 source_intake.md。</text>
+    <text x="2430" y="3476" text-anchor="end" font-size="22">2026-10-31 · 可编辑 SVG · 示意图</text>
+  </g>
+</svg>

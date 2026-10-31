@@ -1,0 +1,11 @@
+[
+  {
+    "repository": "IR-WM",
+    "commit": "94dbbf44d6c22e50db4080e986b3675eadbb4497",
+    "source": "IR-WM/projects/mmdet3d_plugin/bevformer/dense_heads/visualization.py",
+    "sha256": "fd6095276363cba11096caa4b1c5b0b9cf325484483a7e30bab1f4124f346b8e",
+    "snapshot": "reactoccflow/data/source_snapshots/visualization.py.txt",
+    "snapshot_sha256": "fd6095276363cba11096caa4b1c5b0b9cf325484483a7e30bab1f4124f346b8e",
+    "adaptation": "Transpose XY arrays for matplotlib BEV render; independent semantic projection and E0 actor box/history/future overlays added after searching both sources; no torch/mmdet runtime dependencies."
+  }
+]

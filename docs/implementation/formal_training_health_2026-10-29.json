@@ -1,0 +1,29 @@
+{
+  "recorded_at": "2026-10-29T11:21:39+08:00",
+  "status": "running",
+  "scope": "full_training",
+  "seed": 2026,
+  "world_size": 2,
+  "last_logged_global_step": 100,
+  "last_logged_train_loss": 3.7141733169555664,
+  "formal_tune_evaluation_completed": false,
+  "guardian_pid": 854480,
+  "torchrun_pid": 855324,
+  "worker_pids": [
+    855396,
+    855397
+  ],
+  "first_checkpoint": {
+    "global_step": 50,
+    "epoch": 0,
+    "next_batch": 100,
+    "rank_rng_states": 2,
+    "fingerprint_entries_verified": 19726,
+    "fingerprint_mismatches": []
+  },
+  "automatic_resume_from_step50_verified": true,
+  "runtime_json": "outputs/reactflow_joint/seed_2026.runtime.json",
+  "training_log": "outputs/reactflow_joint/seed_2026/training.jsonl",
+  "checkpoint": "outputs/reactflow_joint/seed_2026/latest.pt",
+  "note": "Last logged progress is a snapshot, not a current live counter. Formal model quality and full tune evaluation are pending."
+}

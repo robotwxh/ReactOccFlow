@@ -1,0 +1,21 @@
+{
+  "status": "passed",
+  "optimizer_steps": 200,
+  "windows": 32,
+  "scenes": 2,
+  "probe_seed": 2028,
+  "raw_flow_initial_loss": 4.90875177235399,
+  "raw_flow_final_loss": 0.8047065585437465,
+  "relative_reduction": 0.8360669685772582,
+  "checkpoint": "outputs/formal_training_acceptance/single_gpu_200/latest.pt",
+  "checkpoint_sha256": "897d732546e36108c47e5f0e2d150eba8c09b77491732ce155f0109a7732eae6",
+  "numerical_settings": {
+    "deterministic_algorithms": true,
+    "cudnn_deterministic": true,
+    "cudnn_benchmark": false,
+    "cublas_workspace_config": ":4096:8",
+    "matmul_allow_tf32": false,
+    "cudnn_allow_tf32": true
+  },
+  "scope": "Fixed-noise small overlapping train-window fitting diagnostic; not formal convergence or held-out model quality."
+}

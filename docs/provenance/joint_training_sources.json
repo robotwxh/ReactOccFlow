@@ -1,0 +1,106 @@
+{
+  "version": 1,
+  "date": "2026-10-29",
+  "component": "ReactFlow joint training runner",
+  "status": "Full caches audited; full-size CUDA/200-step/32-window fit and NCCL resume accepted; seed2026 formal training running",
+  "searches": [
+    {
+      "repository": "OccFM",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "inspected": [
+        {
+          "path": "tools/train.py",
+          "sha256": "b74cfb6113d2f8fee5e1383f8959e3e51cdb07a0f2a0e60b3c825bdc9be1d5c2",
+          "finding": "Native torch.distributed NCCL initialization and model/training orchestration; tied to OccFM registries/configuration and data wrappers."
+        },
+        {
+          "path": "tools/train_utils/train_utils.py",
+          "sha256": "16e7ea88467b3db368a8836a9fad9f910d2e164ca620bec7b9e53f2c1766c7ee",
+          "finding": "Native DDP loop, gradient clipping, validation barrier and EMA update; the verbatim source snapshot already exists at reactoccflow/training/source_snapshots/occfm_train_utils.py.txt."
+        },
+        {
+          "path": "tools/train_utils/optimization.py",
+          "sha256": "d4c71330504774580b0bf382be8064a403a52f534aaa8c2ce968d846d5e9d503",
+          "snapshot": "reactoccflow/training/source_snapshots/occfm_optimization.py.txt",
+          "snapshot_sha256": "d4c71330504774580b0bf382be8064a403a52f534aaa8c2ce968d846d5e9d503",
+          "finding": "AdamW grouping, warmup-cosine LambdaLR and torch AveragedModel EMA helpers. Copied verbatim as documentation-only source before adapting project-owned helpers."
+        }
+      ],
+      "decision": "Reuse the migrated ReactFlow model/objective; adapt only the training orchestration and preserve the planned per-module learning rates. Do not import or execute reference code."
+    },
+    {
+      "repository": "IR-WM",
+      "commit": "94dbbf44d6c22e50db4080e986b3675eadbb4497",
+      "inspected": [
+        {
+          "path": "projects/mmdet3d_plugin/bevformer/apis/mmdet_train.py",
+          "sha256": "747489b7a1a92582f9cb639f51760b1b38616c139b72e306bcbf80c59ba47cd5",
+          "finding": "Training delegates to MMDistributedDataParallel and OpenMMLab dataset/runner APIs; not an independent ReactFlow dependency closure."
+        },
+        {
+          "path": "projects/mmdet3d_plugin/core/hooks/ema.py",
+          "sha256": "ee159e82a102fdd1ded032da04160014cdeba3ba8895ef99ce26aeb86db7e8be",
+          "finding": "MMCV Hook-based parameter swapping; no need to copy for the standalone torch EMA path."
+        }
+      ],
+      "decision": "No IR-WM code copied. Avoid MMDetection3D/MMCV runtime dependency."
+    }
+  ],
+  "runtime_boundary": {
+    "reference_paths_imported": false,
+    "reference_scripts_executed": false,
+    "snapshot_files_imported": false,
+    "planned_runtime_dependencies": [
+      "project-owned ReactOccFlow package",
+      "PyTorch distributed",
+      "NumPy",
+      "standard library"
+    ]
+  },
+  "project_implementation": {
+    "files": [
+      {
+        "path": "scripts/train_react_flow.py",
+        "sha256": "9122e706fc474f35be0cdd4ce12c547a509ba9b9cb9e467c1ab3ddc42edc97fa"
+      },
+      {
+        "path": "reactoccflow/training/__init__.py",
+        "sha256": "720b9156397b56691ff987b663a5200247c17e6fc5f66c3b14701ec7a042b732"
+      },
+      {
+        "path": "reactoccflow/training/engine.py",
+        "sha256": "02e3a3113ec1dc0281ef680c9dd0619a5a039c5b077939e1b07c6ac4579d097f"
+      },
+      {
+        "path": "reactoccflow/training/joint.py",
+        "sha256": "7c9a3c16343d0853db6b26cb1aceafe9f9e4e731d6577c58e983bc88b205b13c"
+      },
+      {
+        "path": "tests/test_train_react_flow.py",
+        "sha256": "808e4875125c2b841d48d74978ea759d0a64f5ec39b0503ba2c433b5e24eafc7"
+      },
+      {
+        "path": "tests/test_training_engine.py",
+        "sha256": "ff0e382993bac37e5864d1dd70883878793be6e970d96de3f187d6834d3c8e20"
+      }
+    ],
+    "validation": {
+      "full_cpu_suite": "330 passed in 15.08s",
+      "wheel_sha256": "69f7b1a831beb32db9680d4ed892bbfe69886db6d06842908792b89c09138a15",
+      "wheel_install": "Dedicated ReactOccFlow environment; isolated import from /tmp under python -I; wheel metadata contained no OccFM/IR-WM reference paths.",
+      "runner_cli": "python -m scripts.train_react_flow --help, python -m scripts.train_joint_smoke --help, and dedicated-env torchrun --standalone --nproc_per_node=1 --module scripts.train_react_flow --help passed.",
+      "ddp_checks": "Full-size two-rank NCCL, effectivebatch8, continuous4 vs paused2/restored2: all1395 tensor comparisons exact; validation scalar difference1.262e-6 within recorded tolerance. CPU uneven-shard sufficient-statistics reduction also passed.",
+      "cache_integrity": "All19644 payload SHA-256, record identities, canonical settings digests, rank manifests and whole-scene disjointness passed; see docs/implementation/e0_full_cache_audit_2026-10-29.json.",
+      "formal_training_started": true,
+      "reason": "Formal seed2026 full-cache two-GPU run launched after all acceptance gates; no final model quality claimed.",
+      "settings_contract": "Canonical inner settings SHA-256 checked against wrapper and manifest; generator-format acceptance plus inner-settings/wrapper-digest tamper regressions pass.",
+      "cuda_acceptance": "Fullsize batch2 trainable trunk/frozen VAE finite optimizer step with276 gradient tensors;200-step32-window run complete; fixed-noise probe4.90875177235 to0.80470655854, diagnostic only.",
+      "new_provenance": [
+        "docs/provenance/validation_statistics_sources.json",
+        "docs/provenance/deterministic_training_sources.json"
+      ],
+      "isolated_execution": "docs/implementation/isolation_training_2026-10-29.json passed; installed model/adapter/engine match owned source under python-I outside checkout."
+    }
+  },
+  "source_license": "OccFM has no discovered root LICENSE; derived or redistributed source/weights remain subject to unresolved upstream terms recorded in THIRD_PARTY_NOTICES.md. The optimization snapshot is retained for audit, not installed as runtime code."
+}

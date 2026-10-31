@@ -1,0 +1,13 @@
+# Self-contained inference settings; copied source configs are in models/source_snapshots.
+model:
+  kind: occupancy_codec
+  image_size: 200
+  encoder_depth: [2, 6]
+  decoder_depth: [6, 2]
+  latent_dim: 16
+  num_classes: 18
+  empty_class: 17
+checkpoint: assets/checkpoints/occfm_vae.ckpt
+encode:
+  posterior: mean
+  latent_scale: 1.0

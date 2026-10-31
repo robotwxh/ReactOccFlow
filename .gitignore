@@ -1,0 +1,15 @@
+./OccFM/
+./IR-WM/
+./.superpowers/
+./.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+/build/
+/dist*/
+/data/
+/assets/checkpoints/
+/outputs/
+docs/references/*.pdf
+docs/presentations/

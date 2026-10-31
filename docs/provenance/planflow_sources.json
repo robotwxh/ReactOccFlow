@@ -1,0 +1,48 @@
+{
+  "task": "T10 PlanFlow candidate generation and offline planner contract",
+  "search": {
+    "performed": true,
+    "date": "2026-10-28",
+    "repositories": [
+      {
+        "name": "OccFM",
+        "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+        "paths": [
+          {
+            "path": "forecast/models/modules/planners/EmptyPlanner.py",
+            "sha256": "1f10261483e3fe37a9b777bf4c66bcb5f9f43e7b02007b09fd7050560c48fed1"
+          },
+          {
+            "path": "forecast/models/modules/transition_models/FlowMatchingV2.py",
+            "sha256": "not-copied-reference-search-only"
+          }
+        ],
+        "finding": "EmptyPlanner is a placeholder; FlowMatchingV2 is a latent occupancy model and does not provide a standalone observed-only ego candidate planner."
+      },
+      {
+        "name": "IR-WM",
+        "commit": "94dbbf44d6c22e50db4080e986b3675eadbb4497",
+        "paths": [
+          {
+            "path": "projects/mmdet3d_plugin/bevformer/dense_heads/plan_head.py",
+            "sha256": "6a18cf4d10a90f9b255e92f7f61571310bf0c249b96c31e6448c487d35c68314"
+          },
+          {
+            "path": "projects/mmdet3d_plugin/datasets/samplers/sampler.py",
+            "sha256": "5f243dcb6ae1cfbb64edbdb3dc4c5a49fc7fedea82cc244cf47e240b9e4d1889"
+          },
+          {
+            "path": "projects/mmdet3d_plugin/datasets/trajectory_api.py",
+            "sha256": "not-copied-reference-search-only"
+          }
+        ],
+        "finding": "PlanHead and trajectory sampler are tightly coupled to MMDetection/MMCV and the sampler uses global NumPy RNG; trajectory_api consumes future labels. They were not copied into the independent package."
+      }
+    ]
+  },
+  "implementation": {
+    "source": "independent",
+    "adaptation": "No suitable standalone source existed. Implemented a typed, observed-only local generator, timestamp-based kinematic checks, cost schema, and stable selector in reactoccflow/planning/planflow.py.",
+    "reference_runtime_paths": false
+  }
+}

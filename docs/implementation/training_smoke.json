@@ -1,0 +1,15 @@
+{
+  "task": "actual_training_cache_optimizer_smoke",
+  "batch": 2,
+  "loss": 0.0373404286801815,
+  "gradient_norm_before_clip": 0.06786025315523148,
+  "parameters_changed": true,
+  "checked_parameter": "transition_model.final_conv.1.weight",
+  "seconds": 0.8379073239993886,
+  "peak_cuda_bytes": 6146160640,
+  "device": "cuda:1",
+  "scene_tokens": [
+    "4dfab70f0b3f405bbf17f7c534d2dd91",
+    "cc0a7d86675248779f21b34ae891159c"
+  ]
+}

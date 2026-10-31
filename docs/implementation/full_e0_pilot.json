@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "samples": 4,
+  "complete": false,
+  "expected": 17468,
+  "mean_compressed_bytes": 1607155.75,
+  "estimated_full_bytes_from4examples": 28073796641.0,
+  "default_incomplete_rejected": true,
+  "explicit_debug_partial_verified": true
+}

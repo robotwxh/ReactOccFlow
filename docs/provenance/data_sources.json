@@ -1,0 +1,10 @@
+[
+  {
+    "repository": "OccFM",
+    "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+    "source": "OccFM/forecast/datasets/nuscenes_dataset.py",
+    "sha256": "11133c58522f5c3b2ed1b2fbffb8ff230d93bf74e2984135183bd4ad723957f0",
+    "destination": "reactoccflow/data/cache.py",
+    "adaptation": "Replace legacy monolithic cache runtime and path splitting with sharded arrays, explicit scene/token ordering, gap-safe windows and separate history/targets."
+  }
+]

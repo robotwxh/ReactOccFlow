@@ -1,0 +1,64 @@
+{
+  "version": 1,
+  "component": "T14 simulator-independent bridge and safe controller contract",
+  "reference_search": {
+    "command": "rg -n -i --glob '!*.pyc' '(bridge|controller|timeout|stale|failsafe|fail.?safe|control message|episode_id|sequence)' OccFM IR-WM",
+    "OccFM_commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+    "IR-WM_commit": "94dbbf44d6c22e50db4080e986b3675eadbb4497",
+    "result": "No suitable simulator bridge, IPC schema, freshness gate, or low-level safe controller implementation found. No reference code copied."
+  },
+  "sources": [],
+  "new_implementation": {
+    "reason": "Both read-only references lack the scoped simulator-independent contract; implementation is owned by reactoccflow.",
+    "runtime_dependencies": [
+      "numpy",
+      "Python standard library"
+    ],
+    "reference_runtime_imports": false,
+    "carla_or_bench2drive_executed": false
+  },
+  "owned_files": [
+    "reactoccflow/simulation/bridge.py",
+    "reactoccflow/simulation/controller.py",
+    "reactoccflow/simulation/__init__.py",
+    "tests/test_bridge_controller.py",
+    "configs/bridge.yaml",
+    "docs/implementation/bridge.md"
+  ],
+  "owned_file_hashes": [
+    {
+      "path": "reactoccflow/simulation/bridge.py",
+      "sha256": "24abb11e74877615f1c789773832a9045b7a9f2f5c700d601d194dae5562a49a"
+    },
+    {
+      "path": "reactoccflow/simulation/controller.py",
+      "sha256": "aa28df6642f1d95a16597bbb47af94003aeb4d9df075cff0ca8e359fc219b8ff"
+    },
+    {
+      "path": "reactoccflow/simulation/__init__.py",
+      "sha256": "b1fefacf59e67df3668506765b1e728b5fef44e91d5c33dd646a48977cee2634"
+    },
+    {
+      "path": "tests/test_bridge_controller.py",
+      "sha256": "f4a41dea4e0d373ab31f33800a2650995f14cc93b69b09c48c83f3b1a2ad1f94"
+    },
+    {
+      "path": "configs/bridge.yaml",
+      "sha256": "176ad89e0bd3b971af717b8da0f0ed454060aa8f7fafaffdd1e777a918b63b0c"
+    },
+    {
+      "path": "docs/implementation/bridge.md",
+      "sha256": "3bddb001fefd22cc220238e7e3d93a87fb3b7be7d3fb392b795176313013b7db"
+    }
+  ],
+  "fixes": {
+    "review_date": "2026-10-28",
+    "report": ".superpowers/sdd/2026-10-27-reactoccflow-implementation-plan/t14-bridge-fix-report.md",
+    "changes": [
+      "Composite future/ground-truth key rejection is recursive and token-aware.",
+      "ControlResponse validates required bounded mutually-exclusive actuator fields.",
+      "ControllerConfig enforces physical actuator limits and malformed deadline/timestamp conversion returns explicit fallback.",
+      "BridgeMessage and ControlResponse missing fields raise BridgeError."
+    ]
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "OccFM": {
+    "exact_original_snapshot_match": true,
+    "differences": [],
+    "existing_source_entries_unchanged": true,
+    "head_unchanged": true,
+    "git_status_unchanged": true,
+    "entry_count": 368
+  },
+  "IR-WM": {
+    "exact_original_snapshot_match": false,
+    "differences": [
+      "added: data"
+    ],
+    "existing_source_entries_unchanged": true,
+    "head_unchanged": true,
+    "git_status_unchanged": true,
+    "entry_count": 389,
+    "directory_note": "Empty ordinary directory; mtime2026-10-27 20:41, predating this continuation. Original snapshot17:02 lacks it. Origin not established; no delete/reset/rebaseline performed."
+  },
+  "owned_link_findings": [],
+  "audit_date": "2026-10-28",
+  "latest_command": "python -m reactoccflow audit-references",
+  "latest_output": {
+    "OccFM": [],
+    "IR-WM": [
+      "added: data"
+    ]
+  },
+  "interpretation": "Existing source entries, HEAD and prior worktree state remain unchanged. IR-WM/data is an empty ordinary directory documented in the original continuation audit; it was not removed or rebaselined."
+}

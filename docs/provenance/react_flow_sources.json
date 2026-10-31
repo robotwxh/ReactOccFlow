@@ -1,0 +1,321 @@
+{
+  "schema_version": 1,
+  "task": "T6",
+  "date": "2026-10-28",
+  "sources": [
+    {
+      "source": "OccFM/forecast/models/modules/transition_models/FlowMatchingV2.py",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "sha256": "89b73962947be5abcda56e13f2d305452bebfebf6ac0441d30ba21d2ad64dd1b",
+      "snapshot": "reactoccflow/models/source_snapshots/react_flow_FlowMatchingV2.txt",
+      "snapshot_sha256": "89b73962947be5abcda56e13f2d305452bebfebf6ac0441d30ba21d2ad64dd1b",
+      "adaptation": "copied before adaptation; forward_single adapted as JointTransition._middle_forward",
+      "runtime_derivation": true
+    },
+    {
+      "source": "OccFM/forecast/models/worldmodels/occfm.py",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "sha256": "32acddf3f166f341b5be69eb753fee3265e06974f1f2b6cbcbe7660e091ba301",
+      "snapshot": "reactoccflow/models/source_snapshots/react_flow_occfm.txt",
+      "snapshot_sha256": "32acddf3f166f341b5be69eb753fee3265e06974f1f2b6cbcbe7660e091ba301",
+      "adaptation": "copied source math audit; interpolation/time-grid reuse migrated .flow helpers",
+      "runtime_derivation": true
+    },
+    {
+      "source": "IR-WM/projects/mmdet3d_plugin/bevformer/modules/group_attention.py",
+      "commit": "94dbbf44d6c22e50db4080e986b3675eadbb4497",
+      "sha256": "ef01ab4328432cfd5178ba5900fb602811fd47d365102da3c41138e63c7c2172",
+      "snapshot": "reactoccflow/models/source_snapshots/react_flow_group_attention.txt",
+      "snapshot_sha256": "ef01ab4328432cfd5178ba5900fb602811fd47d365102da3c41138e63c7c2172",
+      "adaptation": "searched and copied for audit; not reused at runtime because MMCV/grouped wrapper is unnecessary and lacks all-padding safety",
+      "runtime_derivation": false
+    }
+  ],
+  "reused_dependency_closure": [
+    {
+      "source": "OccFM/forecast/models/modules/base/others.py",
+      "source_commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "source_sha256": "07473ba923b4a86fd89d69bbb0eb4e1e0ccf905acce958cd8a7240c619013592",
+      "owned_destination": "reactoccflow/models/modules/base/others.py",
+      "current_owned_sha256": "85e431e651bc456e3b8b09a7c111161a4a93c18214fa42b57989e489cce93191",
+      "prior_provenance": "docs/provenance/model_sources.json",
+      "role": "already-copied independent runtime dependency"
+    },
+    {
+      "source": "OccFM/forecast/models/modules/base/attn_base.py",
+      "source_commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "source_sha256": "64289056ad8ad2b07cc2a18df7f5771bbd8f8411e21a1d41f829f794115d8fb8",
+      "owned_destination": "reactoccflow/models/modules/base/attn_base.py",
+      "current_owned_sha256": "4fac2f147c9e80c7dc26d3e48be24a68dd5485ef52ae6ca985a19795e1bcd761",
+      "prior_provenance": "docs/provenance/model_sources.json",
+      "role": "already-copied independent runtime dependency"
+    },
+    {
+      "source": "OccFM/forecast/models/modules/base/dit.py",
+      "source_commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "source_sha256": "4d8f7e7f70601afc7f0149e2a1d38b40ab6bec3e59c9eed9193d6333925f419b",
+      "owned_destination": "reactoccflow/models/modules/base/dit.py",
+      "current_owned_sha256": "4d8f7e7f70601afc7f0149e2a1d38b40ab6bec3e59c9eed9193d6333925f419b",
+      "prior_provenance": "docs/provenance/model_sources.json",
+      "role": "already-copied independent runtime dependency"
+    },
+    {
+      "source": "OccFM/forecast/models/modules/base/res_layersbase.py",
+      "source_commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "source_sha256": "f9836412f36499eb3784c831c3caf6e569871ae7f360a3c35b5839f02d025fe6",
+      "owned_destination": "reactoccflow/models/modules/base/res_layersbase.py",
+      "current_owned_sha256": "f9836412f36499eb3784c831c3caf6e569871ae7f360a3c35b5839f02d025fe6",
+      "prior_provenance": "docs/provenance/model_sources.json",
+      "role": "already-copied independent runtime dependency"
+    },
+    {
+      "source": "OccFM/forecast/models/modules/base/postion_embed.py",
+      "source_commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "source_sha256": "ac9140d712616df71d5a0851150f68273d44e2a44ad113901c00814c565efdda",
+      "owned_destination": "reactoccflow/models/modules/base/postion_embed.py",
+      "current_owned_sha256": "ac9140d712616df71d5a0851150f68273d44e2a44ad113901c00814c565efdda",
+      "prior_provenance": "docs/provenance/model_sources.json",
+      "role": "already-copied independent runtime dependency"
+    },
+    {
+      "source": "OccFM/forecast/models/modules/transition_models/FlowMatchingV2.py",
+      "source_commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "source_sha256": "89b73962947be5abcda56e13f2d305452bebfebf6ac0441d30ba21d2ad64dd1b",
+      "owned_destination": "reactoccflow/models/modules/transition_models/FlowMatchingV2.py",
+      "current_owned_sha256": "e6d21e220cd9302916f773d7b2e6e6d3f5c338a5f66ef2ebd2696821c737810e",
+      "prior_provenance": "docs/provenance/model_sources.json",
+      "role": "already-copied independent runtime dependency"
+    },
+    {
+      "source": "OccFM/forecast/ops/flash_attention/flash_attention.py",
+      "source_commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "source_sha256": "a4f4ae15a6195baa1b7225c58b29d27b2612bdf16d8ed7ab2dcb7d0c5006944c",
+      "owned_destination": "reactoccflow/models/ops/flash_attention/flash_attention.py",
+      "current_owned_sha256": "a4f4ae15a6195baa1b7225c58b29d27b2612bdf16d8ed7ab2dcb7d0c5006944c",
+      "prior_provenance": "docs/provenance/model_sources.json",
+      "role": "already-copied independent runtime dependency"
+    },
+    {
+      "owned_destination": "reactoccflow/models/flow.py",
+      "current_owned_sha256": "f1e63d7b8786ca271a186153dee9d7fb87b5670ba5f338f0ec716b39492ddde0",
+      "prior_provenance": "docs/provenance/model_sources.json",
+      "role": "reuse migrated source CFM interpolation/grid/checkpoint helpers; unchanged"
+    },
+    {
+      "owned_destination": "reactoccflow/models/_utils.py",
+      "current_owned_sha256": "0c7cc6212e84d95c8c9c13a25d1c7add2e7db0d4475101621de973606ec32630",
+      "prior_provenance": "docs/provenance/model_sources.json",
+      "role": "reuse migrated source CFM interpolation/grid/checkpoint helpers; unchanged"
+    }
+  ],
+  "searches": [
+    {
+      "repositories": [
+        "OccFM/forecast",
+        "IR-WM/projects/mmdet3d_plugin"
+      ],
+      "queries": [
+        "class FLOW_MATCHING_DOWN_X4_DiT",
+        "CrossAttention",
+        "cross_attn",
+        "nn.MultiheadAttention",
+        "def sample",
+        "class ConditionalFlow"
+      ],
+      "result": "OccFM supplies compatible occupancy backbone/flow math; IR-WM attention wrappers depend on MMCV and do not implement masked shared-time actor flow."
+    },
+    {
+      "repositories": [
+        "OccFM/forecast",
+        "IR-WM/projects/mmdet3d_plugin"
+      ],
+      "queries": [
+        "actor_future",
+        "actor_existence",
+        "actor_observed_mask",
+        "future_latent_mask",
+        "normalize_actor",
+        "joint.*flow",
+        "flow.*actor",
+        "freeze_trunk"
+      ],
+      "result": "No corresponding occupancy-actor flow, current-mask actor conditioning, safe modal masking/normalization, independent-noise shared-time sampler, or separate existence implementation found. Added independently after search."
+    },
+    {
+      "repositories": [
+        "OccFM/forecast/models",
+        "IR-WM/projects/mmdet3d_plugin/bevformer/modules"
+      ],
+      "queries": [
+        "freeze",
+        "requires_grad",
+        "occupancy_only"
+      ],
+      "result": "Source contains generic requires_grad freezing and fixed positional embeddings but no mode-aware occupancy-only training default. Corrected the independent ReactFlow constructor/config after failing valid-mask and all-empty backward regressions."
+    }
+  ],
+  "new_implementation": [
+    "masked actor-history encoder and selected future-slot tokens",
+    "deterministic sentinel attention and padded-output gating",
+    "two128dim4head bidirectional middle-resolution blocks",
+    "actor velocity and future-existence heads",
+    "future-free E0 observation validation",
+    "per-modality masked losses, normalization, explicit local RNG and shared-time multimodal Euler integration",
+    "strict separate pretrained trunk loading/freezing"
+  ],
+  "owned_files": [
+    {
+      "path": "reactoccflow/models/react_flow.py",
+      "sha256": "b6fc66e2338788fcf25207591d13e0d15b31063edccd77101aabe2a48bce656c",
+      "updated_by": "T7 optional differentiable estimated endpoints / independent consistency config; default API unchanged; see consistency_sources.json"
+    },
+    {
+      "path": "reactoccflow/models/joint_transition.py",
+      "sha256": "d4caa91385be57d4b9cbfeada00090ca2ec404cd0cb742106d7303dd5101b3b6"
+    },
+    {
+      "path": "tests/test_react_flow.py",
+      "sha256": "627819b2adca68e35662698fc831022a6c82d50439f17d9805462f1e6088c2c4"
+    },
+    {
+      "path": "configs/react_flow_joint.yaml",
+      "sha256": "99bb903071b9674a135bc44f015c46155d7c96abae7a48e802fd705d08644368",
+      "updated_by": "T7 optional differentiable estimated endpoints / independent consistency config; default API unchanged; see consistency_sources.json"
+    },
+    {
+      "path": "configs/react_flow_parallel.yaml",
+      "sha256": "c6c996ec8e85ffb7b293002930c313547fe44e7bcfcac311f87bd64de354bee4"
+    },
+    {
+      "path": "configs/react_flow_occupancy_only.yaml",
+      "sha256": "7a091cee013fa046d0ef7ade6e87d7ab89156a24ea35da2342c37dc68dc8d7f7"
+    }
+  ],
+  "checkpoint_contract": {
+    "path": "assets/checkpoints/occfm_history.ckpt",
+    "trunk_key_count": 204,
+    "new_branch_key_count": 74,
+    "condition_length": 6,
+    "note": "Historical trajectory conditioning weights are reused for new six planned candidate controls. This semantic change is untrained. The 12-control future checkpoint is correctly incompatible and is not reshaped."
+  },
+  "licenses": {
+    "OccFM": "No root LICENSE found; unresolved upstream redistribution terms explicitly apply as documented in THIRD_PARTY_NOTICES.md.",
+    "IR-WM": "Apache-2.0 snapshot retained for audit only; no IR-WM runtime dependency or adapted IR-WM source in T6."
+  },
+  "limitations": [
+    "new joint research heads are not trained",
+    "oracle GT observation representation, not perception",
+    "nominal0.5..3.0 physical slots; measured future_time_s remains target-only",
+    "pretrained OccFM700 training scenes mean new70/70 groups are not unseen pretraining sets",
+    "unknown latent target voxels encode empty approximation, not known-free; T7 future_known_mask voxel losses remain pending",
+    "sample preserves autograd; callers should use torch.inference_mode for inference",
+    "existence uses final ODE field evaluation head so nfe equals exact neural evaluation count; no additional endpoint call",
+    "no T7 consistency losses, CLI training integration, codec decoding, or formal training added"
+  ],
+  "validation": {
+    "targeted_test_command": "PYTHONDONTWRITEBYTECODE=1 /home/lthpc/wxh/envs/ReactOccFlow/bin/python -m pytest tests/test_react_flow.py tests/test_flow.py -q",
+    "targeted_test_result": "38 passed in3.50s after occupancy-only default regression fix",
+    "default_gpu_smoke": {
+      "device": "cuda:1",
+      "trunk_key_count": 204,
+      "new_branch_key_count": 74,
+      "losses": {
+        "total": 1.7168586254119873,
+        "occ_fm": 0.0063069355674088,
+        "actor_fm": 1.6424540281295776,
+        "actor_existence": 0.6809776425361633
+      },
+      "gradients": {
+        "actor_encoder.": true,
+        "actor_velocity_head.": true,
+        "existence_head.": true,
+        "interactions.": true
+      },
+      "sample_shapes": {
+        "future_latents": [
+          1,
+          1,
+          6,
+          16,
+          50,
+          50
+        ],
+        "actor_future": [
+          1,
+          1,
+          8,
+          6,
+          6
+        ],
+        "actor_existence": [
+          1,
+          1,
+          8,
+          6
+        ]
+      },
+      "peak_memory_bytes": 896836608,
+      "seconds": 1.4592040970019298,
+      "fixture": "data/research/e0_acceptance/scene-0025.npz",
+      "training_performed": false,
+      "backward_only": true
+    },
+    "reference_audit": {
+      "OccFM": [],
+      "IR-WM": [
+        "added: data"
+      ],
+      "note": "Known preexisting empty IR-WM/data addition from October27 20:41; parent confirmed authority report. No T6 reference changes; no delete/rebaseline performed.",
+      "authority": "docs/implementation/reference_audit_p2.json"
+    },
+    "isolated_package_execution": {
+      "passed": true,
+      "isolated_python": true,
+      "owned_package_zip_execution": true,
+      "reference_directories_present": false,
+      "imported_package_files": 29,
+      "output_shapes": {
+        "future_latents": [
+          1,
+          1,
+          6,
+          2,
+          4,
+          4
+        ],
+        "actor_future": [
+          1,
+          1,
+          2,
+          6,
+          6
+        ],
+        "actor_existence": [
+          1,
+          1,
+          2,
+          6
+        ]
+      },
+      "stderr": ""
+    },
+    "occupancy_only_freeze_regression": {
+      "red": "4 failed,4 passed: occupancy-only constructor/YAML defaults had no active trainable loss path; joint/parallel controls passed",
+      "green": "valid-mask and differentiable all-empty backward pass; all three constructor and YAML modes have active finite gradients",
+      "mode_defaults": {
+        "joint": true,
+        "parallel": true,
+        "occupancy_only": false
+      },
+      "isolated_execution": {
+        "passed": true,
+        "isolated_python": true,
+        "mode": "occupancy_only",
+        "all_empty_backward": true,
+        "trainable_trunk": true,
+        "reference_directories_present": false
+      }
+    }
+  },
+  "t7_compatibility_validation": "T7 extends training_loss with return_endpoints=False default; four scalar defaults remain identical. T6 regression included in 55 passing tests; current hashes maintained by T7. Historical T6 limitations and validation retained as history."
+}

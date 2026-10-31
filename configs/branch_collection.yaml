@@ -1,0 +1,23 @@
+# Scenario requirements catalog only; map placements and CARLA adapters remain future work.
+schema_version: reactoccflow.branch_collection.v1
+observation_schema_version: reactoccflow.observation.v1
+evaluation_target_schema_version: reactoccflow.evaluation_target.v1
+coordinate_frame: sim_ego_x_forward_y_left_z_up
+semantic_taxonomy: simulator_declared
+action_ids: [action_0, action_1, action_2, action_3, action_4, action_5, action_6, action_7]
+npc_seeds: [0, 1, 2]
+scenario_families:
+  - following_braking
+  - merge
+  - unprotected_turn
+  - pedestrian_crossing
+  - lane_change
+  - cut_in
+  - intersection_stop
+  - yield_to_pedestrian
+  - obstacle_avoidance
+  - roundabout_entry
+pilot_origins_per_family: 10
+full_origins_per_family: 100
+pilot_expected_branches: 2400
+full_expected_branches: 24000

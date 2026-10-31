@@ -1,0 +1,130 @@
+{
+  "version": 1,
+  "sources": [
+    {
+      "repository": "IR-WM",
+      "commit": "94dbbf44d6c22e50db4080e986b3675eadbb4497",
+      "source": "IR-WM/projects/mmdet3d_plugin/datasets/trajectory_api.py",
+      "sha256": "02a6e47dc75ede4d4e9a6a9f6499a1e411501069c5c91d313601bcdd4aaaacd0",
+      "snapshot": "reactoccflow/geometry/source_snapshots/irwm_trajectory_api.py.txt",
+      "snapshot_sha256": "02a6e47dc75ede4d4e9a6a9f6499a1e411501069c5c91d313601bcdd4aaaacd0",
+      "snapshot_scope": "complete file",
+      "destination": [
+        "reactoccflow/data/research.py"
+      ],
+      "adaptation": "Instance identity traversal, observed/future trajectory and ego-pose label foundations; remove PredictHelper/MMCV dependencies and future-derived velocity.",
+      "copied_before_adaptation": true,
+      "license": "Apache-2.0 upstream root license; original file notices retained"
+    },
+    {
+      "repository": "IR-WM",
+      "commit": "94dbbf44d6c22e50db4080e986b3675eadbb4497",
+      "source": "IR-WM/projects/mmdet3d_plugin/datasets/nuscenes_world_dataset_v1.py",
+      "sha256": "7a3bd37788873859b3bdaf1103ff6dafaefcffed9fa447f4497bb413a3e24fe4",
+      "snapshot": "reactoccflow/geometry/source_snapshots/irwm_nuscenes_world_dataset_v1.py.txt",
+      "snapshot_sha256": "7a3bd37788873859b3bdaf1103ff6dafaefcffed9fa447f4497bb413a3e24fe4",
+      "snapshot_scope": "complete file",
+      "destination": [
+        "reactoccflow/geometry/__init__.py",
+        "reactoccflow/data/research.py"
+      ],
+      "adaptation": "Transpose row-vector composition into explicit column-vector SE3; use current ego rather than current LiDAR as destination.",
+      "copied_before_adaptation": true,
+      "license": "Apache-2.0 upstream root license; original file notices retained"
+    },
+    {
+      "repository": "IR-WM",
+      "commit": "94dbbf44d6c22e50db4080e986b3675eadbb4497",
+      "source": "IR-WM/projects/mmdet3d_plugin/bevformer/utils/e2e_predictor_utils.py",
+      "sha256": "6f1292eec9748bb46f92b3d3b8b3f674e9f551f862dd441266b7edc739671c46",
+      "snapshot": "reactoccflow/geometry/source_snapshots/irwm_e2e_grid_functions.py.txt",
+      "snapshot_sha256": "51d9403adb4518368f90053c8f9badab354b0daace87a932a1e42d2339dc1377",
+      "snapshot_scope": "lines 1-85 (all pre-JIT grid helpers)",
+      "destination": [
+        "reactoccflow/geometry/__init__.py"
+      ],
+      "adaptation": "Copy pre-JIT grid helpers before adapting; remove Torch/CUDA imports, implement chunked XYZ voxel-centre reverse mapping with nearest semantic IDs and no bounds clamping.",
+      "copied_before_adaptation": true,
+      "license": "Apache-2.0 upstream root license; original file notices retained"
+    },
+    {
+      "repository": "IR-WM",
+      "commit": "94dbbf44d6c22e50db4080e986b3675eadbb4497",
+      "source": "IR-WM/projects/mmdet3d_plugin/datasets/pipelines/loading_occupancy.py",
+      "sha256": "de2bad112c0c93f9409a7c7bf1632601d03c2650d0e73cef3fa2c8d7cff9ec37",
+      "snapshot": "reactoccflow/geometry/source_snapshots/irwm_loading_occupancy.py.txt",
+      "snapshot_sha256": "de2bad112c0c93f9409a7c7bf1632601d03c2650d0e73cef3fa2c8d7cff9ec37",
+      "snapshot_scope": "complete file",
+      "destination": [
+        "reactoccflow/geometry/__init__.py"
+      ],
+      "adaptation": "Inspect copied occupancy transform source; retain original file notice in snapshot; replace forward splat/clamping with unknown-preserving nearest inverse warp for actual Occ3D dense ego labels.",
+      "copied_before_adaptation": true,
+      "license": "Apache-2.0 upstream root license; original file notices retained"
+    },
+    {
+      "repository": "OccFM",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "source": "OccFM/forecast/datasets/nuscenes_dataset.py",
+      "sha256": "11133c58522f5c3b2ed1b2fbffb8ff230d93bf74e2984135183bd4ad723957f0",
+      "snapshot": "reactoccflow/geometry/source_snapshots/occfm_nuscenes_dataset.py.txt",
+      "snapshot_sha256": "11133c58522f5c3b2ed1b2fbffb8ff230d93bf74e2984135183bd4ad723957f0",
+      "snapshot_scope": "complete file",
+      "destination": [
+        "reactoccflow/data/research.py"
+      ],
+      "adaptation": "Adapt project-owned gts scene/sample path loader, retain both visibility masks, isolate actor observations from future targets.",
+      "copied_before_adaptation": true,
+      "license": "Unresolved upstream license; see THIRD_PARTY_NOTICES.md"
+    }
+  ],
+  "search": {
+    "repositories": [
+      "OccFM",
+      "IR-WM"
+    ],
+    "terms": [
+      "get_traj_label",
+      "get_sdc_traj_label",
+      "union2one",
+      "ego2global",
+      "lidar2ego",
+      "voxel",
+      "occ_size",
+      "pc_range",
+      "grid_sample",
+      "semantics",
+      "mask_lidar",
+      "mask_camera",
+      "instance_token",
+      "sample_annotation"
+    ],
+    "found": "IR-WM trajectory/transform/grid and OccFM semantic occupancy loading foundations copied above.",
+    "not_found": [
+      "Future-independent backward actor velocities and current-only nearest stable-instance selection in required tensor contract",
+      "Small official-JSON index without nuScenes/MMCV runtime and without materializing multi-GB sensor tables",
+      "Transactional numeric per-scene oracle actor/ego NPZ labels with separate observation/target groups",
+      "Dense semantic3D reverse warp preserving unknown255 and independent masks without border clamping"
+    ],
+    "new_implementation": "Streaming JSON indexing, backward-only observation features, explicit target existence validity, numeric scene shards, validation and tests are project-owned adaptations/additions after this search."
+  },
+  "dependency_closure": {
+    "runtime": [
+      "numpy",
+      "scipy.spatial.transform.Rotation",
+      "Python standard library"
+    ],
+    "removed_upstream_dependencies": [
+      "nuscenes.PredictHelper",
+      "pyquaternion",
+      "MMCV",
+      "mmdet",
+      "mmdet3d",
+      "Torch grid helpers",
+      "Numba occupancy splat",
+      "dvxlr JIT/CUDA extension"
+    ],
+    "snapshots_are_audit_data_only": true,
+    "reference_imports_or_resource_paths": false
+  }
+}

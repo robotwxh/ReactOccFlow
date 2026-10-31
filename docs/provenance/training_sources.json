@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "copied_before_adaptation": true,
+  "files": [
+    {
+      "source": "OccFM/tools/train_utils/train_utils.py",
+      "destination": "reactoccflow/training/source_snapshots/occfm_train_utils.py.txt",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "source_sha256": "16e7ea88467b3db368a8836a9fad9f910d2e164ca620bec7b9e53f2c1766c7ee",
+      "copied_sha256": "16e7ea88467b3db368a8836a9fad9f910d2e164ca620bec7b9e53f2c1766c7ee",
+      "execution_role": "documentation-only snapshot; never imported or executed",
+      "license": "No root OccFM LICENSE found; unresolved redistribution rights documented in THIRD_PARTY_NOTICES.md. Snapshot preserves source verbatim."
+    }
+  ],
+  "searches": [
+    {
+      "repository": "OccFM",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "queries": [
+        "optimizer.step",
+        "train_one_epoch",
+        "def train",
+        "def training",
+        "fixed probe",
+        "overfit"
+      ],
+      "result": "train_model in tools/train_utils/train_utils.py supplies train/zero_grad/backward/clip/step loop. Copied snapshot before adapting loop into standalone runner."
+    },
+    {
+      "repository": "IR-WM",
+      "commit": "94dbbf44d6c22e50db4080e986b3675eadbb4497",
+      "queries": [
+        "optimizer.step",
+        "train_one_epoch",
+        "def train",
+        "def training",
+        "fixed probe",
+        "overfit"
+      ],
+      "result": "projects/mmdet3d_plugin/bevformer/apis/train.py delegates to OpenMMLab trainers; no standalone local-generator CFM smoke/32-window fixed probe. Not copied or executed."
+    }
+  ],
+  "dependency_closure": {
+    "adapted_loop": "torch, torch.nn.utils.clip_grad_norm_ and standard library; CFM/cache APIs are existing independent package code. Original DDP, Rich display, val_model, model_func, scheduler and EMA plumbing not reused. Snapshot is audit text only.",
+    "model_dependencies": "Existing owned pretrained CFM dependency closure is documented in docs/provenance/model_sources.json."
+  },
+  "new_after_search": [
+    "Finite loss/gradient/parameter fail-fast checks and explicit parameter update evidence",
+    "Deterministic fixed-local-generator eval-mode 32-window before/after probe",
+    "Independent manifest/shard/trajectory/checkpoint hashes and scene/token/index selection record",
+    "Atomic tensor-state-only checkpoint and JSON result writer"
+  ],
+  "adaptations": {
+    "scripts/train_smoke.py": "Standalone single-device AdamW loop derived from copied OccFM optimizer order, preserves clip norm1.0 and existing CFM scalar training API. Removes upstream trainer/UI/DDP dependency rather than executing snapshot. Fixed200step smoke is diagnostic, no formal scheduler/EMA claim."
+  },
+  "adapted_files": [
+    {
+      "path": "scripts/train_smoke.py",
+      "sha256": "dec2387c67c59a7ab9840a6c09a5af2054ff73324bf8b40b8ec3f6e8b5125594"
+    },
+    {
+      "path": "tests/test_training.py",
+      "sha256": "9e862684d19364d8acd653eac297a0bda4a68b2f71287942e46f7fb66a374ae0"
+    }
+  ],
+  "validation": {
+    "red": "4 failed before standalone runner existed; each test reported missing runner functionality",
+    "green": "13 passed in1.98s: tests/test_training.py tests/test_flow.py",
+    "command": "/home/lthpc/wxh/envs/ReactOccFlow/bin/python -m pytest tests/test_training.py tests/test_flow.py -q",
+    "gpu_run": "/home/lthpc/wxh/envs/ReactOccFlow/bin/python -m scripts.train_smoke --device cuda:0 --threads 4",
+    "gpu_result": "outputs/training_acceptance/results.json",
+    "checkpoint_verification": "weights_only=True load:204 finite state tensors; config, data-resource and checkpoint hashes, tracked final parameter SHA and all200 finite step counters verified; outputs/training_acceptance/verification.json",
+    "actual_results": {
+      "optimizer_steps": 200,
+      "selected_windows": 32,
+      "initial_probe": 0.06408674654085189,
+      "final_probe": 0.06128408829681575,
+      "relative_reduction": 0.0437322597153468,
+      "peak_memory_allocated_bytes": 6341215744
+    }
+  }
+}

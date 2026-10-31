@@ -1,0 +1,85 @@
+"""Helper functions for E2E future prediction."""
+
+import torch
+import numpy as np
+import copy
+
+
+def bev_grids_to_coordinates(ref_grids, pc_range):
+    ref_coords = copy.deepcopy(ref_grids)
+    ref_coords[..., 0:1] = (ref_coords[..., 0:1] *
+                            (pc_range[3] - pc_range[0]) + pc_range[0])
+    ref_coords[..., 1:2] = (ref_coords[..., 1:2] *
+                            (pc_range[4] - pc_range[1]) + pc_range[1])
+    return ref_coords
+
+def bev_coords_to_grids(ref_coords, bev_h, bev_w, pc_range):
+    ref_grids = copy.deepcopy(ref_coords)
+
+    ref_grids[..., 0] = ((ref_grids[..., 0] - pc_range[0]) /
+                         (pc_range[3] - pc_range[0]))
+    ref_grids[..., 1] = ((ref_grids[..., 1] - pc_range[1]) /
+                         (pc_range[4] - pc_range[1]))
+    ref_grids = ref_grids * 2 - 1.  # [-1, 1]
+
+    # Ignore the border part.
+    border_x_min = 0.5 / bev_w * 2 - 1
+    border_x_max = (bev_w - 0.5) / bev_w * 2 - 1
+    border_y_min = 0.5 / bev_h * 2 - 1
+    border_y_max = (bev_h - 0.5) / bev_h * 2 - 1
+    valid_mask = ((ref_grids[..., 0:1] > border_x_min) &
+                  (ref_grids[..., 0:1] < border_x_max) &
+                  (ref_grids[..., 1:2] > border_y_min) &
+                  (ref_grids[..., 1:2] < border_y_max))
+    return ref_grids, valid_mask
+
+def coords_to_voxel_grids(ref_coords, bev_h, bev_w, pillar_num, pc_range):
+    ref_grids = copy.deepcopy(ref_coords)
+
+    ref_grids[..., 0] = ((ref_grids[..., 0] - pc_range[0]) /
+                         (pc_range[3] - pc_range[0])) * bev_w
+    ref_grids[..., 1] = ((ref_grids[..., 1] - pc_range[1]) /
+                         (pc_range[4] - pc_range[1])) * bev_h
+    ref_grids[..., 2] = ((ref_grids[..., 2] - pc_range[2]) /
+                         (pc_range[5] - pc_range[2])) * pillar_num
+    return ref_grids
+
+
+def get_bev_grids(H, W, bs=1, device='cuda', dtype=torch.float, offset=0.5):
+    """Get the reference points used in SCA and TSA.
+    Args:
+        H, W: spatial shape of bev.
+        device (obj:`device`): The device where
+            reference_points should be.
+    Returns:
+        Tensor: reference points used in decoder, has \
+            shape (bs, H * W, 2).
+    """
+    ref_y, ref_x = torch.meshgrid(
+        torch.linspace(
+            offset, H - (1 - offset), H, dtype=dtype, device=device),
+        torch.linspace(
+            offset, W - (1 - offset), W, dtype=dtype, device=device)
+    )
+    ref_y = ref_y.reshape(-1)[None] / H
+    ref_x = ref_x.reshape(-1)[None] / W
+    ref_bev = torch.stack((ref_x, ref_y), -1)
+    ref_bev = ref_bev.repeat(bs, 1, 1)
+    return ref_bev
+
+
+def get_bev_grids_3d(H, W, Z, bs=1, device='cuda', dtype=torch.float):
+    # reference points in 3D space, used in spatial cross-attention (SCA)
+    zs = torch.linspace(0.5, Z - 0.5, Z, dtype=dtype,
+                        device=device).view(-1, 1, 1).expand(Z, H, W) / Z
+    xs = torch.linspace(0.5, W - 0.5, W, dtype=dtype,
+                        device=device).view(1, 1, W).expand(Z, H, W) / W
+    ys = torch.linspace(0.5, H - 0.5, H, dtype=dtype,
+                        device=device).view(1, H, 1).expand(Z, H, W) / H
+    ref_3d = torch.stack((xs, ys, zs), -1)
+    # Z B H W ==> Z B HW ==> Z HW 3
+    ref_3d = ref_3d.permute(0, 3, 1, 2).flatten(2).permute(0, 2, 1)
+    ref_3d = ref_3d[None].repeat(bs, 1, 1, 1)
+    return ref_3d
+
+

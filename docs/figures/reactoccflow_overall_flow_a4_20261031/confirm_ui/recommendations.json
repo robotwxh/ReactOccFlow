@@ -1,0 +1,14 @@
+{
+  "stage": "stage1",
+  "lang": "zh",
+  "recommend": {
+    "canvas": "2480×3508，A4比例竖版SVG，总图1张",
+    "mode": "instructional",
+    "visual_style": "白底学术流程图：按参考图使用编号彩色横向分区、细描边模块、清楚的箭头和张量维度；核心Transformer采用Norm、Q/K/V注意力、FFN、门控与残差旁路展开。"
+  },
+  "audience": {
+    "value": "自动驾驶世界模型研究者、组会与论文方法介绍；核心信息：给定候选ego轨迹，ReactFlow以共享流时间联合生成occupancy与actor未来，再以多世界风险支持候选筛选。最终交付仅SVG。"
+  },
+  "content_divergence": {"value": ""},
+  "direction_notes": "沿用用户两张参考图的视觉风格，内容根据权威实施计划与源码校对。六区：1输入与任务；2Occ-VAE；3联合Flow Matching训练；4核心网络及Transformer/双向交互细节（最大区）；5多世界采样、事件风险、校准、轨迹选择与控制；6数据与验证。用状态标记区分已实现模块和待完成的learned PlanFlow、真实感知训练、CARLA反事实/闭环。仅风格参考，不复用DOME的扩散噪声预测假设。"
+}

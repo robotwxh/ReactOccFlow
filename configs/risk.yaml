@@ -1,0 +1,24 @@
+# T9/T11 pure numeric evaluation contracts. No CARLA results are embedded here.
+times_s: [0.5, 1.0, 1.5, 2.0, 2.5, 3.0]
+risk:
+  collision_frequency_smoothing: "(count + 0.5) / (M + 1)"
+  world_count_key: M
+  outside_grid_status: out_of_bounds
+  use_measured_time: true
+  ego_footprint_overlap: area
+  candidate_thresholds: [0.05, 0.10, 0.20]
+calibration:
+  methods: [isotonic, logistic]
+  bins: 10
+  split_key: origin
+  requires_independent_origins: true
+  feature_definition: smoothed_collision_frequency
+  reports: [brier, nll, ece, reliability, risk_coverage]
+  results_status: no_real_labels_reported
+
+artifacts:
+  calibration_eval_path: outputs/calibration/risk_calibrator.json
+  threshold_eval_path: outputs/calibration/risk_threshold.json
+  require_frozen_for_eval: true
+  bind_feature_definition: true
+  bind_split_fingerprints: true

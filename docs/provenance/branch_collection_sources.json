@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "task": "T8",
+  "date": "2026-10-28",
+  "searches": [
+    {
+      "repositories": [
+        "OccFM",
+        "IR-WM"
+      ],
+      "commits": {
+        "OccFM": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+        "IR-WM": "94dbbf44d6c22e50db4080e986b3675eadbb4497"
+      },
+      "queries": [
+        "carla",
+        "branch.collect",
+        "responsive.npc",
+        "npc.seed",
+        "initial.state.fingerprint",
+        "common.history",
+        "atomic.*npz",
+        "resume.*sha256",
+        "scenario",
+        "trajectory"
+      ],
+      "command": "rg -n -i 'carla|branch.collect|responsive.npc|npc.seed|initial.state.fingerprint|common.history|atomic.*npz|resume.*sha256|scenario|trajectory' OccFM IR-WM --glob '*.py' --glob '*.yaml' --glob '*.yml' --glob '*.md' --glob '!**/data/**' --glob '!**/assets/**'",
+      "result": "No simulator collector, backend protocol, responsive NPC rollout, or resumable branch corpus implementation was found. Existing trajectory code is dataset/model functionality and was not suitable for this protocol.",
+      "runtime_adaptation": false
+    }
+  ],
+  "implementation": {
+    "files": [
+      "reactoccflow/simulation/branch_collection.py",
+      "reactoccflow/simulation/__init__.py",
+      "tests/test_branch_collection.py"
+    ],
+    "source": "independent implementation after exact searches",
+    "reference_imports": false
+  },
+  "licenses": {
+    "OccFM": "No source copied; upstream redistribution terms remain unresolved; see THIRD_PARTY_NOTICES.md.",
+    "IR-WM": "No source copied; Apache-2.0 source was searched read-only."
+  },
+  "searched_file_checksums": [
+    {
+      "path": "OccFM/forecast/datasets/nuscenes_dataset.py",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "sha256": "11133c58522f5c3b2ed1b2fbffb8ff230d93bf74e2984135183bd4ad723957f0",
+      "role": "trajectory dataset search; unsuitable collector"
+    },
+    {
+      "path": "OccFM/forecast/models/worldmodels/occfm.py",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "sha256": "32acddf3f166f341b5be69eb753fee3265e06974f1f2b6cbcbe7660e091ba301",
+      "role": "world-model search; unsuitable collector"
+    },
+    {
+      "path": "IR-WM/projects/mmdet3d_plugin/datasets/trajectory_api.py",
+      "commit": "94dbbf44d6c22e50db4080e986b3675eadbb4497",
+      "sha256": "02a6e47dc75ede4d4e9a6a9f6499a1e411501069c5c91d313601bcdd4aaaacd0",
+      "role": "trajectory API search; unsuitable collector"
+    },
+    {
+      "path": "IR-WM/tools/data_converter/nuscenes_converter.py",
+      "commit": "94dbbf44d6c22e50db4080e986b3675eadbb4497",
+      "sha256": "ab1470ff28c39b82084e9a5f9e7405f7def19e1ba844a8681b3fa020044f6e04",
+      "role": "dataset converter search; unsuitable collector"
+    }
+  ]
+}

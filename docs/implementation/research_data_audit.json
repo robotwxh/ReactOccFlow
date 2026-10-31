@@ -1,0 +1,42 @@
+{
+  "passed": true,
+  "raw_frames": 34149,
+  "scenes": 850,
+  "numeric_shards": 850,
+  "current_selected_actor_count": 253444,
+  "valid_future_actor_states": 1306692,
+  "valid_actor_existence_labels": 1389911,
+  "all_numeric_finite": true,
+  "no_future_observation_fields": true,
+  "source_manifest_sha256": "9ab40e37105b549cd7c4226212e3066ca204ac2fd87b1b0e51ce47e1beffe356",
+  "split_sha256": "7ed4af5ea8e57dc7faefd620fec1037a3206ddaf73f18457f292f2f1b656e378",
+  "normalization_sha256": "209f0885d9bb38a3da8ac7f7fc035035a2f04768cbc265ddf3aebfbbc1fea55d",
+  "compatibility_missing_raw_frames": 850,
+  "all_missing_frames_are_scene_last": true,
+  "groups": {
+    "train": {
+      "scenes": 560,
+      "frames": 22508,
+      "manifest_sha256": "b40264d17cbce477750f3888e713322002fc3ad59bd4cb5596c0da76aaa076c6",
+      "missing_occupancy": 0
+    },
+    "tune": {
+      "scenes": 70,
+      "frames": 2806,
+      "manifest_sha256": "3ea8f1a0c40cdff3c5123b9b4adf955a9a52c3c6c369a1d5df5bc81b5d953e5c",
+      "missing_occupancy": 0
+    },
+    "calibration": {
+      "scenes": 70,
+      "frames": 2816,
+      "manifest_sha256": "18db618c98aedd4883ba3b4a451c4819e887c3f5275525ad7704095a843b21d7",
+      "missing_occupancy": 0
+    },
+    "evaluation": {
+      "scenes": 150,
+      "frames": 6019,
+      "manifest_sha256": "13c64948a2bf703f64818fa75e787e7a5cda80f8abd44ba039a8aff68d32cf23",
+      "missing_occupancy": 0
+    }
+  }
+}

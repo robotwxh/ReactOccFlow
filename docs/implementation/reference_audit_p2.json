@@ -1,0 +1,22 @@
+{
+  "OccFM": {
+    "exact_original_snapshot_match": true,
+    "differences": [],
+    "existing_source_entries_unchanged": true,
+    "head_unchanged": true,
+    "git_status_unchanged": true,
+    "entry_count": 368
+  },
+  "IR-WM": {
+    "exact_original_snapshot_match": false,
+    "differences": [
+      "added: data"
+    ],
+    "existing_source_entries_unchanged": true,
+    "head_unchanged": true,
+    "git_status_unchanged": true,
+    "entry_count": 389,
+    "directory_note": "Empty ordinary directory; mtime2026-10-27 20:41, predating this continuation. Original snapshot17:02 lacks it. Origin not established; no delete/reset/rebaseline performed."
+  },
+  "owned_link_findings": []
+}

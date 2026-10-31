@@ -1,0 +1,75 @@
+{
+  "version": 1,
+  "date": "2026-10-29",
+  "status": "Formal seed2026 full-cache DDP training running after acceptance",
+  "implementation": {
+    "runner": "scripts/train_react_flow.py",
+    "training_package": [
+      "reactoccflow/training/engine.py",
+      "reactoccflow/training/joint.py"
+    ],
+    "provenance": "docs/provenance/joint_training_sources.json"
+  },
+  "validation": {
+    "full_cpu_suite": "330 passed in 15.08s",
+    "wheel": {
+      "path": "/home/lthpc/wxh/Paper/dist/reactoccflow-0.1.0-py3-none-any.whl",
+      "sha256": "69f7b1a831beb32db9680d4ed892bbfe69886db6d06842908792b89c09138a15",
+      "isolated_import": "Passed from /tmp with python -I; wheel metadata has no OccFM/IR-WM paths."
+    },
+    "entrypoints": [
+      "python -m scripts.train_react_flow --help",
+      "python -m scripts.train_joint_smoke --help",
+      "/home/lthpc/wxh/envs/ReactOccFlow/bin/torchrun --standalone --nproc_per_node=1 --module scripts.train_react_flow --help"
+    ],
+    "launch_command_after_cache_completion": "/home/lthpc/wxh/envs/ReactOccFlow/bin/torchrun --standalone --nproc_per_node=2 --module scripts.train_react_flow --device cuda --train-cache data/research/e0_full/train --tune-cache data/research/e0_full/tune --output outputs/reactflow_joint",
+    "ddp_ema_sync": "EMA is created after DDP's initial parameter broadcast; a two-rank regression confirms equal initial EMA tensors.",
+    "ddp_output_setup": "A two-rank Gloo regression confirms rank-zero output-collision errors reach both ranks without modifying prior evidence.",
+    "cache_integrity_preflight": "settings.json, manifest-bound group/normalization, record identities and every train/tune payload SHA-256 are checked before output creation or model setup.",
+    "formal_training_started": true,
+    "settings_contract_regression": "Generator-format test failed before correction, then passed with canonical inner-settings SHA validation. Inner-settings and wrapper-digest tampering rejected.",
+    "real_tune_samples": "Full payload checksum/rank/record integrity audit passed for all2176 tune and17468 train windows. Numeric schema is additionally validated on dataset reads.",
+    "full_cache_audit": "docs/implementation/e0_full_cache_audit_2026-10-29.json",
+    "cuda_step": "docs/implementation/fullsize_cuda_step_2026-10-29.json",
+    "overfit_probe": "docs/implementation/full_trunk_overfit_2026-10-29.json",
+    "ddp_resume": "outputs/formal_training_acceptance/ddp_resume/equivalence.json",
+    "single_cuda_resume": "outputs/formal_training_acceptance/deterministic_resume/training_state_acceptance.json",
+    "isolation": "docs/implementation/isolation_training_2026-10-29.json",
+    "numerical_caveat": "All restored training-state tensors match bitwise after deterministic policy; validation scalar alone differs4.015e-6(singleGPU) and1.262e-6(DDP), within explicitly recorded float32 forward/reduction tolerances. Original failed strict evidence retained."
+  },
+  "cache_status_at_recording": {
+    "train_expected_windows": 17468,
+    "train_rank0_observed": "8734/8734",
+    "train_rank1_observed": "8734/8734",
+    "train_manifest_complete": true,
+    "tune_expected_windows": 2176,
+    "tune_observed": "2176/2176",
+    "tune_manifest_complete": true
+  },
+  "training_scope": {
+    "condition": "logged ego action supervision",
+    "observation": "oracle E0 representation",
+    "formal_planning_evaluation": false,
+    "future_targets_used_as_inference_inputs": false
+  },
+  "recorded_at": "2026-10-29T11:21:39+08:00",
+  "formal_run": {
+    "launch": "outputs/reactflow_joint/seed_2026.launch.json",
+    "runtime": "outputs/reactflow_joint/seed_2026.runtime.json",
+    "training_log": "outputs/reactflow_joint/seed_2026/training.jsonl",
+    "checkpoint": "outputs/reactflow_joint/seed_2026/latest.pt",
+    "seed": 2026,
+    "world_size": 2,
+    "max_steps": 100000,
+    "effective_batch": 8,
+    "warmup_steps": 1000,
+    "eval_interval": 2000,
+    "patience": 10,
+    "first_checkpoint_step": 50,
+    "subsequent_resume_preserves_schedule": true,
+    "status": "running; actual log at step100; step50 checkpoint and automatic resume verified",
+    "last_logged_global_step": 100,
+    "checkpoint_global_step": 50,
+    "health_evidence": "docs/implementation/formal_training_health_2026-10-29.json"
+  }
+}

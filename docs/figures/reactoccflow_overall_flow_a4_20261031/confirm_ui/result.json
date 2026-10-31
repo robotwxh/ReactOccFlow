@@ -1,0 +1,19 @@
+{
+  "status": "confirmed",
+  "stage": "final",
+  "confirmation_channel": "chat",
+  "user_message": "按此生成",
+  "canvas": "2480×3508 portrait SVG",
+  "page_count": "1",
+  "audience": "自动驾驶世界模型研究者、组会与论文方法介绍",
+  "mode": "instructional",
+  "visual_style": "custom: user-provided academic flowchart reference",
+  "color": {"name": "用户参考图的白底彩色分区"},
+  "typography": {"name": "参考图无衬线技术图", "body_size": 28, "sizes": {"title": 58, "subtitle": 32, "annotation": 24}},
+  "formula_policy": "text-only",
+  "image_usage": ["none"],
+  "generation_mode": "continuous",
+  "refine_spec": false,
+  "confirmed_date": "2026-10-31",
+  "notes": "已确认的画布、六区内容与参考风格；其余为该方向的实现细节。用户只要求SVG，不导出PPTX。"
+}

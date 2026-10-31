@@ -1,0 +1,28 @@
+{
+  "date": "2026-10-29",
+  "function": "Strict deterministic CUDA training continuation",
+  "source_repository": "OccFM",
+  "source_commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+  "source_path": "OccFM/forecast/utils/common_utils.py",
+  "source_sha256": "bed7b2ea861d3cf04275b5d3e71fc5a2fd33836d3c8c1d4a12c82f86c532694d",
+  "snapshot": "reactoccflow/training/source_snapshots/occfm_common_utils.py.txt",
+  "snapshot_sha256": "bed7b2ea861d3cf04275b5d3e71fc5a2fd33836d3c8c1d4a12c82f86c532694d",
+  "copied_before_adaptation": true,
+  "dependency_closure": [
+    "random",
+    "numpy",
+    "torch"
+  ],
+  "other_reference": {
+    "repository": "IR-WM",
+    "commit": "94dbbf44d6c22e50db4080e986b3675eadbb4497",
+    "inspected": [
+      "tools/train.py",
+      "tools/test.py"
+    ],
+    "decision": "Uses framework seeding, may enable cudnn benchmarking; no strict CUDA/BLAS continuation helper reused."
+  },
+  "adaptation": "Reuse copied deterministic-cuDNN/no-benchmark pattern; add strict deterministic algorithms, BLAS workspace setup before CUDA initialization, numerical config binding. Snapshot remains documentation only.",
+  "runtime_reference_imports": false,
+  "licensing": "OccFM root licensing unresolved; see THIRD_PARTY_NOTICES.md."
+}

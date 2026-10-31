@@ -1,0 +1,52 @@
+{
+  "validation": {
+    "frames": 5869,
+    "scenes": 150,
+    "windows_6plus6": 4219,
+    "shards": 12,
+    "history_shape": [
+      6,
+      16,
+      50,
+      50
+    ],
+    "future_shape": [
+      6,
+      16,
+      50,
+      50
+    ],
+    "duplicate_records": [
+      {
+        "scene": "scene-0003",
+        "token": "fd8420396768425eabec9bdddf7e64b6",
+        "kept_index": 0,
+        "ignored_index": 5869,
+        "same_latent": false
+      }
+    ],
+    "seconds": 3.2036975310002163,
+    "coordinate_frame": "legacy_per_frame_ego"
+  },
+  "training": {
+    "frames": 27430,
+    "scenes": 700,
+    "windows_6plus6": 19719,
+    "shards": 54,
+    "history_shape": [
+      6,
+      16,
+      50,
+      50
+    ],
+    "future_shape": [
+      6,
+      16,
+      50,
+      50
+    ],
+    "duplicate_records": [],
+    "seconds": 15.294576635998965,
+    "coordinate_frame": "legacy_per_frame_ego"
+  }
+}

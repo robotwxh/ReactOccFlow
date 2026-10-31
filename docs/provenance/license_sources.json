@@ -1,0 +1,11 @@
+[
+  {
+    "repository": "IR-WM",
+    "commit": "94dbbf44d6c22e50db4080e986b3675eadbb4497",
+    "source": "IR-WM/LICENSE",
+    "destination": "docs/licenses/IR-WM-APACHE-2.0.txt",
+    "source_sha256": "5ad8c213095c573921d7388edf93f6a9f54490b8ebf3b165ae8ef1947cf70846",
+    "destination_sha256": "5ad8c213095c573921d7388edf93f6a9f54490b8ebf3b165ae8ef1947cf70846",
+    "ordinary_independent_file": true
+  }
+]

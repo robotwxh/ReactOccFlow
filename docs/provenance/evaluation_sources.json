@@ -1,0 +1,18 @@
+[
+  {
+    "repository": "OccFM",
+    "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+    "source": "OccFM/forecast/utils/eval_utils.py",
+    "sha256": "11b60285639e569cb6555ba5ce63d999bdbbe19307c74f1c9afdbbf2518c3f68",
+    "destination": "reactoccflow/evaluation/occupancy.py",
+    "adaptation": "Extract class IoU counting into CPU NumPy evaluation, with explicit standard vs original absent-ground-truth protocol."
+  },
+  {
+    "repository": "OccFM",
+    "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+    "source": "OccFM/tools/test.py",
+    "sha256": "fd5ad8a3e9564cb661f143470f82b6cd8afbdf339f2e53618358634da764f880",
+    "destination": "reactoccflow/evaluation/source_snapshots/test.py.txt",
+    "adaptation": "Dataset-level evaluator derived from val_model loop; streaming counts, deterministic per-window noise, explicit masks and atomic resumable state added after checking both references."
+  }
+]

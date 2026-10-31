@@ -1,0 +1,93 @@
+{
+  "version": 1,
+  "date": "2026-10-29",
+  "component": "Detached sufficient statistics for masked joint validation loss",
+  "search": {
+    "command": "rg -n 'validation|sufficient|statistics|masked_mean|kinematic|loss_dict|losses|reduce_mean|numerator|denominator' OccFM IR-WM --glob '*.py' --glob '!**/.git/**' --max-count 2",
+    "repositories": [
+      {
+        "repository": "OccFM",
+        "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+        "inspected": [
+          {
+            "path": "forecast/utils/eval_utils.py",
+            "sha256": "11b60285639e569cb6555ba5ce63d999bdbbe19307c74f1c9afdbbf2518c3f68",
+            "finding": "DistributedDictMeanCounter averages already reduced batch scalars with one count per update; it cannot recover masked component denominators."
+          },
+          {
+            "path": "tools/test.py",
+            "sha256": "fd5ad8a3e9564cb661f143470f82b6cd8afbdf339f2e53618358634da764f880",
+            "finding": "Validation passes batch scalar dictionaries into DistributedDictMeanCounter; no occupancy-actor loss statistics interface."
+          }
+        ]
+      },
+      {
+        "repository": "IR-WM",
+        "commit": "94dbbf44d6c22e50db4080e986b3675eadbb4497",
+        "inspected": [
+          {
+            "path": "projects/mmdet3d_plugin/dd3d/modeling/nuscenes_dd3d.py",
+            "sha256": "494d0aaa5d637a44c0ef1ff7d287b96cafb38cf7c6a0bf8508d7c42eeed63d24",
+            "finding": "Attribute/speed training losses reduce weighted foreground denominators through the detection framework, without a detached joint validation statistics interface."
+          },
+          {
+            "path": "projects/mmdet3d_plugin/bevformer/losses/semkitti_loss.py",
+            "sha256": "cac83eedf9f6f309ea66b1e08a613aba435e17e54ff4af0d857e719e0bdf0cc3",
+            "finding": "Semantic and geometry losses return scalar means; no actor/occupancy/kinematics sufficient-statistics closure."
+          }
+        ]
+      }
+    ],
+    "decision": "Neither reference supplies the masked joint validation statistics function. Implement a project-owned opt-in output at the existing reductions; no new reference code or dependencies copied."
+  },
+  "implementation": [
+    {
+      "path": "reactoccflow/models/react_flow.py",
+      "before_sha256": "b6fc66e2338788fcf25207591d13e0d15b31063edccd77101aabe2a48bce656c",
+      "sha256": "07bb8b6da4d0f98eda59537fee093fdd5f4561541621dbf8e2885c4bba346212"
+    },
+    {
+      "path": "reactoccflow/losses/consistency.py",
+      "before_sha256": "4820591ae261c042ab0d8ccc190d0f5a4c31ef60251961e6215e69735ab9335e",
+      "sha256": "ce5927f6adc249ca8ffc97d3f3e1382fcd14b58f7ca932abb7ff1290aab110e7"
+    },
+    {
+      "path": "reactoccflow/training/joint.py",
+      "before_sha256": "e297b61ede319a278d95771b86b46d9b4405713623ba7620656e3cd043a045ec",
+      "sha256": "7c9a3c16343d0853db6b26cb1aceafe9f9e4e731d6577c58e983bc88b205b13c"
+    },
+    {
+      "path": "tests/test_validation_statistics.py",
+      "sha256": "d3b235b554b5e61d36ea7b9daccbfcbd022da75bfe99cfa690651b68676303f1"
+    }
+  ],
+  "interface": {
+    "flow_and_consistency": "return_statistics=True adds statistics to the existing loss dictionary; defaults retain existing keys and scalars.",
+    "adapter": "JointTrainingAdapter.validation_statistics(..., generator=...) returns component -> {numerator: detached scalar tensor, count: detached raw scalar count, weight: float} from one objective pass. Adapter training_loss defaults to scalar; its opt-in return is (scalar, statistics).",
+    "components": {
+      "occ_fm": "Masked occupancy latent elements; occ_weight.",
+      "actor_fm": "Masked pose and available velocity elements; actor_weight.",
+      "actor_existence": "Masked selected actor-frame labels; existence_weight.",
+      "occ_actor_consistency": "Eligible actor-frame ROIs containing known voxels; occ_actor_weight.",
+      "temporal_consistency": "Consecutive known same-static-class voxel entries expanded across six semantic classes; temporal_weight.",
+      "kinematic_velocity": "Available consecutive pose transitions expanded across XY velocity dimensions; kinematics_weight.",
+      "heading_alignment": "Available transitions passing speed/class masks; class weights remain in the numerator, kinematics_weight."
+    },
+    "aggregation": "Sum numerators and raw counts per component across batches/ranks, then sum weight * numerator / max(count, 1). Empty sets export zero numerator and count with the configured weight."
+  },
+  "validation": {
+    "environment": "/home/lthpc/wxh/envs/ReactOccFlow",
+    "red": "Before production edits: all 8 initial new tests failed at missing return_statistics / validation_statistics interfaces.",
+    "command": "/home/lthpc/wxh/envs/ReactOccFlow/bin/python -m pytest -q tests/test_validation_statistics.py tests/test_consistency.py tests/test_react_flow.py tests/test_joint_training.py",
+    "result": "65 passed in 3.86s (9 new cases).",
+    "coverage": "Independent recreation of existing flow scalar formulas and literal mask counts; exact scalar/gradient/RNG equality between opt-in and normal calls; one field evaluation; three modes; three variable-mask batch partitions with fixed stochastic realization; geometry ROI exclusions; distinct velocity and heading denominators; detached outputs; empty counts and fixed weights."
+  },
+  "runtime_boundary": {
+    "reference_paths_imported": false,
+    "reference_scripts_executed": false,
+    "new_reference_source_copied": false,
+    "reference_files_unchanged": "Inspected source SHA-256 values checked again after implementation; hashes unchanged.",
+    "inference_changes": false
+  },
+  "license": "Existing provenance and copyright/license notices remain applicable; no new upstream code copied. Unresolved upstream terms remain documented in THIRD_PARTY_NOTICES.md."
+}

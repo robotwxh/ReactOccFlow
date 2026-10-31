@@ -1,0 +1,20 @@
+# Simulator-independent IPC/control contract. CARLA/Bench2Drive are future adapters.
+schema_version: reactoccflow.bridge.v1
+response_schema_version: reactoccflow.control_response.v1
+max_message_bytes: 1000000
+max_array_elements: 1000000
+max_array_rank: 4
+freshness:
+  sequence_must_increase: true
+  timestamp_must_not_regress: true
+controller:
+  max_steer: 1.0
+  max_throttle: 1.0
+  max_brake: 1.0
+  max_acceleration: 3.0
+  max_deceleration: 6.0
+  fallback_brake: 0.5
+  steering_gain: 1.5
+transport: in_memory_test_only
+future_ground_truth: rejected
+requested_deadline_required_in_responses: true

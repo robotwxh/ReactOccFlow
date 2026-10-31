@@ -1,0 +1,13 @@
+{
+  "date": "2026-10-29",
+  "cli_exit": 1,
+  "differences": {
+    "OccFM": [],
+    "IR-WM": [
+      "added: data"
+    ]
+  },
+  "source_files_head_and_git_status_unchanged": true,
+  "preexisting_anomaly": "An empty ordinary IR-WM/data directory predates this continuation and is absent from the original snapshot; preserved without deleting or rebasing the snapshot.",
+  "exact_whole_tree_match": false
+}

@@ -1,0 +1,11 @@
+# Observed-only perception frontend
+
+The T12/T13 perception package accepts timestamped current and past LiDAR observations and observed actor detections in the project-owned `E0` frame contract. It does not accept future labels, target fields, occupancy ground truth, or actor ground truth. Mapping inputs are checked for forbidden keys before any feature extraction.
+
+`LidarObservation` validates finite `N x >=3` point arrays, explicit timestamps, a non-empty sensor frame, and a finite 4x4 sensor-to-E0 SE(3) transform. `VoxelBEVExtractor` transforms points into E0, uses configurable axis-aligned bounds and resolution, and computes fixed-shape channels for point count, minimum height, maximum height, and mean intensity. The upper bound is exclusive. Points outside the grid are counted in `out_of_bounds_count` and are never clamped. Each frame carries timestamp, source frame, point counts, and E0 metadata.
+
+`ActorFrontend` consumes observed detections with position, dimensions, yaw, class, score, and an optional external track ID. It requires `coordinate_frame: E0`, validates finite geometry and scores, masks classes outside an optional allow-list, and uses deterministic nearest-neighbor association with a distance gate. Tracks retain their history when a frame is missing; `observed_mask` and `current_mask` distinguish missing observations from current detections. The returned history includes position, encoded yaw, and finite planar velocity, while current fields retain box geometry and score.
+
+`Perception.observe` joins the two frontends into a typed `ObservationBundle`. `latent_frontend_input` is deliberately `None`, `oracle` is `False`, and the source metadata identifies observed LiDAR and detections. The package emits voxel/BEV summaries and tracks only; it does not emit trained occupancy logits and provides no trained perception quality claim. No simulator or CARLA execution is part of this implementation.
+
+The configuration in `configs/perception.yaml` records the E0 sensor keys, default grid, feature channels, association gate, missing-track behavior, latent placeholder, and forbidden input keys. Source searches and immutable reference snapshot hashes are recorded in `docs/provenance/perception_sources.json`.

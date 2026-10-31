@@ -1,0 +1,11 @@
+[
+  {
+    "repository": "IR-WM",
+    "commit": "94dbbf44d6c22e50db4080e986b3675eadbb4497",
+    "source": "IR-WM/tools/data_converter/nuscenes_converter.py",
+    "source_sha256": "ab1470ff28c39b82084e9a5f9e7405f7def19e1ba844a8681b3fa020044f6e04",
+    "copied_snapshot": "reactoccflow/data/source_snapshots/nuscenes_converter.py.txt",
+    "copied_sha256": "ab1470ff28c39b82084e9a5f9e7405f7def19e1ba844a8681b3fa020044f6e04",
+    "adaptation": "Keep official train/val selection; implement deterministic scene-grouped model/tune/calibration subgroups (no such implementation found in either reference). No reference SDK import at runtime."
+  }
+]

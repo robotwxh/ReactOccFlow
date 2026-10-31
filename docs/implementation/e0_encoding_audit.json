@@ -1,0 +1,161 @@
+{
+  "passed": true,
+  "samples": 20,
+  "coordinate_frame": "E0",
+  "raw_3d_warp_before_encode": true,
+  "posterior": "mean",
+  "only_training_scenes": true,
+  "input_visibility": "mask_lidar & in_bounds & semantics!=255",
+  "future_unknown_masks_retained": true,
+  "no_future_input_keys": true,
+  "current_box_support": {
+    "boxes_with_grid_support": 131,
+    "boxes_with_same_class_voxels": 131,
+    "same_class_voxels": 9370,
+    "body_voxels": 18554,
+    "note": "Sparse visibility/label disagreement can leave body voxels unoccupied; this is alignment QA, not a trained metric."
+  },
+  "examples": [
+    {
+      "scene": "scene-0034",
+      "valid_history": 4,
+      "valid_future": 6,
+      "history_abs_mean": 0.010243498720228672,
+      "known_future_voxels": 2743515
+    },
+    {
+      "scene": "scene-0001",
+      "valid_history": 1,
+      "valid_future": 6,
+      "history_abs_mean": 0.010599573142826557,
+      "known_future_voxels": 3135863
+    },
+    {
+      "scene": "scene-0002",
+      "valid_history": 1,
+      "valid_future": 6,
+      "history_abs_mean": 0.011529688723385334,
+      "known_future_voxels": 3320874
+    },
+    {
+      "scene": "scene-0007",
+      "valid_history": 4,
+      "valid_future": 6,
+      "history_abs_mean": 0.012875279411673546,
+      "known_future_voxels": 3257632
+    },
+    {
+      "scene": "scene-0004",
+      "valid_history": 1,
+      "valid_future": 6,
+      "history_abs_mean": 0.01081930473446846,
+      "known_future_voxels": 3364962
+    },
+    {
+      "scene": "scene-0008",
+      "valid_history": 4,
+      "valid_future": 6,
+      "history_abs_mean": 0.013034257106482983,
+      "known_future_voxels": 3105521
+    },
+    {
+      "scene": "scene-0009",
+      "valid_history": 4,
+      "valid_future": 6,
+      "history_abs_mean": 0.010002964176237583,
+      "known_future_voxels": 2958293
+    },
+    {
+      "scene": "scene-0010",
+      "valid_history": 4,
+      "valid_future": 6,
+      "history_abs_mean": 0.014251829124987125,
+      "known_future_voxels": 2959023
+    },
+    {
+      "scene": "scene-0019",
+      "valid_history": 4,
+      "valid_future": 6,
+      "history_abs_mean": 0.013603385537862778,
+      "known_future_voxels": 3087529
+    },
+    {
+      "scene": "scene-0020",
+      "valid_history": 4,
+      "valid_future": 6,
+      "history_abs_mean": 0.012286308221518993,
+      "known_future_voxels": 3713297
+    },
+    {
+      "scene": "scene-0021",
+      "valid_history": 4,
+      "valid_future": 6,
+      "history_abs_mean": 0.01388816349208355,
+      "known_future_voxels": 3734258
+    },
+    {
+      "scene": "scene-0023",
+      "valid_history": 4,
+      "valid_future": 6,
+      "history_abs_mean": 0.012500629760324955,
+      "known_future_voxels": 3159213
+    },
+    {
+      "scene": "scene-0024",
+      "valid_history": 4,
+      "valid_future": 6,
+      "history_abs_mean": 0.014522884972393513,
+      "known_future_voxels": 3446032
+    },
+    {
+      "scene": "scene-0025",
+      "valid_history": 4,
+      "valid_future": 6,
+      "history_abs_mean": 0.01011857483536005,
+      "known_future_voxels": 3840000
+    },
+    {
+      "scene": "scene-0026",
+      "valid_history": 4,
+      "valid_future": 6,
+      "history_abs_mean": 0.012426620349287987,
+      "known_future_voxels": 3254530
+    },
+    {
+      "scene": "scene-0027",
+      "valid_history": 4,
+      "valid_future": 6,
+      "history_abs_mean": 0.009910832159221172,
+      "known_future_voxels": 3136597
+    },
+    {
+      "scene": "scene-0028",
+      "valid_history": 4,
+      "valid_future": 6,
+      "history_abs_mean": 0.012963023036718369,
+      "known_future_voxels": 3148614
+    },
+    {
+      "scene": "scene-0029",
+      "valid_history": 4,
+      "valid_future": 6,
+      "history_abs_mean": 0.008707989938557148,
+      "known_future_voxels": 3840000
+    },
+    {
+      "scene": "scene-0030",
+      "valid_history": 4,
+      "valid_future": 6,
+      "history_abs_mean": 0.013566853478550911,
+      "known_future_voxels": 3025169
+    },
+    {
+      "scene": "scene-0031",
+      "valid_history": 4,
+      "valid_future": 6,
+      "history_abs_mean": 0.013605332933366299,
+      "known_future_voxels": 3059869
+    }
+  ],
+  "manifest_sha256": "e9b804a076a6a5f3d3f77273ae4224dcd2d8b98c629f316406a8d545c7d58220"
+}

@@ -1,0 +1,131 @@
+{
+  "checked_date": "2026-10-31",
+  "deliverable": "ReactOccFlow创新点对比_DOME_OccFM_IR-WM.md",
+  "sha256": "6b14746578871e09adc082cc9ad6c32ecbebe8e3d75610761eb5feb57a21eec7",
+  "skills_used": [
+    "academic-research-suite: source verification",
+    "pdf: method-section extraction"
+  ],
+  "scope": "Bounded comparison of the three named papers and ReactOccFlow design/code. No full-field novelty claim or new experiment.",
+  "sources": [
+    {
+      "path": "docs/references/05_DOME_2410.10429.pdf",
+      "sha256": "512b700e790315e1b4a54f52d71b00e91659f81699bc0454eb323a68778ccbe7"
+    },
+    {
+      "path": "docs/references/01_OccFM_2506.23434.pdf",
+      "sha256": "690c42bb96ea951c449171379d6367329a20a9f0e4c315942d322e11efc7638a"
+    },
+    {
+      "path": "docs/references/07_IR-WM_2510.16729.pdf",
+      "sha256": "ad7429f776a5c4c1ef7250a7f57e3b2cdcba1e32a0ed6f6006828296b9b5d6cf"
+    },
+    {
+      "path": "docs/superpowers/plans/2026-10-27-reactoccflow-implementation-plan.md",
+      "sha256": "c76e1bc98b79a5750b0d168f4c32c01073427bf4490c8a31d7bbe0d0cf675b10"
+    },
+    {
+      "path": "README.md",
+      "sha256": "a0a779bc3dd3d231a95c3d3996976fd29b0f984de5cd0fd275559ad2c2518d50"
+    },
+    {
+      "path": "docs/implementation/progress.md",
+      "sha256": "1c771fce55fa9f3e13e5601967d47695d1fa423965cfc3b23949dc8b3dd014fb"
+    },
+    {
+      "path": "reactoccflow/models/react_flow.py",
+      "sha256": "07bb8b6da4d0f98eda59537fee093fdd5f4561541621dbf8e2885c4bba346212"
+    },
+    {
+      "path": "reactoccflow/models/joint_transition.py",
+      "sha256": "d4caa91385be57d4b9cbfeada00090ca2ec404cd0cb742106d7303dd5101b3b6"
+    },
+    {
+      "path": "reactoccflow/losses/consistency.py",
+      "sha256": "ce5927f6adc249ca8ffc97d3f3e1382fcd14b58f7ca932abb7ff1290aab110e7"
+    },
+    {
+      "path": "reactoccflow/training/joint.py",
+      "sha256": "7c9a3c16343d0853db6b26cb1aceafe9f9e4e731d6577c58e983bc88b205b13c"
+    },
+    {
+      "path": "reactoccflow/evaluation/risk.py",
+      "sha256": "410314eff28dc75d28e6d762d2c05582a24f735f90800649872ce3c97851b857"
+    },
+    {
+      "path": "reactoccflow/planning/planflow.py",
+      "sha256": "7c72bef37bbd3a573f90c1fb3584fe098a1ebda3c980aa35135c8159499f60f0"
+    },
+    {
+      "path": "reactoccflow/simulation/branch_collection.py",
+      "sha256": "e1ee26a2f561994f396f1f272c082dabc12f5c870ecf44988930e803f14769a3"
+    }
+  ],
+  "paper_versions": [
+    {
+      "name": "DOME",
+      "version": "2410.10429v1",
+      "url": "https://arxiv.org/html/2410.10429v1",
+      "read_scope": "Methods 3.1–3.4, trajectory-resampling algorithm context",
+      "evidence_role": "primary method description, not evidence for ReactOccFlow effectiveness"
+    },
+    {
+      "name": "OccFM",
+      "version": "2506.23434v2",
+      "url": "https://arxiv.org/html/2506.23434v2",
+      "read_scope": "Methods 3, future-trajectory-conditioned task 4.2, Appendix G",
+      "evidence_role": "primary method description, not evidence for ReactOccFlow effectiveness"
+    },
+    {
+      "name": "IR-WM",
+      "version": "2510.16729v3",
+      "url": "https://arxiv.org/html/2510.16729v3",
+      "read_scope": "Methods III-B/III-C and experimental-protocol context",
+      "evidence_role": "primary method description, not evidence for ReactOccFlow effectiveness"
+    }
+  ],
+  "metadata_verification": {
+    "primary": "Official arXiv abstract/HTML and local PDF version labels match.",
+    "semantic_scholar": [
+      {
+        "arxiv": "2410.10429",
+        "status": "S2-API-UNAVAILABLE",
+        "reason": "HTTP Error 429: "
+      },
+      {
+        "arxiv": "2506.23434",
+        "status": "S2-API-UNAVAILABLE",
+        "reason": "HTTP Error 429: "
+      },
+      {
+        "arxiv": "2510.16729",
+        "status": "S2-API-UNAVAILABLE",
+        "reason": "HTTP Error 429: "
+      }
+    ],
+    "fallback": "Official arXiv records verified; no S2_VERIFIED status claimed."
+  },
+  "claim_audit": {
+    "implemented_design": [
+      "bidirectional occupancy–actor conditional joint flow",
+      "differentiable endpoint local geometry/temporal/kinematics constraints"
+    ],
+    "pending_evidence": [
+      "controlled executed-action response validation",
+      "independent event calibration and closed-loop decision benefit"
+    ],
+    "inherited_not_novel": [
+      "VAE/Swin/spatial-temporal DiT",
+      "CFM/Euler/trajectory conditioning",
+      "generic cross-attention/isotonic tools"
+    ],
+    "absence_claim_boundary": "Only checked named method sections and current code. No exhaustive absence claim across all releases or literature."
+  },
+  "verification_limits": "No replication, new training or simulator execution; no exhaustive peer-review venue, COI or field-wide novelty audit.",
+  "local_link_check": {
+    "checked": 18,
+    "missing": []
+  },
+  "reference_protection": "Read-only text searches; no code executed/imported, files copied for runtime, installations, or writes in OccFM/IR-WM.",
+  "environment": "/home/lthpc/wxh/envs/ReactOccFlow"
+}

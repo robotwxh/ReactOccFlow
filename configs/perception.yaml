@@ -1,0 +1,40 @@
+# Observed-only perception frontend configuration.
+# All coordinates entering the frontend are transformed into E0 by the caller.
+schema_version: 1
+source: observed_only
+coordinate_frame: E0
+sensor:
+  timestamp_key: timestamp
+  frame_key: frame
+  transform_key: sensor_to_e0
+  points_columns: [x, y, z]
+  optional_columns: [intensity, ring]
+voxel:
+  bounds: [-40.0, -40.0, -1.0, 40.0, 40.0, 5.4]
+  resolution: [0.4, 0.4, 0.4]
+  feature_channels: [count, height_min, height_max, intensity_mean]
+  out_of_bounds: count
+  upper_bound: exclusive
+actors:
+  coordinate_frame: E0
+  gating_distance_m: 2.0
+  allowed_classes: null
+  association: deterministic_nearest_neighbor
+  missing_track_policy: preserve_with_mask
+latent_frontend:
+  emit: false
+  value: null
+oracle: false
+forbidden_input_keys:
+  - future_semantics
+  - future_actor
+  - future_actors
+  - target
+  - gt
+  - gt_occupancy
+  - gt_actor
+  - labels
+  - future_labels
+limitation: >-
+  This frontend emits finite voxel/BEV summaries and observed actor tracks;
+  it does not emit trained occupancy logits or claim trained perception quality.

@@ -1,0 +1,339 @@
+{
+  "schema_version": 1,
+  "sources": [
+    {
+      "source": "OccFM/forecast/models/modules/base/temporal_base.py",
+      "destination": "reactoccflow/models/modules/base/temporal_base.py",
+      "sha256": "f32f9f0942e719824750c2f2a85641b9d0dd2c326e56620e581b841791b653fb",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "copied_sha256": "f32f9f0942e719824750c2f2a85641b9d0dd2c326e56620e581b841791b653fb",
+      "adapted_sha256": "f32f9f0942e719824750c2f2a85641b9d0dd2c326e56620e581b841791b653fb",
+      "execution_role": "runtime model dependency"
+    },
+    {
+      "source": "OccFM/forecast/models/modules/base/others.py",
+      "destination": "reactoccflow/models/modules/base/others.py",
+      "sha256": "07473ba923b4a86fd89d69bbb0eb4e1e0ccf905acce958cd8a7240c619013592",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "copied_sha256": "07473ba923b4a86fd89d69bbb0eb4e1e0ccf905acce958cd8a7240c619013592",
+      "adapted_sha256": "85e431e651bc456e3b8b09a7c111161a4a93c18214fa42b57989e489cce93191",
+      "execution_role": "runtime model dependency"
+    },
+    {
+      "source": "OccFM/forecast/models/modules/base/attn_base.py",
+      "destination": "reactoccflow/models/modules/base/attn_base.py",
+      "sha256": "64289056ad8ad2b07cc2a18df7f5771bbd8f8411e21a1d41f829f794115d8fb8",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "copied_sha256": "64289056ad8ad2b07cc2a18df7f5771bbd8f8411e21a1d41f829f794115d8fb8",
+      "adapted_sha256": "4fac2f147c9e80c7dc26d3e48be24a68dd5485ef52ae6ca985a19795e1bcd761",
+      "execution_role": "runtime model dependency"
+    },
+    {
+      "source": "OccFM/forecast/models/modules/base/dit.py",
+      "destination": "reactoccflow/models/modules/base/dit.py",
+      "sha256": "4d8f7e7f70601afc7f0149e2a1d38b40ab6bec3e59c9eed9193d6333925f419b",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "copied_sha256": "4d8f7e7f70601afc7f0149e2a1d38b40ab6bec3e59c9eed9193d6333925f419b",
+      "adapted_sha256": "4d8f7e7f70601afc7f0149e2a1d38b40ab6bec3e59c9eed9193d6333925f419b",
+      "execution_role": "runtime model dependency"
+    },
+    {
+      "source": "OccFM/forecast/models/modules/base/__init__.py",
+      "destination": "reactoccflow/models/modules/base/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "copied_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "adapted_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "execution_role": "runtime model dependency"
+    },
+    {
+      "source": "OccFM/forecast/models/modules/base/swin_transformerbase.py",
+      "destination": "reactoccflow/models/modules/base/swin_transformerbase.py",
+      "sha256": "0f1a099bbe2569060fd234ab4b4b382663568a406f1b3a5457211d5c2aaa8a9c",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "copied_sha256": "0f1a099bbe2569060fd234ab4b4b382663568a406f1b3a5457211d5c2aaa8a9c",
+      "adapted_sha256": "0f1a099bbe2569060fd234ab4b4b382663568a406f1b3a5457211d5c2aaa8a9c",
+      "execution_role": "runtime model dependency"
+    },
+    {
+      "source": "OccFM/forecast/models/modules/base/res_layersbase.py",
+      "destination": "reactoccflow/models/modules/base/res_layersbase.py",
+      "sha256": "f9836412f36499eb3784c831c3caf6e569871ae7f360a3c35b5839f02d025fe6",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "copied_sha256": "f9836412f36499eb3784c831c3caf6e569871ae7f360a3c35b5839f02d025fe6",
+      "adapted_sha256": "f9836412f36499eb3784c831c3caf6e569871ae7f360a3c35b5839f02d025fe6",
+      "execution_role": "runtime model dependency"
+    },
+    {
+      "source": "OccFM/forecast/models/modules/base/postion_embed.py",
+      "destination": "reactoccflow/models/modules/base/postion_embed.py",
+      "sha256": "ac9140d712616df71d5a0851150f68273d44e2a44ad113901c00814c565efdda",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "copied_sha256": "ac9140d712616df71d5a0851150f68273d44e2a44ad113901c00814c565efdda",
+      "adapted_sha256": "ac9140d712616df71d5a0851150f68273d44e2a44ad113901c00814c565efdda",
+      "execution_role": "runtime model dependency"
+    },
+    {
+      "source": "OccFM/forecast/models/modules/embedding/voxel_height_sem_embed.py",
+      "destination": "reactoccflow/models/modules/embedding/voxel_height_sem_embed.py",
+      "sha256": "d844fb01eb201986f81ff15b5d2fecfbe8cf80a2dd660c8383837fa2b6240027",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "copied_sha256": "d844fb01eb201986f81ff15b5d2fecfbe8cf80a2dd660c8383837fa2b6240027",
+      "adapted_sha256": "7b430041a5b9fd563e70a2d3318fe6c4df787b46871cefdf4ecd2bc1b04016b5",
+      "execution_role": "runtime model dependency"
+    },
+    {
+      "source": "OccFM/forecast/models/modules/embedding/__init__.py",
+      "destination": "reactoccflow/models/modules/embedding/__init__.py",
+      "sha256": "5fa0083225473fd1b62214837197ed0a852f212328e296eb2d9614636acc4047",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "copied_sha256": "5fa0083225473fd1b62214837197ed0a852f212328e296eb2d9614636acc4047",
+      "adapted_sha256": "5fa0083225473fd1b62214837197ed0a852f212328e296eb2d9614636acc4047",
+      "execution_role": "runtime model dependency"
+    },
+    {
+      "source": "OccFM/forecast/models/modules/encoders/SwinSingleFrameDownV2.py",
+      "destination": "reactoccflow/models/modules/encoders/SwinSingleFrameDownV2.py",
+      "sha256": "f8c02831de05a7971160542e78ee57076c8986d398964e2cfbfa1c43c76fdaaa",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "copied_sha256": "f8c02831de05a7971160542e78ee57076c8986d398964e2cfbfa1c43c76fdaaa",
+      "adapted_sha256": "f8c02831de05a7971160542e78ee57076c8986d398964e2cfbfa1c43c76fdaaa",
+      "execution_role": "runtime model dependency"
+    },
+    {
+      "source": "OccFM/forecast/models/modules/encoders/__init__.py",
+      "destination": "reactoccflow/models/modules/encoders/__init__.py",
+      "sha256": "db80a943c5b7070f2b3b7eb6d421e4b4b51ce08faf557485990e777331f74e77",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "copied_sha256": "db80a943c5b7070f2b3b7eb6d421e4b4b51ce08faf557485990e777331f74e77",
+      "adapted_sha256": "db80a943c5b7070f2b3b7eb6d421e4b4b51ce08faf557485990e777331f74e77",
+      "execution_role": "runtime model dependency"
+    },
+    {
+      "source": "OccFM/forecast/models/modules/decoders/SwinSingleFrameUpV2.py",
+      "destination": "reactoccflow/models/modules/decoders/SwinSingleFrameUpV2.py",
+      "sha256": "5bd3729defe6310d703d082aebd87d394a49ca950baf829030e922bafbdd076c",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "copied_sha256": "5bd3729defe6310d703d082aebd87d394a49ca950baf829030e922bafbdd076c",
+      "adapted_sha256": "5bd3729defe6310d703d082aebd87d394a49ca950baf829030e922bafbdd076c",
+      "execution_role": "runtime model dependency"
+    },
+    {
+      "source": "OccFM/forecast/models/modules/decoders/__init__.py",
+      "destination": "reactoccflow/models/modules/decoders/__init__.py",
+      "sha256": "c3c426692c9e4bc0b2cf746673cb012e7ceea15da9e2586e13ce358db04970ef",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "copied_sha256": "c3c426692c9e4bc0b2cf746673cb012e7ceea15da9e2586e13ce358db04970ef",
+      "adapted_sha256": "c3c426692c9e4bc0b2cf746673cb012e7ceea15da9e2586e13ce358db04970ef",
+      "execution_role": "runtime model dependency"
+    },
+    {
+      "source": "OccFM/forecast/models/modules/quantization/vae_quant.py",
+      "destination": "reactoccflow/models/modules/quantization/vae_quant.py",
+      "sha256": "0090eb15aa248696d46fe0c6c95517d31aa048888a4b0de3ef55bf5c839b7148",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "copied_sha256": "0090eb15aa248696d46fe0c6c95517d31aa048888a4b0de3ef55bf5c839b7148",
+      "adapted_sha256": "0090eb15aa248696d46fe0c6c95517d31aa048888a4b0de3ef55bf5c839b7148",
+      "execution_role": "runtime model dependency"
+    },
+    {
+      "source": "OccFM/forecast/models/modules/quantization/__init__.py",
+      "destination": "reactoccflow/models/modules/quantization/__init__.py",
+      "sha256": "c360ed4e468543009a7237543c99db8f090b7d7a0f8686e49fcd489aedafa9a7",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "copied_sha256": "c360ed4e468543009a7237543c99db8f090b7d7a0f8686e49fcd489aedafa9a7",
+      "adapted_sha256": "c360ed4e468543009a7237543c99db8f090b7d7a0f8686e49fcd489aedafa9a7",
+      "execution_role": "runtime model dependency"
+    },
+    {
+      "source": "OccFM/forecast/models/modules/transition_models/FlowMatchingV2.py",
+      "destination": "reactoccflow/models/modules/transition_models/FlowMatchingV2.py",
+      "sha256": "89b73962947be5abcda56e13f2d305452bebfebf6ac0441d30ba21d2ad64dd1b",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "copied_sha256": "89b73962947be5abcda56e13f2d305452bebfebf6ac0441d30ba21d2ad64dd1b",
+      "adapted_sha256": "e6d21e220cd9302916f773d7b2e6e6d3f5c338a5f66ef2ebd2696821c737810e",
+      "execution_role": "runtime model dependency"
+    },
+    {
+      "source": "OccFM/forecast/models/modules/transition_models/__init__.py",
+      "destination": "reactoccflow/models/modules/transition_models/__init__.py",
+      "sha256": "b5ee3192dcc1a030cab861554ea7b153a9ba69e3e47bd9bda221abe36c8be62d",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "copied_sha256": "b5ee3192dcc1a030cab861554ea7b153a9ba69e3e47bd9bda221abe36c8be62d",
+      "adapted_sha256": "b5ee3192dcc1a030cab861554ea7b153a9ba69e3e47bd9bda221abe36c8be62d",
+      "execution_role": "runtime model dependency"
+    },
+    {
+      "source": "OccFM/forecast/ops/flash_attention/flash_attention.py",
+      "destination": "reactoccflow/models/ops/flash_attention/flash_attention.py",
+      "sha256": "a4f4ae15a6195baa1b7225c58b29d27b2612bdf16d8ed7ab2dcb7d0c5006944c",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "copied_sha256": "a4f4ae15a6195baa1b7225c58b29d27b2612bdf16d8ed7ab2dcb7d0c5006944c",
+      "adapted_sha256": "a4f4ae15a6195baa1b7225c58b29d27b2612bdf16d8ed7ab2dcb7d0c5006944c",
+      "execution_role": "runtime model dependency"
+    },
+    {
+      "source": "OccFM/forecast/ops/flash_attention/__init__.py",
+      "destination": "reactoccflow/models/ops/flash_attention/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "copied_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "adapted_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "execution_role": "runtime model dependency"
+    },
+    {
+      "source": "OccFM/forecast/models/compressors/occfm_vae.py",
+      "destination": "reactoccflow/models/source_snapshots/occfm_vae.txt",
+      "sha256": "a61e10d43fb892a302721239490ad9081ffd641ff33a0768a448a821800befba",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "copied_sha256": "a61e10d43fb892a302721239490ad9081ffd641ff33a0768a448a821800befba",
+      "adapted_sha256": "a61e10d43fb892a302721239490ad9081ffd641ff33a0768a448a821800befba",
+      "execution_role": "documentation only"
+    },
+    {
+      "source": "OccFM/forecast/models/worldmodels/occfm.py",
+      "destination": "reactoccflow/models/source_snapshots/occfm.txt",
+      "sha256": "32acddf3f166f341b5be69eb753fee3265e06974f1f2b6cbcbe7660e091ba301",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "copied_sha256": "32acddf3f166f341b5be69eb753fee3265e06974f1f2b6cbcbe7660e091ba301",
+      "adapted_sha256": "32acddf3f166f341b5be69eb753fee3265e06974f1f2b6cbcbe7660e091ba301",
+      "execution_role": "documentation only"
+    },
+    {
+      "source": "OccFM/forecast/models/model_template.py",
+      "destination": "reactoccflow/models/source_snapshots/model_template.txt",
+      "sha256": "01eb1eff23ab66d56764c3284e7fd9b663c6aab60102302f32bd3e45b5213796",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "copied_sha256": "01eb1eff23ab66d56764c3284e7fd9b663c6aab60102302f32bd3e45b5213796",
+      "adapted_sha256": "01eb1eff23ab66d56764c3284e7fd9b663c6aab60102302f32bd3e45b5213796",
+      "execution_role": "documentation only"
+    },
+    {
+      "source": "OccFM/forecast/utils/common_utils.py",
+      "destination": "reactoccflow/models/source_snapshots/common_utils.txt",
+      "sha256": "bed7b2ea861d3cf04275b5d3e71fc5a2fd33836d3c8c1d4a12c82f86c532694d",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "copied_sha256": "bed7b2ea861d3cf04275b5d3e71fc5a2fd33836d3c8c1d4a12c82f86c532694d",
+      "adapted_sha256": "bed7b2ea861d3cf04275b5d3e71fc5a2fd33836d3c8c1d4a12c82f86c532694d",
+      "execution_role": "documentation only"
+    },
+    {
+      "source": "OccFM/tools/cfgs/occfm_vae.yaml",
+      "destination": "reactoccflow/models/source_snapshots/occfm_vae.yaml",
+      "sha256": "793cc1008c8861c79761a37719bf5c6e8bf823830590af475ab99c9fad273a07",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "copied_sha256": "793cc1008c8861c79761a37719bf5c6e8bf823830590af475ab99c9fad273a07",
+      "adapted_sha256": "793cc1008c8861c79761a37719bf5c6e8bf823830590af475ab99c9fad273a07",
+      "execution_role": "documentation only"
+    },
+    {
+      "source": "OccFM/tools/cfgs/occfm.yaml",
+      "destination": "reactoccflow/models/source_snapshots/occfm.yaml",
+      "sha256": "e4d9733daad3f51dd76f1dedb14c83927269843a6c38154ae5dc8c123757eecb",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "copied_sha256": "e4d9733daad3f51dd76f1dedb14c83927269843a6c38154ae5dc8c123757eecb",
+      "adapted_sha256": "e4d9733daad3f51dd76f1dedb14c83927269843a6c38154ae5dc8c123757eecb",
+      "execution_role": "documentation only"
+    },
+    {
+      "source": "OccFM/tools/cfgs/occfm_fut.yaml",
+      "destination": "reactoccflow/models/source_snapshots/occfm_fut.yaml",
+      "sha256": "9d4eb829b7de629ec89c1da7503ad90e19f0e202ed3ad551c65387e88e60562d",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "copied_sha256": "9d4eb829b7de629ec89c1da7503ad90e19f0e202ed3ad551c65387e88e60562d",
+      "adapted_sha256": "9d4eb829b7de629ec89c1da7503ad90e19f0e202ed3ad551c65387e88e60562d",
+      "execution_role": "documentation only"
+    },
+    {
+      "source": "OccFM/tools/cfgs/compressor_configs/vae_swin_x16_h16.yaml",
+      "destination": "reactoccflow/models/source_snapshots/vae_swin_x16_h16.yaml",
+      "sha256": "e8b204e391489126a78fcc40eec375d1403cb78934b065ba350fc93fd84de7c7",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "copied_sha256": "e8b204e391489126a78fcc40eec375d1403cb78934b065ba350fc93fd84de7c7",
+      "adapted_sha256": "e8b204e391489126a78fcc40eec375d1403cb78934b065ba350fc93fd84de7c7",
+      "execution_role": "documentation only"
+    },
+    {
+      "source": "OccFM/tools/cfgs/transition_configs/cfm.yaml",
+      "destination": "reactoccflow/models/source_snapshots/cfm.yaml",
+      "sha256": "1e41bd3eadeffb943c277f36eaa95092181d8baed6ed40e4056e8af1403727dc",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "copied_sha256": "1e41bd3eadeffb943c277f36eaa95092181d8baed6ed40e4056e8af1403727dc",
+      "adapted_sha256": "1e41bd3eadeffb943c277f36eaa95092181d8baed6ed40e4056e8af1403727dc",
+      "execution_role": "documentation only"
+    },
+    {
+      "source": "OccFM/tools/cfgs/transition_configs/cfm_fut_traj.yaml",
+      "destination": "reactoccflow/models/source_snapshots/cfm_fut_traj.yaml",
+      "sha256": "f6da2c1fc05efd725878ad72fdf08d4167c074bd1b32f4bcdd9037ab47acc9e9",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "copied_sha256": "f6da2c1fc05efd725878ad72fdf08d4167c074bd1b32f4bcdd9037ab47acc9e9",
+      "adapted_sha256": "f6da2c1fc05efd725878ad72fdf08d4167c074bd1b32f4bcdd9037ab47acc9e9",
+      "execution_role": "documentation only"
+    }
+  ],
+  "searches": [
+    {
+      "repository": "OccFM",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "queries": [
+        "OccupancyCodec",
+        "OccFmVAE",
+        "FlowMatchingV2",
+        "OccFM.sample",
+        "to_2tuple"
+      ],
+      "result": "VAE, embedding, Swin encoder/decoder, quantization, CFM backbone and dependency closure copied before adaptation."
+    },
+    {
+      "repository": "IR-WM",
+      "commit": "94dbbf44d6c22e50db4080e986b3675eadbb4497",
+      "queries": [
+        "class .*VAE",
+        "class .*Flow",
+        "flow_matching",
+        "OccupancyCodec",
+        "CFM"
+      ],
+      "result": "No compatible codec or conditional flow model; existing occupancy modules require OpenMMLab and are not used for bootstrap."
+    }
+  ],
+  "independent_implementations": [
+    "Posterior mean/sample wrapper and explicit strict checkpoint mapping; uses copied VAE components.",
+    "Future-only deterministic Euler integration with local generator and shifted time grid; derived from copied OccFM.sample.",
+    "Configuration and checkpoint normalization without Lightning/OpenMMLab.",
+    "training_loss derives copied OccFM.training_step and get_training_loss: sigmoid-normal time, history conditioning dropout and scaled future velocity MSE with explicit local generator."
+  ],
+  "adaptations": {
+    "modules/base/others.py": "package-relative to_2tuple import extracted from copied common_utils snapshot",
+    "modules/base/attn_base.py": "package-relative FlashAttention import; enable math SDPA fallback while preserving upstream head-major output reshape",
+    "modules/transition_models/FlowMatchingV2.py": "package-relative base imports only",
+    "modules/embedding/voxel_height_sem_embed.py": "height indexing uses configured height_num (pretrained configuration remains16)"
+  },
+  "checkpoint_mapping": {
+    "prefixes_removed": [
+      "module.",
+      "model."
+    ],
+    "weights": [
+      "state_dict",
+      "ema_model"
+    ],
+    "ema_metadata_removed": [
+      "n_averaged"
+    ],
+    "cfm_selected_prefix": "transition_model.",
+    "cfm_documented_excluded_prefixes": [
+      "embedding.",
+      "encoder.",
+      "quantization.",
+      "decoder."
+    ],
+    "strict": true
+  },
+  "validation": {
+    "unit_test_command": "/home/lthpc/wxh/envs/ReactOccFlow/bin/python -m pytest tests/test_codec.py tests/test_flow.py -q",
+    "result": "13 passed in 2.64s",
+    "gpu_evidence": ".superpowers/sdd/2026-10-27-reactoccflow-implementation-plan/model-gpu-validation.json"
+  }
+}

@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "reactoccflow"
+version = "0.1.0"
+description = "Reactive occupancy and actor conditional flow matching"
+requires-python = ">=3.10"
+dependencies = ["numpy>=1.26,<2", "torch>=2.7,<2.8", "einops>=0.8,<0.9", "einops-exts>=0.0.4", "PyYAML>=6,<7", "easydict>=1.13", "scipy>=1.15,<1.16"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<9", "build>=1,<2"]
+qa = ["matplotlib>=3.10,<3.11"]
+
+[tool.setuptools.packages.find]
+include = ["reactoccflow*"]
+exclude = ["OccFM*", "IR-WM*", "tests*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"

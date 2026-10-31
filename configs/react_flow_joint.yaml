@@ -1,0 +1,53 @@
+# T6 research configuration; load stats JSON before constructing ReactFlow.
+model:
+  kind: react_flow
+  mode: joint
+  history_frames: 6
+  future_frames: 6
+  latent_shape:
+  - 16
+  - 50
+  - 50
+  max_actors: 8
+  actor_history_frames: 4
+  actor_hidden: 128
+  actor_heads: 4
+  interaction_layers: 2
+  latent_scale: 10.0
+  time_scalar: 1000.0
+  alpha: 3.0
+  occ_weight: 1.0
+  actor_weight: 1.0
+  existence_weight: 0.1
+  freeze_pretrained_trunk: true
+normalization: data/research/normalization.json
+pretrained_trunk: assets/checkpoints/occfm_history.ckpt
+sampling:
+  num_worlds: 1
+  nfe: 8
+  heading_normalization: endpoint_only
+  requires_local_generator: true
+research_status:
+  joint_trained: false
+  oracle_observations: true
+  physical_future_slots_s:
+  - 0.5
+  - 1.0
+  - 1.5
+  - 2.0
+  - 2.5
+  - 3.0
+  future_timestamps_are_targets_only: true
+  initialization_conditioning: six-waypoint historical checkpoint reused with new
+    planned candidate semantics; requires research training
+  cli_integration: model specification only; existing baseline CLI is unchanged
+# T7 research regularizers; construct ConsistencyLosses separately from model.
+consistency:
+  occ_actor_weight: 0.1
+  temporal_weight: 0.05
+  kinematics_weight: 0.01
+  temperature: 0.4
+  roi_margin: 1.0
+  velocity_scale: 10.0
+  low_speed_threshold: 0.5
+  cycle_heading_weight: 0.5

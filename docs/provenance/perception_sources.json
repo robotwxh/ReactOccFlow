@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "task": "T12/T13",
+  "date": "2026-10-28",
+  "searches": [
+    {
+      "repositories": ["OccFM", "IR-WM"],
+      "commits": {
+        "OccFM": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+        "IR-WM": "94dbbf44d6c22e50db4080e986b3675eadbb4497"
+      },
+      "queries": [
+        "voxel",
+        "pillar",
+        "point.?cloud",
+        "lidar",
+        "detection",
+        "tracking",
+        "track_id",
+        "associate"
+      ],
+      "command": "rg -n -i 'voxel|pillar|point.?cloud|lidar|detection|tracking|track_id|associate' OccFM IR-WM --glob '*.py' --glob '*.yaml' --glob '*.yml' --glob '*.md' --glob '!**/data/**' --glob '!**/assets/**'",
+      "result": "OccFM contains voxel-height embedding/configuration for an occupancy model. IR-WM contains dataset coordinate transforms, LiDAR conversion, and trajectory/box utilities. Neither repository contains a standalone observed-only E0 voxel/BEV frontend with strict future/GT rejection and deterministic actor association matching this contract; no source was copied or executed.",
+      "runtime_adaptation": false
+    }
+  ],
+  "implementation": {
+    "files": [
+      "reactoccflow/perception/lidar.py",
+      "reactoccflow/perception/actors.py",
+      "reactoccflow/perception/frontend.py",
+      "reactoccflow/perception/__init__.py",
+      "tests/test_perception.py",
+      "configs/perception.yaml",
+      "docs/implementation/perception.md",
+      ".superpowers/sdd/2026-10-27-reactoccflow-implementation-plan/t12-perception-report.md"
+    ],
+    "source": "independent implementation after exact read-only searches",
+    "reference_imports": false
+  },
+  "licenses": {
+    "OccFM": "No source copied; upstream redistribution terms remain unresolved; see THIRD_PARTY_NOTICES.md.",
+    "IR-WM": "No source copied; Apache-2.0 source was searched read-only."
+  },
+  "searched_file_checksums": [
+    {
+      "path": "OccFM/forecast/models/modules/embedding/voxel_height_sem_embed.py",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "sha256": "d844fb01eb201986f81ff15b5d2fecfbe8cf80a2dd660c8383837fa2b6240027",
+      "role": "voxel/height embedding search; model-specific and not copied"
+    },
+    {
+      "path": "OccFM/tools/cfgs/compressor_configs/vae_swin_x16_h16_3d.yaml",
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "sha256": "5470156f7851aaf63b224c6139af94416cd3c01d59c0ab19f167c0831b029f71",
+      "role": "voxel size/range configuration search; model configuration only"
+    },
+    {
+      "path": "IR-WM/projects/mmdet3d_plugin/datasets/nuscenes_dataset_v2.py",
+      "commit": "94dbbf44d6c22e50db4080e986b3675eadbb4497",
+      "sha256": "db0bebb546bdd142b32bd4074530fa1d045fd236b6ede9850f55f66f9e11bc3b",
+      "role": "LiDAR history transform search; dataset/OpenMMLab dependent"
+    },
+    {
+      "path": "IR-WM/projects/mmdet3d_plugin/datasets/trajectory_api.py",
+      "commit": "94dbbf44d6c22e50db4080e986b3675eadbb4497",
+      "sha256": "02a6e47dc75ede4d4e9a6a9f6499a1e411501069c5c91d313601bcdd4aaaacd0",
+      "role": "actor box/trajectory search; future/GT dataset utility and not copied"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+# Independent external datasets; never resolve data via reference repositories.
+data_root: /home/lthpc/data
+nuscenes_root: /home/lthpc/data/nuscenes
+nuscenes_version: v1.0-trainval
+occupancy_root: /home/lthpc/data/nuscenes/gts
+compatibility_cache:
+  training: data/latents/training
+  validation: data/latents/validation
+research_output: data/research
+split_seed: 2026

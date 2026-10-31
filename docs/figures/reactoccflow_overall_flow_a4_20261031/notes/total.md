@@ -1,0 +1,23 @@
+# Speaker Notes
+
+## 01_reactoccflow_overall
+
+这是一张研究总体架构图，读图从上往下进行，核心网络区可以单独放大。所有文字、公式、连线、框体都保留为SVG元素。示意网格与BEV不是模型预测结果。
+
+第一部分定义任务与观测边界。Occupancy历史有6个兼容槽位，默认最近4个有效。Actor只从当前观测选最近8个，历史4帧，未来6个时刻。候选ego轨迹是已知计划控制量，不是推理时读取的未来专家真值。研究oracle表示与真实传感器前端应分开讨论。实际LiDAR latent学习仍待完成。
+
+第二部分是从OccFM迁移的occupancy VAE。类别与高度嵌入后折叠成BEV，两个Swin stage将200×200压缩到50×50，得到16通道均值latent。研究缓存使用μ；Codec也允许显式局部随机数驱动的posterior采样。Decoder恢复每高度层的8维特征，并通过类别embedding内积形成18类logits。联合流使用10倍latent，解码前除回去。VAE参数冻结不代表截断其输入梯度，连续端点仍可经decoder接受一致性监督。
+
+第三部分定义条件Flow Matching训练。两个模态各自从高斯噪声出发，共享生成流时间t。向量场学习干净状态与噪声的差，输出不是diffusion噪声ε。未来target、存在性和有效性真值mask仅用于损失。连续端点经decoder形成局部occupancy–actor、静态时序和类别运动学约束。局部几何约束只覆盖当前选中有效actor的支持域，不能把全部动态occupancy约束成8个actor的并集，也不应强行删除真实危险未来。
+
+第四部分是实际计算结构。Occupancy 12槽序列经过stem、两级down、middle和两级up。空间只有一次50→25下采样，上采样恢复50；不能因源类名带DOWN_X4而把实际主干画成50→25→12。主干stage使用条件DiT，middle使用普通空间/时间注意力。Actor分支由51维历史、noisy state、time、candidate与future-slot条件组成48个128维token。7500个occupancy tokens投影到相同维度，两层4头MiddleInteraction完成masked actor self-attention、同步双向cross-attention和actor FFN。两路cross计算来自同一轮状态，不能将一方向输出先作为另一方向输入。只将occupancy交互的delta投影回256通道、加回原middle特征。Actor velocity与existence使用独立输出头。
+
+DiT详图展示两个AdaLN调制、门控与残差。空间注意力沿H×W，时间注意力沿12槽；它不是自回归masked decoder。Swin详图展示窗口/移位窗口注意力与两次残差，和主干DiT、普通双向cross-attention是三类不同结构。
+
+第五部分展示总体推理规划链路。每候选默认8世界、8次shifted Euler；仅积分未来，历史固定。解码后按车体面积、高度、方向和实测时间识别3秒碰撞事件并汇总平滑频率。校准接口已经实现，独立真实执行标签、实际校准效果与闭环实验尚待完成。阈值在tune选择后冻结，评测不能重新调参。候选运动学无效或风险不可接受时，选择显式刹停并保留失败原因。Bridge/controller接口处理episode新鲜度、按时间插值和执行器边界，不能把协议验收当作CARLA闭环结果或实时性能。目标规划2Hz、控制20Hz仅是目标。
+
+第六部分是数据与证据。nuScenes划分为560/70/70/150场景；预训练权重已经见过官方700训练场景，新划的tune/calibration不能自动算作预训练未见数据。CARLA反事实需要同初始状态下实际执行不同ego动作、允许NPC反应并按origin分组。Log未来不能作为扰动候选的反事实真值。指标覆盖occupancy、actor、联合一致性、动作响应、概率校准和闭环，结构与采样预算消融分别报告。
+
+来源事实见sources/source_intake.md，权威依据为docs/superpowers/plans/2026-10-27-reactoccflow-implementation-plan.md，网络细节核对react_flow.py、joint_transition.py、FlowMatchingV2.py、dit.py、codec.py与Swin组件。未在参考仓库执行脚本或修改资源。
+
+生成记录：用户确认单张SVG和六区结构，采用连续模式；未用位图或AI图像；未导出PPTX。Flask缺失使可选浏览器预览不可用。SVG质量检查0错误；PPTX字体resolver相关警告不影响本次SVG交付。

@@ -1,0 +1,20 @@
+{
+  "python": "3.10.22",
+  "torch": "2.7.1+cu128",
+  "numpy": "1.26.4",
+  "cuda_runtime": "12.8",
+  "cuda_available": true,
+  "gpu_count": 2,
+  "devices": [
+    {
+      "index": 0,
+      "name": "NVIDIA RTX A6000",
+      "matmul_passed": true
+    },
+    {
+      "index": 1,
+      "name": "NVIDIA RTX A6000",
+      "matmul_passed": true
+    }
+  ]
+}

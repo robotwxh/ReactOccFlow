@@ -1,0 +1,47 @@
+{
+  "date": "2026-10-29T10:31:27+08:00",
+  "status": "passed",
+  "checks": "All payload SHA-256, record/manifest identities, canonical inner settings hashes, group disjointness and common train-only E0 normalization",
+  "groups": {
+    "train": {
+      "root": "/home/lthpc/wxh/Paper/data/research/e0_full/train",
+      "complete": true,
+      "count": 17468,
+      "scenes": 560,
+      "manifest_sha256": "998586ec77b75042a037e943c53c319211a6f1a00405c9fca2fa81a869ba72ec",
+      "settings_sha256": "4a89d8bac6ebac7695a54f8b48bdefaf01cd9bc04b5da897916bc8beee924ead",
+      "rank_manifests": [
+        {
+          "rank": 0,
+          "complete": true,
+          "count": 8734,
+          "sha256": "fddb5f97060c2a3d55ac2da0e8924a80e2048494d64c6fbacbd27c36da52639b"
+        },
+        {
+          "rank": 1,
+          "complete": true,
+          "count": 8734,
+          "sha256": "0bf547406a11598a11a38ea8a00b89fa34e33eb83157b06588d57982a855c4b1"
+        }
+      ]
+    },
+    "tune": {
+      "root": "/home/lthpc/wxh/Paper/data/research/e0_full/tune",
+      "complete": true,
+      "count": 2176,
+      "scenes": 70,
+      "manifest_sha256": "24c42199430f9b054cb21d7fa610a3800170d21de1903dde05811f30b860a70b",
+      "settings_sha256": "1e396c4b343dec32e9a13644f1ce75e013066724adb7992b89153bbc2642c757",
+      "rank_manifests": [
+        {
+          "rank": 0,
+          "complete": true,
+          "count": 2176,
+          "sha256": "f3da6943759b32e7cd8975f1b55062a3605b160483242d7deca89a9a1e37fe65"
+        }
+      ]
+    }
+  },
+  "seconds": 29.632684612995945,
+  "full_array_schema_audit": false
+}
