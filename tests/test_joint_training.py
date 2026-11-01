@@ -137,6 +137,6 @@ def test_adapter_rejects_a_trunk_gradient_leak():
     trunk(torch.ones(1, 1)).sum().backward()
     trunk.requires_grad_(False)
     flow.transition_model.trunk = trunk
-    adapter = adapter_class()(flow, codec, consistency=consistency)
+    adapter = adapter_class()(flow, codec, consistency=consistency, require_frozen_trunk=True)
     with pytest.raises(RuntimeError, match='trunk.*gradients None'):
         adapter.frozen_status()

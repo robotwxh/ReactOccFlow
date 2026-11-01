@@ -1,5 +1,7 @@
 # ReactOccFlow 总体流程图：输入材料
 
+> 2026-10-31 架构同步：以下方法事实按当前标准 DiT 实现更新。目录内已有 SVG/预览/导出文件仍属于旧 U-Net 图件，本次只修改 Markdown，尚待按新规格重生成。旧图件来源摘要保持其历史归属；新架构依据见 [DiT 迁移记录](../../../implementation/2026-10-31-standard-dit.md)。
+
 ## 用户要求
 
 - 交付一张 SVG 总体流程图。
@@ -11,7 +13,7 @@
 ## 材料优先级
 
 1. `docs/superpowers/plans/2026-10-27-reactoccflow-implementation-plan.md`：权威总体方案。
-2. `reactoccflow/models/react_flow.py`、`joint_transition.py`、`modules/transition_models/FlowMatchingV2.py`、`modules/base/dit.py`：实际联合流与网络顺序。
+2. `reactoccflow/models/react_flow.py`、`joint_transition.py`、`standard_dit.py`、`modules/base/dit.py`：当前联合流与标准 DiT 网络顺序。`modules/transition_models/FlowMatchingV2.py` 已从运行时代码删除，仅保留来源快照。
 3. `reactoccflow/models/codec.py`、Swin encoder/decoder：实际 occupancy 表示。
 4. `reactoccflow/losses/consistency.py`、`reactoccflow/training/joint.py`：训练与连续端点约束。
 5. `reactoccflow/planning/planflow.py`、`configs/risk.yaml`、perception/bridge 文档：规划和接口边界。
@@ -39,6 +41,7 @@
 - decoder：Conv、Res–Attention–Res、Swin depth=[6,2]、两次上采样 50→100→200，得到 128 通道。
 - reshape 为每高度层 8 维，与类别 embedding 权重内积得到 18 类 logits，再 argmax 得 occupancy。
 - 研究阶段 VAE 冻结；连续 logits 保留至一致性损失，不对 argmax 反传。
+- 只有一套 occupancy VAE。缓存阶段用同一 encoder 分别处理历史观测与未来监督标签；训练 step 读取 latent 缓存，只对预测端点调用 decoder。DiT patch 线性投影不是第二次 VAE 编码，actor 不经过 occupancy VAE。
 
 ### 候选动作
 
@@ -51,18 +54,17 @@
 - 目标 p_theta(O_future,A_future|h,c,tau_k)。当前核心模型实际接收历史 latent、actor 观测和候选 tau；地图/路线接入属于总体规划条件，不能虚构当前网络地图 encoder。
 - occupancy 与 actor 独立高斯噪声、共享流时间；occupancy future 6×16×50×50，actor future 8×6×6。
 - history latent 与当前 noisy future latent 沿时间拼接，总计 12 槽；历史保持固定，仅积分 future。
-- occupancy stem：Conv3D(kernel 1×7×7, 16→64) 与初始 temporal attention。
-- 条件：timestep sinusoidal embedding→MLP；6×2 candidate 的 8-frequency Fourier embedding→MLP；相加得到 128 维条件。
-- 下采样层级：ResNet×2→Spatial DiT→Temporal DiT→skip；50×50×128 后一次 downsample 至 25×25；第二层 25×25×256 后 downsample=identity。
-- middle：ResNet→spatial attention→temporal attention→ResNet，实际为 B×256×12×25×25。
-- middle occupancy tokens：B×7500×256→Linear→B×7500×128。
+- occupancy patchify：每帧 `16×50×50` latent 切为 100 个 `5×5` patch，每个 patch 400 个值，Linear(400→256)。12 槽共得到 `B×1200×256` token。
+- 条件：timestep sinusoidal embedding→MLP；6×2 candidate 的 8-frequency Fourier embedding→MLP；相加得到 256 维条件，用于各 DiT Block 和输出层的 adaLN。空间 patch 与时间槽分别添加固定位置编码。
+- 标准 DiT：8 个固定宽度 Block，hidden=256、heads=8、MLP ratio=4；各层直接对全部 1,200 个 token 做全局时空 self-attention，没有 U-Net stem/down/middle/up/skip，也不再拆分空间/时间两次注意力。
+- 交互接入：第 4 个 DiT Block 后 `B×1200×256→Linear→B×1200×128`；占据序列与 actor 序列保持独立。
 - actor history：[4×(6+2 masks)] + size(3) + class embed(16) = 51 维→MLP→128。
 - actor noisy state 6→128，加历史条件、未来槽位 embedding、共享时间 embedding、候选 Fourier/MLP embedding；8×6=48 个 tokens。
-- middle interaction ×2，hidden=128，heads=4：actor LayerNorm→masked self-attention→residual；随后 actor/occupancy 归一化，从同一轮状态同时计算两个 cross-attention；最后 actor LN→FFN(128→512→128,GELU)→residual。
+- 层间 interaction ×2，hidden=128，heads=4：actor LayerNorm→masked self-attention→residual；随后 actor/occupancy 归一化，从同一轮状态同时计算两个 cross-attention；最后 actor LN→FFN(128→512→128,GELU)→residual。当前交互类为 `TokenInteraction`，不再保留旧瓶颈接口。
 - actor←occ：Q=actor，K/V=occupancy；occ←actor：Q=occupancy，K/V=actor，使用当前有效 actor mask。
 - 双向 cross delta 分别乘 learnable gate 并 residual add。当前初始化 gate=0.05。
-- occupancy 只把 exchange delta 投影回 256 通道并加回 middle feature。
-- decoder 各级 concat skip→ResNet×2→Spatial/Temporal DiT→upsample；25→50；最终 stem skip concat、ResNet、1×1×1 Conv 输出 16 通道 velocity；只取未来 6 槽。
+- occupancy 只把两层交互累计的 exchange delta 投影回 256 维并加回原 DiT token，继续第 5–8 个 DiT Block。两种模态不拼接成共同 self-attention 序列。
+- 输出：adaLN 最终归一化→Linear(256→400)→unpatchify，恢复 `B×12×16×50×50` occupancy velocity，只积分未来 6 槽。unpatchify 不属于 VAE 解码；ODE 后的未来 latent 由原 occupancy VAE decoder 按需解码。
 - actor LN→Linear(6) 输出运动 velocity；独立 LN→Linear(1) 输出 future existence logits。
 - joint 开双向交互；parallel 保留 actor self-attention/FFN 而关 exchange；occupancy_only 只用 occupancy 主干。
 
@@ -70,8 +72,9 @@
 
 - DiT 的条件 MLP 输出 6 组 shift/scale/gate，分别调制 MSA 和 MLP。
 - LN→AdaLN shift/scale→QKV Multihead Self-Attention→gate→残差；LN→AdaLN shift/scale→FFN(ratio4,GELU)→gate→残差。
-- spatial：reshape 为 (B×F,N,C)，沿 N=H×W 注意力；temporal：reshape 为 (B×N,F,C)，沿 F=12 注意力；再还原。
-- 空间/时间各 8 heads。Q/K/V 来自当前 tokens；所有未来状态同时生成，不能画成 autoregressive masked decoder。
+- 全局时空 self-attention：`B×1200×256` token 经 Q/K/V 投影后分为 8 头，注意力覆盖所有物理时间槽与空间 patch；合并 heads 后保留相同 token 数。
+- actor masked self-attention 为 `Q=K=V=actor`；跨模态为 `Q=actor,K/V=occupancy` 和 `Q=occupancy,K/V=actor` 两路。候选轨迹通过条件调制注入，不是第三组 cross-attention token。
+- 所有未来状态同时生成，不能画成 autoregressive masked decoder。adaLN 门控与 occupancy 输出层零初始化；结构连接的验证与初始化零输出要区别。
 - Swin 的 W-MSA / SW-MSA、Norm、MLP、residual 可以作为 VAE 结构展开；它与核心联合 interaction 的普通 multihead cross-attention区分。
 
 ### 训练
@@ -82,7 +85,7 @@
 - 总目标 L=L_occ_fm+L_actor_fm+0.1L_exist+0.1L_occ_actor+0.05L_temporal+0.01L_kinematics。
 - 一致性只约束已选有效 actor 的局部支持区域；occupancy 仍须覆盖新进入/未显式选择目标。不能把全部 occupancy 等同 8 个 actor 的并集。
 - 不把危险未来强行变成无碰撞；世界模型保留危险分布，安全筛选在规划侧。
-- VAE 冻结；预训练主干可冻结热身/低学习率微调，新 actor/interaction 训练。
+- VAE 冻结；标准 DiT 与 actor/interaction 从随机初始化共同训练，初始学习率均为1e-4。旧 U-Net 的运行路径和专用配置已删除；历史权重不能载入标准 DiT。
 
 ### 采样、风险与规划
 
@@ -100,7 +103,7 @@
 - nuScenes oracle 研究：train/tune/calibration/evaluation=560/70/70/150 scenes，train-only normalization，E0 warp后重新编码，history与target分离。
 - CARLA 分支目标：固定公共历史和初始环境，改变ego动作并记录有响应NPC；按origin分组；真实分支采集尚待完成。
 - 指标：occupancy mIoU；actor 运动/存在性；局部/时序一致性；动作响应；Brier/NLL/ECE、可靠性和risk–coverage；闭环碰撞/完成度/延迟与消融。
-- 预训练权重见过官方700训练场景，新划tune/calibration不能自动称作预训练未见集。
+- 旧 CFM 与仍复用的 VAE 权重涉及预训练暴露；新 DiT 随机初始化也不自动消除 VAE 表示层的暴露，新划 tune/calibration 的严格独立性仍需单独控制。
 
 ## 状态表述边界
 
@@ -111,5 +114,5 @@
 ## 保护规则与环境
 
 - OccFM/IR-WM仅只读检索，无脚本执行、导入、写入或资源运行时依赖。
-- 本次只生成项目自有图件，不实施模型函数。
+- 本次仅同步项目自有 Markdown，不修改模型函数、训练配置或已有 SVG/导出图件。
 - 用户AGENTS.md要求使用ReactOccFlow专用环境；优先于技能中PPTcreater环境建议，不更改参考项目环境。

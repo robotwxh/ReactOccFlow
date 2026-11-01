@@ -1,4 +1,4 @@
-# T6 research configuration; load stats JSON before constructing ReactFlow.
+# Standard DiT only; the independent VAE remains frozen.
 model:
   kind: react_flow
   mode: joint
@@ -19,9 +19,16 @@ model:
   occ_weight: 1.0
   actor_weight: 1.0
   existence_weight: 0.1
-  freeze_pretrained_trunk: true
+  backbone: dit
+  dit_config:
+    patch_size: 5
+    hidden_size: 256
+    depth: 8
+    num_heads: 8
+    mlp_ratio: 4.0
+    activation_checkpointing: true
+  freeze_backbone: false
 normalization: data/research/normalization.json
-pretrained_trunk: assets/checkpoints/occfm_history.ckpt
 sampling:
   num_worlds: 1
   nfe: 8
@@ -38,10 +45,10 @@ research_status:
   - 2.5
   - 3.0
   future_timestamps_are_targets_only: true
-  initialization_conditioning: six-waypoint historical checkpoint reused with new
-    planned candidate semantics; requires research training
-  cli_integration: model specification only; existing baseline CLI is unchanged
-# T7 research regularizers; construct ConsistencyLosses separately from model.
+  initialization_conditioning: Standard DiT initialized from scratch; generation time
+    and separately supplied ego candidate condition adaLN-Zero.
+  cli_integration: Full runner defaults to DiT; --dit-config configs/dit.yaml supplies
+    architecture options. This file also specifies research loss/sampling defaults.
 consistency:
   occ_actor_weight: 0.1
   temporal_weight: 0.05

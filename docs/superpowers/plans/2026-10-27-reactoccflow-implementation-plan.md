@@ -1,5 +1,11 @@
 # ReactOccFlow 独立工程详细实施计划
 
+> 2026-10-31 继续执行：依据用户最新“按照计划继续进行”及充分使用双卡的指示，标准 DiT 已完成 200 步、32 窗口拟合及有效 batch=8 的双卡精确恢复检查，新 seed=2026 全量实验已启动并保存第 50 步完整状态，恢复身份摘要全部匹配，已启动续训。吞吐实测选择每卡 batch=2、累积=2、decode-chunk=4、workers=4。此前“所有训练保持停止”记录属于删除 U-Net 时的状态；旧 U-Net 实验继续停止。当前结果见 [DiT 训练验收](../../implementation/2026-10-31-dit-training-acceptance.md)。
+
+> 2026-10-31 后续决定：用户要求删除 U-Net 部分。项目运行时代码只保留标准 DiT；旧主干、旧 CFM 包装器、专用配置、权重加载与评测命令已移除。下文涉及原始 OccFM 复现的任务作为已完成的历史阶段，不要求重新加入 U-Net；日志、检查点与来源档案继续保留。当前实现以 [删除记录](../../implementation/2026-10-31-remove-unet.md) 为准，所有训练保持停止。
+
+> 2026-10-31 用户明确要求将研究世界模型改为标准 DiT。该决定覆盖本文中“研究模型沿用 OccFM U-Net 主干及其中间分辨率交互”的实现选择：默认研究主干改为固定分辨率的全局时空 DiT，actor 在 Transformer 层间交互；VAE、数据规范、FM 目标、风险/闭环计划及参考仓库保护规则保持适用。新 DiT 从随机初始化训练，旧 U-Net 实验单独保留。具体配置与验收见 [DiT 迁移记录](../../implementation/2026-10-31-standard-dit.md)。
+
 ## 一、目标、已确认决策与工程边界
 
 **目标**：根据现有 ReactOccFlow 方案，构建可独立训练、推理、评估的 occupancy 世界模型项目，完成 occupancy–邻居运动联合 Flow Matching、候选自车轨迹生成、风险校准及点云输入的闭环驾驶验证。
@@ -76,21 +82,22 @@ Paper/
 下表中的原始路径只用于定位复制来源。复制后统一迁移为 `reactoccflow` 包内导入。
 
 
-| 功能                     | 首选复制来源                                                                             | 复制后的处理                                        | 需要新增的部分                       |
-| -------------------------- | ------------------------------------------------------------------------------------------ | ----------------------------------------------------- | -------------------------------------- |
-| occupancy 语义与高度编码 | OccFM `forecast/models/modules/embedding/voxel_height_sem_embed.py`                      | 保留网格和类别兼容接口                              | 统一空间规范与可见性 mask            |
-| VAE 编解码               | OccFM `compressors/occfm_vae.py`、`encoders/`、`decoders/`、`quantization/` 及对应基础层 | 保留可加载权重的网络结构，拆分编码和解码 API        | 支持项目自有数据、确定性均值编码     |
-| 时空 CFM 主干            | OccFM `transition_models/FlowMatchingV2.py` 及依赖基础层                                 | 保留轨迹条件与时空注意力，参数化时间长度和设备      | occupancy–actor 双向交互模块        |
-| FM 训练和 ODE 采样       | OccFM `worldmodels/occfm.py`                                                             | 提取路径采样、速度目标、CFG 和积分器                | actor 分支、可复现随机数、分块采样   |
-| nuScenes 缓存读取        | OccFM `datasets/nuscenes_dataset.py`、`tools/cache_vae.py`                               | 用 token 索引替代固定字符串路径切分                 | 独立缓存格式、身份和有效性 mask      |
-| actor 与 ego 标签        | IR-WM `datasets/trajectory_api.py` 及坐标转换代码                                        | 复制标签构造和变换逻辑，移除不必要的 OpenMMLab 包装 | 当前帧选取、稳定身份关联、防未来泄漏 |
-| 规划代价                 | IR-WM `bevformer/utils/cost.py`                                                          | 提取安全、可行驶区、前向间距等代价                  | 多未来样本聚合、校准后风险筛选       |
-| 规划指标                 | IR-WM `metric_stp3.py`、`planning_metrics.py`                                            | 保留指标定义，移除旧 Lightning Metric 依赖          | 分辨率参数化、旋转车体碰撞和统一统计 |
-| 几何工具                 | IR-WM `e2e_predictor_utils.py` 的必要函数                                                | 仅复制网格坐标函数，避免导入时编译无关 CUDA 扩展    | SE(2)/SE(3) 一致性与 round-trip 测试 |
-| 检测与匹配               | IR-WM 检测 head、bbox 匹配和编码代码中的可复用部分                                       | 提取当前目标查询、匹配代价及 box 参数化             | 点云感知接口、简化检测头、在线跟踪   |
-| PlanFlow                 | 先检查 OccFM 的 FM 和轨迹编码组件、IR-WM 的轨迹采样与规划组件                            | 复用已有层、采样和坐标处理                          | 自车轨迹 FM 网络及训练目标           |
-| 风险校准                 | 两个参考项目检索后无对应完整实现时新增                                                   | 复用已有碰撞几何                                    | 校准器、概率指标、阈值选择           |
-| 反事实数据与闭环桥接     | 先检查两个项目的数据和控制相关实现                                                       | 复用可用转换与规划逻辑                              | CARLA 采集、跨进程协议、控制闭环     |
+| 功能                     | 首选复制来源                                                                             | 复制后的处理                                                            | 需要新增的部分                                                                                   |
+| -------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| occupancy 语义与高度编码 | OccFM `forecast/models/modules/embedding/voxel_height_sem_embed.py`                      | 保留网格和类别兼容接口                                                  | 统一空间规范与可见性 mask                                                                        |
+| VAE 编解码               | OccFM `compressors/occfm_vae.py`、`encoders/`、`decoders/`、`quantization/` 及对应基础层 | 保留可加载权重的网络结构，拆分编码和解码 API                            | 支持项目自有数据、确定性均值编码                                                                 |
+| 原 OccFM/U-Net 复现（历史阶段） | 原始复制来源保留在 provenance | 历史复现已完成；按用户后续要求，运行代码、配置和加载入口已删除 | 仅保留来源档案、日志、权重和已产生的指标，不重新加入包 |
+| 标准 DiT 研究主干        | OccFM 已复制的 `base/dit.py`、注意力及条件/位置编码；完整标准 DiT 经两仓库检索后新增     | 固定 1,200 个时空 token、8 层、256 维、8 头，使用正确的 math 注意力分支 | patch 投影、adaLN 输出与 unpatchify；第 4 层后的 actor self-attention 和同步双向 cross-attention |
+| FM 训练和 ODE 采样       | OccFM `worldmodels/occfm.py`                                                             | 提取路径采样、速度目标、CFG 和积分器                                    | actor 分支、可复现随机数、分块采样                                                               |
+| nuScenes 缓存读取        | OccFM `datasets/nuscenes_dataset.py`、`tools/cache_vae.py`                               | 用 token 索引替代固定字符串路径切分                                     | 独立缓存格式、身份和有效性 mask                                                                  |
+| actor 与 ego 标签        | IR-WM `datasets/trajectory_api.py` 及坐标转换代码                                        | 复制标签构造和变换逻辑，移除不必要的 OpenMMLab 包装                     | 当前帧选取、稳定身份关联、防未来泄漏                                                             |
+| 规划代价                 | IR-WM `bevformer/utils/cost.py`                                                          | 提取安全、可行驶区、前向间距等代价                                      | 多未来样本聚合、校准后风险筛选                                                                   |
+| 规划指标                 | IR-WM `metric_stp3.py`、`planning_metrics.py`                                            | 保留指标定义，移除旧 Lightning Metric 依赖                              | 分辨率参数化、旋转车体碰撞和统一统计                                                             |
+| 几何工具                 | IR-WM `e2e_predictor_utils.py` 的必要函数                                                | 仅复制网格坐标函数，避免导入时编译无关 CUDA 扩展                        | SE(2)/SE(3) 一致性与 round-trip 测试                                                             |
+| 检测与匹配               | IR-WM 检测 head、bbox 匹配和编码代码中的可复用部分                                       | 提取当前目标查询、匹配代价及 box 参数化                                 | 点云感知接口、简化检测头、在线跟踪                                                               |
+| PlanFlow                 | 先检查 OccFM 的 FM 和轨迹编码组件、IR-WM 的轨迹采样与规划组件                            | 复用已有层、采样和坐标处理                                              | 自车轨迹 FM 网络及训练目标                                                                       |
+| 风险校准                 | 两个参考项目检索后无对应完整实现时新增                                                   | 复用已有碰撞几何                                                        | 校准器、概率指标、阈值选择                                                                       |
+| 反事实数据与闭环桥接     | 先检查两个项目的数据和控制相关实现                                                       | 复用可用转换与规划逻辑                                                  | CARLA 采集、跨进程协议、控制闭环                                                                 |
 
 **每次新增功能的固定流程**：搜索并记录 → 确定复用范围 → 复制普通文件 → 记录来源及校验值 → 修改项目复制件 → 更新导入与配置 → 测试 → 检查参考目录未变化。
 
@@ -112,7 +119,7 @@ Paper/
 
 ### 3.1 两条数据管线
 
-**兼容基线管线**：保留原 OccFM 的网格、时序、latent 缩放、轨迹条件语义及评价口径，用于加载已存在权重和建立数值基线。记录未来真实 ego 轨迹条件属于该预测任务的已知条件，不能把它当作实际规划性能。
+**历史兼容基线管线**：原 OccFM 网格、时序、latent 缩放、动作条件及评价口径的复现已经完成，现按用户要求移除运行模型与入口，只保留结果和来源记录。其日志真实 ego 轨迹条件属于当时预测任务的已知条件，不能当作实际规划性能，也不能挪作新 DiT 的效果。
 
 **研究管线**：统一将历史观测、未来 occupancy 和 actor 状态表达在当前自车坐标 `E0` 中，约定 x 向前、y 向左、z 向上，距离单位为米、时间单位为秒。
 
@@ -166,8 +173,10 @@ Controller.step(selected_plan, ego_state, dt) -> VehicleControl
 ### 3.4 ReactFlow 联合生成
 
 - 先保持 occupancy-only CFM 可运行，再增加 actor motion 分支。
-- actor 分支复用复制后的时间编码、Fourier 编码及注意力基础层；新增 masked actor tokens 和与 occupancy tokens 的双向 cross-attention。
-- 首版在主干中间分辨率处交换 occupancy 与 actor 信息；actor token 的 hidden dimension 固定为 128，使用 4 个注意力头和 2 层交互模块。
+- occupancy 主干采用标准 DiT：latent patch=5、hidden=256、depth=8、heads=8；12 槽共形成 1,200 个固定分辨率 token，各层进行全局时空 self-attention，没有 U-Net 编解码与跨尺度跳连。
+- actor 分支复用复制后的时间编码、Fourier 编码及注意力基础层；8 个 actor×6 个未来槽共形成 48 个 token，hidden=128，在两层、4 头交互模块中分别进行 masked actor self-attention 和 FFN。
+- 第 4 个 DiT Block 后接入双向 cross-attention：actor 更新时 `Q=actor, K/V=occupancy`；occupancy 更新时 `Q=occupancy, K/V=actor`。两路从同一轮状态计算，再经门控残差更新。occupancy 先投影至 128 维，交互增量回投至 256 维后继续后 4 层 DiT；两组 token 不拼接做共同 self-attention。
+- 单套 VAE 在离线阶段分别编码历史观测与未来监督标签。训练读取 latent 缓存，仅对预测端点运行冻结 decoder；patch 线性投影和 unpatchify 不属于第二次 VAE 编解码。actor 不经过 occupancy VAE。
 - occupancy 与 actor 使用独立高斯初始噪声、共享生成流时间；物理未来时间与生成时间分开命名。
 - 采用线性 source–target 插值及速度回归；每种模态分别做有效元素均值，再加权求和。
 - actor 的未来存在性单独预测，不能将真值存在性 mask 输入推理过程。
@@ -280,8 +289,8 @@ L = L_occ_fm
 **任务 T6：建立 actor 条件与输出分支。**
 
 - 先运行独立 occupancy 分支和独立 actor 分支，形成并行多任务对照。
-- 增加中间层 cross-attention、存在性预测和共享生成时间。
-- VAE 默认冻结，先训练新增分支，再使用较小学习率微调 CFM 主干。
+- 在标准 DiT 第 4 层后增加两层 actor self-attention／双向 cross-attention／actor FFN，并保留独立存在性预测与共享生成时间。记录两路 cross-attention 的 Q/K/V 和当前观测 mask。
+- VAE 默认冻结；新 DiT 与 actor/interaction 分支从随机初始化共同训练。旧 OccFM/U-Net 的冻结/微调属于历史实验，其运行分支已删除，不加载其权重。
 
 **任务 T7：加入一致性约束。**
 
@@ -385,7 +394,7 @@ L = L_occ_fm
 
 - VAE 首先冻结并加载已有权重；只有专门的 VAE 实验才训练压缩器。
 - 训练先单卡小样本，再双卡 DDP；默认每卡 micro-batch=2、梯度累积=2，有效 batch=8。
-- 新增模块初始学习率 `1e-4`，已加载 CFM 主干 `2e-5`；AdamW、weight decay=0.01、梯度裁剪=1.0、EMA=0.9999。
+- 标准 DiT 主干与 actor/interaction 分支初始学习率均为 `1e-4`。AdamW、weight decay=0.01、梯度裁剪=1.0、EMA=0.9999。原 U-Net 的初始化/微调入口已移除，不再属于当前训练配置。
 - 使用 1,000 步 warmup 和 cosine decay；每 2,000 步评估，连续 10 次无调参集改进时停止该阶段训练。
 - 正式训练前均运行 200 步 smoke test 与 32 个样本的过拟合测试。
 - 随机种子固定为 2026、2027、2028；数据划分、训练噪声和推理采样分别使用独立随机数生成器。

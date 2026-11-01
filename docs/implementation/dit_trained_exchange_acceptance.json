@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "backbone": "dit",
+  "checkpoint": "outputs/dit_training_acceptance/single_gpu_200/state.pt",
+  "checkpoint_sha256": "340538196d0180c4fa2a55fcff6707281ba8958d529cc33a726d623baec374fc",
+  "optimizer_steps": 200,
+  "scene": "scene-0001",
+  "token": "8de7ec06e1ac48c689c4d24d6cc64fd7",
+  "actor_to_occupancy_max_abs_delta": 0.0895845890045166,
+  "occupancy_to_actor_max_abs_delta": 0.007672995328903198,
+  "empty_actor_mask_finite": true,
+  "sampling_reproducible": true,
+  "nfe": 2,
+  "future_targets_used_as_inputs": false,
+  "candidate": "independently supplied all-zero candidate",
+  "scope": "Nonzero learned exchange paths and numerical boundary check on a trained real-size field; no physical reaction or quality claim."
+}

@@ -1,0 +1,86 @@
+{
+  "passed": true,
+  "backbone": "dit",
+  "observations": "real cached history",
+  "sample_shapes": {
+    "future_latents": [
+      1,
+      1,
+      6,
+      16,
+      50,
+      50
+    ],
+    "actor_future": [
+      1,
+      1,
+      8,
+      6,
+      6
+    ],
+    "actor_existence": [
+      1,
+      1,
+      8,
+      6
+    ]
+  },
+  "vae_encoded_shape": [
+    1,
+    16,
+    50,
+    50
+  ],
+  "decoded_logits_shape": [
+    1,
+    200,
+    200,
+    16,
+    18
+  ],
+  "strict_checkpoint_round_trip": true,
+  "removed_runtime_modules_absent": true,
+  "loaded_modules": {
+    "reactoccflow": "/home/lthpc/wxh/envs/ReactOccFlow/lib/python3.10/site-packages/reactoccflow/__init__.py",
+    "reactoccflow.models.modules": "/home/lthpc/wxh/envs/ReactOccFlow/lib/python3.10/site-packages/reactoccflow/models/modules/__init__.py",
+    "reactoccflow.models.modules.embedding.voxel_height_sem_embed": "/home/lthpc/wxh/envs/ReactOccFlow/lib/python3.10/site-packages/reactoccflow/models/modules/embedding/voxel_height_sem_embed.py",
+    "reactoccflow.models.modules.embedding": "/home/lthpc/wxh/envs/ReactOccFlow/lib/python3.10/site-packages/reactoccflow/models/modules/embedding/__init__.py",
+    "reactoccflow.models.modules.base": "/home/lthpc/wxh/envs/ReactOccFlow/lib/python3.10/site-packages/reactoccflow/models/modules/base/__init__.py",
+    "reactoccflow.models.modules.base.swin_transformerbase": "/home/lthpc/wxh/envs/ReactOccFlow/lib/python3.10/site-packages/reactoccflow/models/modules/base/swin_transformerbase.py",
+    "reactoccflow.models._utils": "/home/lthpc/wxh/envs/ReactOccFlow/lib/python3.10/site-packages/reactoccflow/models/_utils.py",
+    "reactoccflow.models.modules.base.others": "/home/lthpc/wxh/envs/ReactOccFlow/lib/python3.10/site-packages/reactoccflow/models/modules/base/others.py",
+    "reactoccflow.models.modules.base.res_layersbase": "/home/lthpc/wxh/envs/ReactOccFlow/lib/python3.10/site-packages/reactoccflow/models/modules/base/res_layersbase.py",
+    "reactoccflow.models.ops": "/home/lthpc/wxh/envs/ReactOccFlow/lib/python3.10/site-packages/reactoccflow/models/ops/__init__.py",
+    "reactoccflow.models.ops.flash_attention": "/home/lthpc/wxh/envs/ReactOccFlow/lib/python3.10/site-packages/reactoccflow/models/ops/flash_attention/__init__.py",
+    "reactoccflow.models.ops.flash_attention.flash_attention": "/home/lthpc/wxh/envs/ReactOccFlow/lib/python3.10/site-packages/reactoccflow/models/ops/flash_attention/flash_attention.py",
+    "reactoccflow.models.modules.base.attn_base": "/home/lthpc/wxh/envs/ReactOccFlow/lib/python3.10/site-packages/reactoccflow/models/modules/base/attn_base.py",
+    "reactoccflow.models.modules.base.temporal_base": "/home/lthpc/wxh/envs/ReactOccFlow/lib/python3.10/site-packages/reactoccflow/models/modules/base/temporal_base.py",
+    "reactoccflow.models.modules.encoders.SwinSingleFrameDownV2": "/home/lthpc/wxh/envs/ReactOccFlow/lib/python3.10/site-packages/reactoccflow/models/modules/encoders/SwinSingleFrameDownV2.py",
+    "reactoccflow.models.modules.encoders": "/home/lthpc/wxh/envs/ReactOccFlow/lib/python3.10/site-packages/reactoccflow/models/modules/encoders/__init__.py",
+    "reactoccflow.models.modules.decoders.SwinSingleFrameUpV2": "/home/lthpc/wxh/envs/ReactOccFlow/lib/python3.10/site-packages/reactoccflow/models/modules/decoders/SwinSingleFrameUpV2.py",
+    "reactoccflow.models.modules.decoders": "/home/lthpc/wxh/envs/ReactOccFlow/lib/python3.10/site-packages/reactoccflow/models/modules/decoders/__init__.py",
+    "reactoccflow.models.modules.quantization.vae_quant": "/home/lthpc/wxh/envs/ReactOccFlow/lib/python3.10/site-packages/reactoccflow/models/modules/quantization/vae_quant.py",
+    "reactoccflow.models.modules.quantization": "/home/lthpc/wxh/envs/ReactOccFlow/lib/python3.10/site-packages/reactoccflow/models/modules/quantization/__init__.py",
+    "reactoccflow.models.codec": "/home/lthpc/wxh/envs/ReactOccFlow/lib/python3.10/site-packages/reactoccflow/models/codec.py",
+    "reactoccflow.models.flow": "/home/lthpc/wxh/envs/ReactOccFlow/lib/python3.10/site-packages/reactoccflow/models/flow.py",
+    "reactoccflow.models.modules.base.postion_embed": "/home/lthpc/wxh/envs/ReactOccFlow/lib/python3.10/site-packages/reactoccflow/models/modules/base/postion_embed.py",
+    "reactoccflow.models.modules.base.dit": "/home/lthpc/wxh/envs/ReactOccFlow/lib/python3.10/site-packages/reactoccflow/models/modules/base/dit.py",
+    "reactoccflow.models.standard_dit": "/home/lthpc/wxh/envs/ReactOccFlow/lib/python3.10/site-packages/reactoccflow/models/standard_dit.py",
+    "reactoccflow.models.joint_transition": "/home/lthpc/wxh/envs/ReactOccFlow/lib/python3.10/site-packages/reactoccflow/models/joint_transition.py",
+    "reactoccflow.models.react_flow": "/home/lthpc/wxh/envs/ReactOccFlow/lib/python3.10/site-packages/reactoccflow/models/react_flow.py",
+    "reactoccflow.models": "/home/lthpc/wxh/envs/ReactOccFlow/lib/python3.10/site-packages/reactoccflow/models/__init__.py",
+    "reactoccflow.geometry": "/home/lthpc/wxh/envs/ReactOccFlow/lib/python3.10/site-packages/reactoccflow/geometry/__init__.py",
+    "reactoccflow.losses.consistency": "/home/lthpc/wxh/envs/ReactOccFlow/lib/python3.10/site-packages/reactoccflow/losses/consistency.py",
+    "reactoccflow.losses": "/home/lthpc/wxh/envs/ReactOccFlow/lib/python3.10/site-packages/reactoccflow/losses/__init__.py",
+    "reactoccflow.training.joint": "/home/lthpc/wxh/envs/ReactOccFlow/lib/python3.10/site-packages/reactoccflow/training/joint.py",
+    "reactoccflow.training": "/home/lthpc/wxh/envs/ReactOccFlow/lib/python3.10/site-packages/reactoccflow/training/__init__.py",
+    "reactoccflow.training.diagnostics": "/home/lthpc/wxh/envs/ReactOccFlow/lib/python3.10/site-packages/reactoccflow/training/diagnostics.py",
+    "reactoccflow.evaluation": "/home/lthpc/wxh/envs/ReactOccFlow/lib/python3.10/site-packages/reactoccflow/evaluation/__init__.py"
+  },
+  "training_started": false,
+  "wheel": "/home/lthpc/wxh/Paper/dist/reactoccflow-0.1.0-py3-none-any.whl",
+  "wheel_sha256": "2724ee0173760472246108db56872663015acdfcc506bd8c0cf4efa613230881",
+  "wheel_entries": 62,
+  "resource_sha256": "85c5a2566b3fa8a1ebb785af3113c6674fe9811e5eda2402b1959ce6cd66ef10",
+  "device": "cpu"
+}

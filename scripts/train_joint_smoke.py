@@ -24,7 +24,7 @@ from reactoccflow.models import OccupancyCodec
 from reactoccflow.models.react_flow import ReactFlow
 from reactoccflow.provenance import sha256_file
 from reactoccflow.training.joint import JointTrainingAdapter
-from scripts.train_smoke import atomic_write, evaluate_probe, run_training
+from reactoccflow.training.diagnostics import atomic_write, evaluate_probe, run_training
 
 
 def array_fingerprint(array):
@@ -45,15 +45,14 @@ def module_fingerprint(module):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--cache', default='data/research/full_e0')
-    parser.add_argument('--output', default='outputs/joint_training_acceptance')
-    parser.add_argument('--trunk-checkpoint', default='assets/checkpoints/occfm_history.ckpt')
+    parser.add_argument('--cache', default='data/research/e0_full/train')
+    parser.add_argument('--output', default='outputs/dit_joint_training_acceptance')
     parser.add_argument('--codec-checkpoint', default='assets/checkpoints/occfm_vae.ckpt')
     parser.add_argument('--device', default='cuda:1')
     parser.add_argument('--windows', type=int, default=32)
     parser.add_argument('--batch-size', type=int, default=1)
     parser.add_argument('--steps', type=int, default=200)
-    parser.add_argument('--lr', type=float, default=1e-4, help='New branches only; pretrained trunk stays frozen')
+    parser.add_argument('--lr', type=float, default=1e-4, help='Standard DiT and actor/interaction learning rate')
     parser.add_argument('--threads', type=int, default=4)
     parser.add_argument('--seed', type=int, default=2026)
     parser.add_argument('--decode-chunk', type=int, default=1)
@@ -112,12 +111,10 @@ def main():
         batches.append((observation, target, candidate))
     del samples
     flow = ReactFlow(normalization=normalization).to(device)
-    trunk_loading = flow.load_pretrained_trunk(args.trunk_checkpoint, weights='state_dict')
     codec = OccupancyCodec().to(device)
     codec_loading = codec.load_pretrained(args.codec_checkpoint, weights='state_dict')
-    adapter = JointTrainingAdapter(flow, codec, decode_chunk=args.decode_chunk)
-    frozen_before = {'trunk': module_fingerprint(flow.transition_model.trunk),
-                     'vae': module_fingerprint(codec)}
+    adapter = JointTrainingAdapter(flow, codec, decode_chunk=args.decode_chunk, require_frozen_trunk=False)
+    frozen_before = {'vae': module_fingerprint(codec)}
     frozen_status = adapter.frozen_status()
     components_before = []
     # evaluate_probe uses a replayed local generator and eval/no_grad mode.
@@ -145,16 +142,16 @@ def main():
     final_probe = evaluate_probe(adapter, batches, seed=args.seed + 2)
     final_last_components = dict(adapter.last_components)
     frozen_status = adapter.frozen_status()
-    frozen_after = {'trunk': module_fingerprint(flow.transition_model.trunk),
-                    'vae': module_fingerprint(codec)}
+    frozen_after = {'vae': module_fingerprint(codec)}
     if frozen_before != frozen_after:
-        raise RuntimeError('Frozen trunk or VAE tensors changed during diagnostic')
+        raise RuntimeError('Frozen VAE tensors changed during diagnostic')
     config = {'mode': 'joint', 'steps': args.steps, 'windows': args.windows, 'batch_size': args.batch_size,
-              'optimizer': 'AdamW', 'lr_new_branches': args.lr, 'weight_decay': .01, 'max_grad_norm': 1.,
+              'backbone': 'dit', 'dit': flow.transition_model.trunk.config,
+              'optimizer': 'AdamW', 'lr': args.lr, 'weight_decay': .01, 'max_grad_norm': 1.,
               'gradient_accumulation': 1, 'precision': 'float32', 'decode_chunk': args.decode_chunk,
               'occ_weight': 1., 'actor_weight': 1., 'existence_weight': .1,
               'occ_actor_weight': .1, 'temporal_weight': .05, 'kinematics_weight': .01,
-              'freeze_pretrained_trunk': True, 'freeze_vae': True, 'device': str(device),
+              'freeze_backbone': False, 'freeze_vae': True, 'device': str(device),
               'seed_global': args.seed, 'seed_training': args.seed + 1, 'seed_probe': args.seed + 2,
               'threads': args.threads, 'allow_incomplete': args.allow_incomplete,
               'cache_complete': dataset.manifest['complete'], 'scheduler': None, 'ema': None}
@@ -162,10 +159,10 @@ def main():
     state = {name: value.detach().cpu() for name, value in flow.state_dict().items()}
     atomic_write(state_path, lambda path: torch.save({'state_dict': state, 'config': config,
                                                       'normalization': normalization}, path))
-    input_paths = ['scripts/train_joint_smoke.py', 'scripts/train_smoke.py', 'reactoccflow/models/react_flow.py',
+    input_paths = ['scripts/train_joint_smoke.py', 'reactoccflow/training/diagnostics.py', 'reactoccflow/models/react_flow.py',
                    'reactoccflow/models/joint_transition.py', 'reactoccflow/models/codec.py',
                    'reactoccflow/losses/consistency.py', 'reactoccflow/data/e0_dataset.py',
-                   args.trunk_checkpoint, args.codec_checkpoint]
+                   'reactoccflow/models/standard_dit.py', args.codec_checkpoint]
     report = {'version': 1, 'status': 'completed', 'started_utc': started_utc, 'config': config,
               'training': training, 'initial_probe': initial_probe, 'final_probe': final_probe,
               'probe_loss_decreased': final_probe['mean_loss'] < initial_probe['mean_loss'],
@@ -176,7 +173,7 @@ def main():
               'small_sample_32_window_loss_decreased': args.windows == 32 and final_probe['mean_loss'] < initial_probe['mean_loss'],
               'frozen_status': frozen_status, 'frozen_check_count': adapter.frozen_checks,
               'frozen_initial_sha256': frozen_before, 'frozen_final_sha256': frozen_after,
-              'loading_reports': {'trunk': trunk_loading, 'codec': codec_loading},
+              'loading_reports': {'initialization': 'standard DiT from scratch', 'codec': codec_loading},
               'data_identity': {'cache_root': str(dataset.root), 'cache_complete': dataset.manifest['complete'],
                                 'allow_incomplete': args.allow_incomplete, 'expected_count': dataset.manifest['expected_count'],
                                 'available_count': len(dataset), 'selected_window_count': args.windows,
@@ -198,7 +195,7 @@ def main():
               'limitations': ['Partial-cache use is an explicitly enabled debug diagnostic when allow_incomplete is true.',
                              'A lower fixed32-window probe is fitting evidence, not full overfit convergence or formal dataset training.',
                              'No generalization, calibrated reaction, planning, closed-loop or safety result is established.',
-                             'No VAE/trunk optimization; no argmax decode; checkpoint is not a production resume checkpoint.']}
+                             'VAE stays frozen; DiT and actor/interaction are optimized. No argmax decode; checkpoint is not a production resume checkpoint.']}
     atomic_write(output / 'results.json', lambda path: Path(path).write_text(json.dumps(report, indent=2, allow_nan=False) + '\n'))
     print(json.dumps({'output': str(output), 'optimizer_steps': training['optimizer_steps'],
                       'initial_probe': initial_probe['mean_loss'], 'final_probe': final_probe['mean_loss'],

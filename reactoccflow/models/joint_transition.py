@@ -1,28 +1,16 @@
-"""Research-only actor branch and explicit middle-resolution interaction.
+"""Standard DiT with actor self-attention and bidirectional token exchange.
 
-``_middle_forward`` is copied/adapted from OccFM FLOW_MATCHING_DOWN_X4_DiT
-forward_single, commit 64959840a9a4cb54d5b0f6cd4bc6779bb242a853. The original
-trunk remains a separate, strictly loadable module with its 204-key interface.
-See docs/provenance/react_flow_sources.json and THIRD_PARTY_NOTICES.md for
-upstream attribution and unresolved OccFM redistribution terms. No reference
-repository is imported or needed at runtime.
+Shared conditioning components reuse the independently migrated OccFM closure.
+See docs/provenance/standard_dit_sources.json, remove_unet_sources.json and
+THIRD_PARTY_NOTICES.md for source attribution and licensing boundaries.
 """
 from __future__ import annotations
 
 import torch
 from torch import nn
-from einops import rearrange, repeat
 
 from .modules.base.postion_embed import timestep_embedding, get_fourier_embeds_from_coordinates
-from .modules.transition_models.FlowMatchingV2 import FLOW_MATCHING_DOWN_X4_DiT
-
-
-def default_trunk(future_frames=6):
-    """Construct the already-migrated source-compatible occupancy trunk."""
-    return FLOW_MATCHING_DOWN_X4_DiT(
-        in_channels=16, out_channels=16, model_channels=128, channel_multi=[2, 4],
-        input_size=[50, 50], trajectory_length=future_frames, init_kernel_size=7,
-        init_3d_conv_channels=64, attn_dim=32, temporal_attn_head=8, spatial_attn_head=8)
+from .standard_dit import StandardDiT
 
 
 def _safe_actor_attention(module, query, memory, valid):
@@ -37,7 +25,7 @@ def _safe_actor_attention(module, query, memory, valid):
     return torch.where(has_actor[..., None], result, torch.zeros_like(result))
 
 
-class MiddleInteraction(nn.Module):
+class TokenInteraction(nn.Module):
     """One actor self-attention/FFN plus simultaneous bidirectional exchange."""
     def __init__(self, hidden=128, heads=4):
         super().__init__()
@@ -75,14 +63,27 @@ class JointTransition(nn.Module):
     """
     def __init__(self, trunk=None, *, mode='joint', future_frames=6,
                  actor_history_frames=4, actor_hidden=128, actor_heads=4,
-                 interaction_layers=2, history_frames=6):
+                 interaction_layers=2, history_frames=6, backbone='dit',
+                 dit_config=None, latent_shape=(16, 50, 50)):
         super().__init__()
         if mode not in {'joint', 'parallel', 'occupancy_only'}:
             raise ValueError('mode must be joint, parallel, or occupancy_only')
         self.mode = mode
         self.history_frames = history_frames
         self.future_frames = future_frames
-        self.trunk = default_trunk(future_frames) if trunk is None else trunk
+        if backbone != 'dit':
+            raise ValueError('Only standard DiT is supported')
+        if trunk is None:
+            channels, height, width = latent_shape
+            if height != width:
+                raise ValueError('Standard DiT requires square spatial latent shape')
+            trunk = StandardDiT(in_channels=channels, input_size=height,
+                                frames=history_frames + future_frames,
+                                trajectory_length=future_frames, **(dit_config or {}))
+        if not isinstance(trunk, StandardDiT):
+            raise ValueError('trunk must be a StandardDiT; use transition_model for custom test fields')
+        self.trunk = trunk
+        self.backbone = 'dit'
         self.actor_hidden = actor_hidden
         self.actor_class_embedding = nn.Embedding(19, 16, padding_idx=0)
         self.actor_encoder = nn.Sequential(nn.Linear(actor_history_frames * 8 + 3 + 16, actor_hidden), nn.SiLU(), nn.Linear(actor_hidden, actor_hidden))
@@ -90,10 +91,9 @@ class JointTransition(nn.Module):
         self.actor_time_encoder = nn.Sequential(nn.Linear(actor_hidden, actor_hidden), nn.SiLU(), nn.Linear(actor_hidden, actor_hidden))
         self.actor_action_encoder = nn.Sequential(nn.Linear(future_frames * 8 * 4, actor_hidden), nn.SiLU(), nn.Linear(actor_hidden, actor_hidden))
         self.register_buffer('future_slot_embedding', timestep_embedding(torch.arange(1, future_frames + 1) * .5, actor_hidden), persistent=False)
-        middle_channels = self.trunk.mid_block2.block2.proj.out_channels
-        self.occ_projection = nn.Linear(middle_channels, actor_hidden)
-        self.occ_delta_projection = nn.Linear(actor_hidden, middle_channels, bias=False)
-        self.interactions = nn.ModuleList([MiddleInteraction(actor_hidden, actor_heads) for _ in range(interaction_layers)])
+        self.occ_projection = nn.Linear(self.trunk.hidden_size, actor_hidden)
+        self.occ_delta_projection = nn.Linear(actor_hidden, self.trunk.hidden_size, bias=False)
+        self.interactions = nn.ModuleList([TokenInteraction(actor_hidden, actor_heads) for _ in range(interaction_layers)])
         self.actor_velocity_head = nn.Sequential(nn.LayerNorm(actor_hidden), nn.Linear(actor_hidden, 6))
         self.existence_head = nn.Sequential(nn.LayerNorm(actor_hidden), nn.Linear(actor_hidden, 1))
 
@@ -123,72 +123,21 @@ class JointTransition(nn.Module):
         tokens = tokens.reshape(batch, -1, self.actor_hidden)
         return torch.where(valid[..., None], tokens, torch.zeros_like(tokens)), valid
 
-    def _middle_forward(self, x, timesteps, trajectory, actors, valid):
-        """Copied OccFM forward path; exchange immediately after mid_block2.
 
-        Source math/reshape/residual ordering remains unchanged. Interaction
-        inputs/outputs are explicit local values, with no hooks or global state.
-        """
+    def _dit_forward(self, x, timesteps, trajectory, actors, valid):
+        """Exchange actors between isotropic DiT blocks, at fixed resolution."""
         trunk = self.trunk
-        x = rearrange(x, 'b f c h w -> b c f h w')
-        time_rel_pos_bias = trunk.time_rel_pos_bias(x.shape[2], device=x.device)
-        x = trunk.init_conv(x)
-        x_temporal = trunk.init_temporal_attn(x, pos_bias=time_rel_pos_bias)
-        x = x + x_temporal
-        r = x.clone()
-        emb = trunk.t_embedder(timestep_embedding(timesteps, trunk.model_channels, repeat_only=False))
-        if trajectory is not None:
-            emb = trunk.encode_pose(trajectory[:, :trunk.traj_length, :]) + emb
-        h = []
-        timestep_spatial = repeat(emb, 'n d -> (n c) d', c=trunk.temp_embed.shape[1])
-        temp_repeat_time = trunk.pos_embed.shape[1]
-        height_img = trunk.input_size[0]
-        for idx, (block1, block2, spatial_attn, temporal_attn, identity, downsample) in enumerate(trunk.downs):
-            timestep_temp = repeat(emb, 'n d -> (n c) d', c=temp_repeat_time)
-            x = block1(x, emb)
-            x = block2(x, emb)
-            x = rearrange(x, 'b c f h w -> (b f) (h w) c')
-            x = x + trunk.pos_embed if idx == 0 else x
-            x = spatial_attn(x, timestep_spatial)
-            x = rearrange(x, '(b f) t c -> (b t) f c', b=r.shape[0])
-            x = x + trunk.temp_embed if idx == 0 else x
-            x = temporal_attn(x, timestep_temp)
-            x = rearrange(x, '(b t) f c -> b c f t', b=r.shape[0])
-            x = rearrange(x, 'b c f (h w) -> b c f h w', h=height_img, w=height_img)
-            h.append(x)
-            x = downsample(x)
-            height_img = x.shape[-2]
-            temp_repeat_time = x.shape[-1] * x.shape[-2]
-        x = trunk.mid_block1(x, emb)
-        x = trunk.mid_spatial_attn(x)
-        x = trunk.mid_temporal_attn(x, pos_bias=time_rel_pos_bias)
-        x = trunk.mid_block2(x, emb)
-        # Research addition: project actual 3-D middle features, exchange twice,
-        # and inject ONLY the exchanged delta before the source decoder path.
-        middle_shape = x.shape
-        original_tokens = self.occ_projection(rearrange(x, 'b c f h w -> b (f h w) c'))
-        occ_tokens = original_tokens
-        for interaction in self.interactions:
-            occ_tokens, actors = interaction(occ_tokens, actors, valid, exchange=True)
-        delta = self.occ_delta_projection(occ_tokens - original_tokens)
-        x = x + delta.reshape(middle_shape[0], middle_shape[2], middle_shape[3], middle_shape[4], middle_shape[1]).permute(0, 4, 1, 2, 3)
-        for block1, block2, spatial_attn, temporal_attn, upsample in trunk.ups:
-            timestep_temp = repeat(emb, 'n d -> (n c) d', c=temp_repeat_time)
-            x = torch.cat((x, h.pop()), dim=1)
-            height_img = x.shape[-2]
-            x = block1(x, emb)
-            x = block2(x, emb)
-            x = rearrange(x, 'b c f h w -> (b f) (h w) c')
-            x = spatial_attn(x, timestep_spatial)
-            x = rearrange(x, '(b f) t c -> (b t) f c', b=r.shape[0])
-            x = temporal_attn(x, timestep_temp)
-            x = rearrange(x, '(b t) f c -> b t f c', b=r.shape[0])
-            x = rearrange(x, 'b (h w) f c -> b h w f c', h=height_img)
-            x = rearrange(x, 'b h w f c -> b c f h w')
-            x = upsample(x)
-            temp_repeat_time = x.shape[-1] * x.shape[-2]
-        x = trunk.final_conv(torch.cat((x, r), dim=1))
-        return rearrange(x, 'b c f h w -> b f c h w'), actors
+        tokens, condition = trunk.encode_tokens(x, timesteps, trajectory)
+        exchange_after = max(1, len(trunk.blocks) // 2) - 1
+        for index, block in enumerate(trunk.blocks):
+            tokens = trunk.run_block(block, tokens, condition)
+            if index == exchange_after:
+                original = self.occ_projection(tokens)
+                occupancy = original
+                for interaction in self.interactions:
+                    occupancy, actors = interaction(occupancy, actors, valid, exchange=True)
+                tokens = tokens + self.occ_delta_projection(occupancy - original)
+        return trunk.decode_tokens(tokens, condition), actors
 
     def forward(self, data):
         if self.mode == 'occupancy_only':
@@ -199,7 +148,7 @@ class JointTransition(nn.Module):
                     'actor_existence_logits': torch.zeros_like(data['actor_noised'][..., 0]) + zero}
         actors, valid = self._actor_tokens(data)
         if self.mode == 'joint':
-            predicted, actors = self._middle_forward(data['noised_sequence'], data['timesteps'], data['trajectory'], actors, valid)
+            predicted, actors = self._dit_forward(data['noised_sequence'], data['timesteps'], data['trajectory'], actors, valid)
         else:
             predicted = self.trunk({key: data[key] for key in ('noised_sequence', 'timesteps', 'trajectory')})['predicted_latent']
             for interaction in self.interactions:

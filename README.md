@@ -1,16 +1,24 @@
 # ReactOccFlow
 
-面向候选自车动作的 occupancy–actor 联合 Flow Matching 研究工程。当前已实现独立基线、完整 E0 训练缓存、联合生成和连续一致性损失，并启动 seed=2026 的正式双卡训练；反事实采集、风险校准及实际感知/闭环结果仍待完成。
+面向候选自车动作的 occupancy–actor 联合 Flow Matching 研究工程。2026-10-31 起，研究模型使用标准 DiT：patch 编码、固定分辨率全局时空 Transformer、输出还原，并在 Transformer 层间加入 actor 双向交互。新 DiT 的 200 步、32 窗口拟合与双卡恢复验收已通过，独立的 seed=2026 全量双卡训练已启动，见[本轮训练记录](docs/implementation/2026-10-31-dit-training-acceptance.md)。旧 U-Net 实验继续停止，其权重不适用于 DiT；旧实验停止时日志到 51,400 步，保留的最近检查点为 50,000 步，详见[停止记录](docs/implementation/2026-10-31-training-stopped.md)。反事实采集、风险校准及实际感知/闭环结果仍待完成。
+
+架构、训练命令、旧实验边界和验收见 [标准 DiT 迁移说明](docs/implementation/2026-10-31-standard-dit.md)。
+
+按用户后续要求，U-Net 实现、运行分支、专用配置、旧 CFM 包装器和基线命令已从当前工程移除，仅保留标准 DiT。旧实验与来源快照只作历史记录，见 [U-Net 删除记录](docs/implementation/2026-10-31-remove-unet.md)。
+
+当前网络采用“模态内 self-attention＋模态间双向 cross-attention”：1,200 个 occupancy token 在 8 层 DiT 中进行全局时空 self-attention；48 个 actor token 使用 masked self-attention；第 4 层 DiT 后的两层交互分别以 actor 为 Q、occupancy 为 K/V 更新 actor，以 occupancy 为 Q、actor 为 K/V 更新 occupancy。两组 token 保持独立，没有拼接成一条共同做 self-attention 的序列。
+
+只使用一套冻结的 occupancy VAE。缓存构建时分别编码历史观测与未来训练标签；训练 step 直接读取缓存 latent，并用 VAE decoder 计算连续端点一致性。DiT 的 patch 线性投影及 unpatchify 不构成第二次 VAE 编解码，actor 状态也不经过 occupancy VAE。
 
 实施计划：[完整计划](docs/superpowers/plans/2026-10-27-reactoccflow-implementation-plan.md)。科学问题：[问题与解决机制](ReactOccFlow科学问题与解决机制.md)。进展与已知限制见 [实施记录](docs/implementation/progress.md)。
 
 ## 已实现
 
 - 独立 Python 包、专用环境、参考项目快照与复制来源记录。
-- OccFM VAE 编解码、历史轨迹与未来轨迹条件 CFM，显式 state_dict/EMA 权重选择。
+- 独立 occupancy VAE 编解码、标准 DiT occupancy–actor 联合 CFM；联合模型使用完整 state_dict/EMA 保存与恢复。
 - future-only ODE 采样、局部随机数生成器、训练损失及反向传播。
 - 缓存迁移为 NumPy 分片和场景/token 索引；历史与未来标签分离。
-- 单窗口与全验证集评测，standard/legacy 指标分开；按窗口身份固定噪声、数据内容哈希和原子断点续跑。
+- occupancy/actor/风险评价接口；旧基线的已完成评测报告按历史保留，运行旧模型的命令已删除。
 - 官方 JSON 轻量索引、当前 E0 下 actor/ego 标签、3D 语义与可见性 warp 后重新编码。
 - 官方训练场景按固定哈希分为 560/70/70，官方 val150 场景保留评测；仅训练观测拟合归一化。
 
@@ -24,13 +32,9 @@ python -m reactoccflow doctor
 python -m reactoccflow inspect-cache data/latents/validation
 python -m pytest -q
 python -m reactoccflow audit-references
-python -m reactoccflow baseline \
-  --data-root /home/lthpc/data/nuscenes \
-  --device cuda:0 --nfe 10 --seed 2026 \
-  --output outputs/baseline_initial
 ```
 
-最后一条命令仅评价单个窗口，用于检查链路，不是完整验证集结果。两种兼容模型均沿用原缓存中每帧的下一步真实 ego 位移：`history` 最后一个条件含当前到下一帧的信息；`future` 还包含未来帧的真实位移。它们是带真实动作条件的预测基线，不能声称无未来信息的实际规划性能。兼容缓存保留原逐帧 ego 坐标；E0 研究管线使用独立标签与重新编码。
+旧 `history`／`future` 模型的报告属于带日志真实 ego 动作条件的历史预测实验，不是规划效果或新 DiT 的结果；其专用命令和模型加载接口已删除。E0 研究管线继续使用独立标签和缓存。
 
 ## 安装和资源
 
@@ -76,12 +80,7 @@ python -m scripts.build_e0_examples --device cuda:0
 
 第一条构建按 train/tune/calibration/evaluation 分开的 actor/ego 标签与 train-only 归一化。第二条输出至少20个不同训练场景的离线 oracle 标签图。第三条构建这20个示例的E0重新编码验收缓存，**不是全量E0训练缓存**。可视化为了覆盖转弯等情况使用离线标签挑选例子，不影响模型的当前观测 actor 选择规则。
 
-```bash
-python -m reactoccflow.evaluation.baseline   --data-root /home/lthpc/data/nuscenes --variant history   --device cuda:0 --batch-size 8 --decode-chunk 8   --output outputs/baseline_validation/history_v2
-# future 模型对应 --variant future 和独立输出目录。
-```
-
-同目录和完全相同设置会续跑；cache/label/checkpoint 内容变化会拒绝续跑。`metrics.json` 的 `status` 和 `processed_windows/total_windows` 决定是否全量完成，不能把中途输出当最终成绩。当前并行工程运行时记录的耗时不是隔离的公平性能实验。
+旧基线的完整/中途评测状态与指标保留在原输出和文档中，不迁移为新 DiT 成绩。移除旧评测入口后，本项目不再提供运行其检查点的命令；后续 DiT 质量与效率需要独立实测。
 
 研究阶段的 GT occupancy/actor 为 **oracle 表示实验**；尚未实现实际 LiDAR 感知。未来目标仅在 `target`，推理观测不读取未来帧。后续6个关键帧是标称0.5–3秒，实测时间保存在 `future_time_s`，不伪造严格等间隔。
 
@@ -96,18 +95,21 @@ python -m scripts.cache_research --device cuda:0 --rank 0 --world-size 2 --outpu
 python -m scripts.cache_research --device cuda:1 --rank 1 --world-size 2 --output data/research/e0_full/train
 ```
 
-train 的 17,468 个窗口与 tune 的 2,176 个窗口已全部生成并通过全量载荷与 rank 清单审计。200 步、32 个重叠窗口拟合、单/双卡恢复、隔离安装及 330 项测试通过。正式 seed=2026 已启动，尚无正式收敛或主实验结论，详见 [本轮训练验收](docs/implementation/2026-10-29-training-acceptance.md)。T8 的分支协议、T9/T11 的指标接口和 T10 的候选规划器不会替代 CARLA 反事实采集、独立校准集或闭环评测。
+train 的 17,468 个窗口与 tune 的 2,176 个窗口已全部生成并通过全量载荷与 rank 清单审计。历史 U-Net 的 200 步、32 窗口、恢复和 330 项测试证据见 [原训练验收](docs/implementation/2026-10-29-training-acceptance.md)，该训练现已停止；新 DiT 的验收单独记录。T8 的分支协议、T9/T11 的指标接口和 T10 的候选规划器不会替代 CARLA 反事实采集、独立校准集或闭环评测。
 
-正式入口使用以下命令；当前正在运行的实验、实际命令和进程状态以 `outputs/reactflow_joint/seed_2026.launch.json`、`seed_2026.runtime.json` 为准。已有实验恢复时增加 `--resume outputs/reactflow_joint/seed_2026/latest.pt`，保留其余配置与数据/源码身份。
+标准 DiT 正式入口使用以下命令，默认从随机初始化训练，继续使用独立的冻结 VAE 和完整 E0 缓存。新输出目录与旧 U-Net 实验分开：
 
 ```bash
 torchrun --standalone --nproc_per_node=2 --module scripts.train_react_flow \
+  --backbone dit --dit-config configs/dit.yaml \
   --train-cache data/research/e0_full/train \
   --tune-cache data/research/e0_full/tune \
-  --output outputs/reactflow_joint/seed_2026 --seed 2026
+  --output outputs/reactflow_dit/seed_2026 --seed 2026
 ```
 
 诊断可显式同时设置 `--diagnostic-train-windows 32 --diagnostic-tune-windows 8`，保留原 complete 缓存不变，并在配置中标记工程子集。`--stop-after-steps N` 会保存后暂停，恢复时沿用原学习率计划。
+
+DiT 恢复时增加 `--resume outputs/reactflow_dit/seed_2026/latest.pt` 并保留相同配置与源码身份。本机本轮实际运行使用 `outputs/reactflow_dit/source_seed_2026/` 的独立普通文件副本，每卡 batch=2、累积=2、decode-chunk=4、workers=4；恢复工作目录与完整绝对路径命令以 `outputs/reactflow_dit/seed_2026.launch.json` 为准。后续工作区改动不进入该训练副本。入口仅接受 `--backbone dit`，旧的主干权重加载参数、U-Net 分支和基线命令已删除。历史 U-Net 检查点不能由当前包加载或续跑，其日志、权重及源码归档保留作审计与实验记录。
 
 ## Observed-only perception frontend
 

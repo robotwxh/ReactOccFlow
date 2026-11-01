@@ -1,0 +1,17 @@
+{
+  "checked_at": "2026-10-31T15:05:38.808128+08:00",
+  "legacy_run": "outputs/reactflow_joint/seed_2026",
+  "last_event": {
+    "event": "train",
+    "global_step": 51100,
+    "loss": 0.20048337802290916,
+    "lr_trunk": 9.911515829476867e-06,
+    "lr_new_branches": 4.955757914738434e-05,
+    "rank0_peak_cuda_bytes": 13783440896,
+    "utc": "2026-10-31T07:02:36.529335+00:00",
+    "elapsed_seconds": 186615.24453669597
+  },
+  "launcher_alive": true,
+  "new_formal_dit_training_started": false,
+  "note": "Only short DiT engineering diagnostics were launched. Original installed package and legacy training process were retained."
+}

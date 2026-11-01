@@ -71,9 +71,6 @@ def test_resuming_early_stopped_state_does_not_optimize_again(tmp_path, monkeypa
         def __init__(self, **kwargs):
             super().__init__(1, 1)
 
-        def load_pretrained_trunk(self, *args, **kwargs):
-            return {}
-
         def freeze_trunk(self, **kwargs):
             return self
 

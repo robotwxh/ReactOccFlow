@@ -1,4 +1,4 @@
-"""T6 contracts: no future conditioning, safe masks, and real middle exchange."""
+"""T6 contracts: no future conditioning, safe masks, and real DiT token exchange."""
 import importlib.util
 
 
@@ -63,12 +63,19 @@ class RecordingTransition(nn.Module):
 
 def small_model(mode='joint', *, freeze=False):
     from reactoccflow.models.react_flow import ReactFlow
-    from reactoccflow.models.modules.transition_models.FlowMatchingV2 import FLOW_MATCHING_DOWN_X4_DiT
-    trunk = FLOW_MATCHING_DOWN_X4_DiT(
-        in_channels=2, out_channels=2, model_channels=32, channel_multi=[2, 4],
-        input_size=[4, 4], trajectory_length=6, init_kernel_size=3,
-        init_3d_conv_channels=16, attn_dim=8, temporal_attn_head=2, spatial_attn_head=2)
-    return ReactFlow(mode=mode, trunk=trunk, latent_shape=(2, 4, 4), max_actors=3, freeze_pretrained_trunk=freeze)
+    from reactoccflow.models.standard_dit import StandardDiT
+    trunk = StandardDiT(in_channels=2, input_size=4, frames=12,
+                        patch_size=2, hidden_size=32, depth=2, num_heads=4,
+                        activation_checkpointing=False)
+    # Emulate a learned field for coupling checks; pristine zero initialization
+    # has its own architecture test in test_standard_dit.py.
+    with torch.no_grad():
+        trunk.final_layer.linear.weight.normal_(std=.02)
+        trunk.final_layer.modulation[-1].weight.normal_(std=.02)
+        for block in trunk.blocks:
+            block.adaLN_modulation[-1].weight.normal_(std=.02)
+    return ReactFlow(mode=mode, trunk=trunk, latent_shape=(2, 4, 4),
+                     max_actors=3, freeze_backbone=freeze)
 
 
 def recording_model(**kwargs):
@@ -103,7 +110,7 @@ def test_modes_sample_shapes_and_reproducibility_without_global_rng(mode):
 
 
 @pytest.mark.parametrize('mode', ['joint', 'parallel'])
-def test_middle_exchange_is_bidirectional_only_in_joint(mode):
+def test_token_exchange_is_bidirectional_only_in_joint(mode):
     model = small_model(mode).eval()
     obs, _, candidate = batch(1)
     data = flow_inputs(obs, candidate)
@@ -123,7 +130,7 @@ def test_middle_exchange_is_bidirectional_only_in_joint(mode):
         assert torch.equal(original['actor_velocity'], occ_changed['actor_velocity'])
 
 
-def test_real_middle_path_matches_unchanged_trunk_when_no_actor():
+def test_real_token_path_matches_unchanged_trunk_when_no_actor():
     model = small_model().eval()
     obs, _, candidate = batch(1)
     obs['actor_observed_mask'].zero_()
@@ -280,21 +287,6 @@ def test_occupancy_only_uses_original_head_and_skips_missing_actor_targets():
     torch.testing.assert_close(actual, expected, rtol=0, atol=0)
 
 
-def test_strict_trunk_loading_freezing_and_new_branch_report(tmp_path):
-    model = small_model(freeze=True)
-    checkpoint = tmp_path / 'trunk.pt'
-    state = model.transition_model.trunk.state_dict()
-    torch.save({'state_dict': {'transition_model.' + k: v for k, v in state.items()}}, checkpoint)
-    report = model.load_pretrained_trunk(checkpoint)
-    assert report['missing_keys'] == [] and report['unexpected_keys'] == []
-    assert report['trunk_key_count'] == 204
-    assert report['new_branch_keys']
-    assert not any(p.requires_grad for p in model.transition_model.trunk.parameters())
-    assert all(p.requires_grad for n, p in model.transition_model.named_parameters() if not n.startswith('trunk.'))
-    state.pop(next(iter(state)))
-    torch.save(state, checkpoint)
-    with pytest.raises(RuntimeError, match='Missing key'):
-        model.load_pretrained_trunk(checkpoint)
 
 
 def test_real_trunk_backward_reaches_both_new_branches_with_frozen_trunk():
@@ -405,7 +397,12 @@ def test_each_mode_default_and_yaml_has_active_trainable_gradient_path(mode, ori
     if origin == 'yaml':
         kwargs = yaml.safe_load(Path(f'configs/react_flow_{mode}.yaml').read_text())['model']
         kwargs.pop('kind')
-    kwargs.update(trunk=trunk, latent_shape=(2, 4, 4), max_actors=3)
+    if origin == 'yaml':
+        kwargs['dit_config'] = {'patch_size': 2, 'hidden_size': 32, 'depth': 2,
+                                'num_heads': 4, 'activation_checkpointing': False}
+    else:
+        kwargs['trunk'] = trunk
+    kwargs.update(latent_shape=(2, 4, 4), max_actors=3)
     model = ReactFlow(**kwargs)
     obs, target, candidate = batch(1)
     loss = model.training_loss(obs, target, candidate, generator=torch.Generator().manual_seed(30))['total']
@@ -415,4 +412,4 @@ def test_each_mode_default_and_yaml_has_active_trainable_gradient_path(mode, ori
     assert active and any(p.grad is not None and p.grad.abs().sum() > 0 for p in active)
     assert all(torch.isfinite(p.grad).all() for p in active if p.grad is not None)
     trunk_trainable = any(p.requires_grad for p in model.transition_model.trunk.parameters())
-    assert trunk_trainable == (mode == 'occupancy_only')
+    assert trunk_trainable

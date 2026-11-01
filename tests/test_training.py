@@ -5,13 +5,12 @@ import pytest
 import torch
 from torch import nn
 
-from reactoccflow.models.flow import ConditionalFlowMatching
 
 
 def runner():
     # Import inside tests so missing acceptance functionality is a test failure.
     try:
-        return importlib.import_module('scripts.train_smoke')
+        return importlib.import_module('reactoccflow.training.diagnostics')
     except ModuleNotFoundError:
         pytest.fail('standalone training acceptance runner is not implemented')
 
@@ -24,6 +23,11 @@ class TinyVelocity(nn.Module):
     def forward(self, data):
         return {'predicted_latent': self.velocity.expand_as(data['noised_sequence'])}
 
+    def training_loss(self, history, target, trajectory, *, generator):
+        noise = torch.randn(target.shape, generator=generator, device=target.device) * .1
+        prediction = self({'noised_sequence': history})['predicted_latent']
+        return (prediction - target - noise).square().mean()
+
 
 def small_batches():
     return [(torch.zeros(2, 6, 1, 2, 2), torch.ones(2, 6, 1, 2, 2), torch.zeros(2, 6, 2))]
@@ -31,7 +35,7 @@ def small_batches():
 
 def test_real_optimizer_updates_and_probe_replays_without_gradients():
     api = runner()
-    model = ConditionalFlowMatching(TinyVelocity(), latent_scale=1., uncond_p=0.)
+    model = TinyVelocity()
     model.train()
     initial_probe = api.evaluate_probe(model, small_batches(), seed=90)
     assert model.training
@@ -81,7 +85,7 @@ def test_probe_disables_dropout_and_gradients_and_restores_mode_on_error():
             assert not self.training, 'probe must disable model dropout'
             return {'predicted_latent': self.dropout(self.velocity.expand_as(data['noised_sequence']))}
 
-    model = ConditionalFlowMatching(GuardedVelocity(), latent_scale=1.)
+    model = GuardedVelocity()
     api.evaluate_probe(model, small_batches(), seed=1)
     assert model.training
     broken = InvalidLoss('loss').train()

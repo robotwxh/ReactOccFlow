@@ -1,0 +1,48 @@
+{
+  "checked_at": "2026-10-31T20:04:21.378486+08:00",
+  "status": "running",
+  "backbone": "dit",
+  "torchrun_pid": 2838011,
+  "last_verified_log_step": 50,
+  "last_verified_checkpoint_step": 50,
+  "max_steps": 100000,
+  "train_windows": 17468,
+  "tune_windows": 2176,
+  "full_tune_evaluations": 0,
+  "runtime_source_directory": "/home/lthpc/wxh/Paper/outputs/reactflow_dit/source_seed_2026",
+  "resumed_from_step": 50,
+  "stop_after_steps": null,
+  "identity_files_verified": 19722,
+  "preserved_bootstrap_checkpoint": "/home/lthpc/wxh/Paper/outputs/reactflow_dit/seed_2026/bootstrap_step_000050.pt",
+  "bootstrap_checkpoint_sha256": "ba74d8f50fe803dc70666dc6e2e08ec78d1f4434dc92cd7790a980d6e0374557",
+  "gpu_utilization_30_second_sample": {
+    "0": {
+      "utilization_percent_mean": 90.83333333333333,
+      "utilization_percent_median": 96.0,
+      "utilization_percent_range": [
+        56.0,
+        100.0
+      ],
+      "memory_used_mib_range": [
+        9758.0,
+        9760.0
+      ],
+      "power_w_mean": 207.724
+    },
+    "1": {
+      "utilization_percent_mean": 87.83333333333333,
+      "utilization_percent_median": 91.0,
+      "utilization_percent_range": [
+        45.0,
+        100.0
+      ],
+      "memory_used_mib_range": [
+        9672.0,
+        9672.0
+      ],
+      "power_w_mean": 197.00933333333333
+    }
+  },
+  "training_log": "/home/lthpc/wxh/Paper/outputs/reactflow_dit/seed_2026/training.jsonl",
+  "scope": "Full dataset supervised logged-action oracle E0 training. GPU activity confirms resumed execution; logging every50 means unlogged in-memory progress is not reported as a verified step."
+}

@@ -1,5 +1,21 @@
 # Execution Lock
 
+## architecture_revision_2026_10_31
+
+- status: Markdown synchronized; existing SVG/previews/exports require regeneration
+- backbone: standard isotropic DiT; patch=5, hidden=256, depth=8, heads=8
+- occupancy_tokens: 12×10×10=1200; global space-time self-attention
+- actor_tokens: 8×6=48; hidden=128; masked self-attention
+- exchange: two interaction modules after DiT block 4; four heads
+- cross_actor_update: Q=actor, K/V=occupancy
+- cross_occupancy_update: Q=occupancy, K/V=actor
+- cross_order: simultaneous updates from the same normalized state, gated residuals, actor FFN
+- token_sequences: separate modality sequences; no concatenated occupancy–actor self-attention
+- occupancy_delta: 256→128 projection before exchange; delta 128→256 back-projection
+- codec: one frozen occupancy VAE; DiT patch projection is not a second VAE encoder
+- checkpoint_scope: scratch DiT; old U-Net training/weights and original export hashes remain historical
+- retained_visual_spec: the canvas, colors and typography below are retained for a future redraw
+
 ## canvas
 - viewBox: 0 0 2480 3508
 - format: Custom portrait SVG 2480×3508, A4 ratio

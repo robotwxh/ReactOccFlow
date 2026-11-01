@@ -13,8 +13,7 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--cache',type=Path,default=Path('data/research/e0_acceptance'))
     parser.add_argument('--normalization',type=Path,default=Path('data/research/normalization.json'))
-    parser.add_argument('--checkpoint',type=Path,default=Path('assets/checkpoints/occfm_history.ckpt'))
-    parser.add_argument('--output',type=Path,default=Path('outputs/react_flow_acceptance.json'))
+    parser.add_argument('--output',type=Path,default=Path('outputs/dit_react_flow_acceptance.json'))
     parser.add_argument('--device',default='cuda:0')
     args=parser.parse_args()
     torch.set_num_threads(4);torch.manual_seed(2026)
@@ -23,13 +22,12 @@ def main():
     if stats['fit_group']!='train' or manifest['group']!='train':raise ValueError('Require train-only diagnostic inputs')
     report={'status':'running','not_trained_evaluation':True,'oracle':True,'device':str(device),
             'normalization_sha256':sha256_file(args.normalization),'cache_sha256':sha256_file(args.cache/'manifest.json'),
-            'checkpoint_sha256':sha256_file(args.checkpoint),'modes':{},
+            'initialization':'standard DiT from scratch','modes':{},
             'training_condition':'logged executed ego future is supplied separately as a supervised action condition',
             'sampling_condition':'constant speed from observed ego_state only; no future labels used',
             'timing':'concurrent engineering checks; no fair throughput claim'}
     for mode in ['joint','parallel','occupancy_only']:
         model=ReactFlow(mode=mode,normalization=stats).to(device).train()
-        loaded=model.load_pretrained_trunk(args.checkpoint)
         results=[]
         selected=manifest['samples'] if mode=='joint' else manifest['samples'][:5]
         for i,sample in enumerate(selected):
@@ -42,10 +40,7 @@ def main():
             loss['total'].backward()
             grads=[p.grad for p in model.parameters() if p.grad is not None]
             assert grads and all(torch.isfinite(g).all() for g in grads)
-            if mode=='occupancy_only':
-                assert any(p.grad is not None for p in model.transition_model.trunk.parameters() if p.requires_grad)
-            else:
-                assert all(p.grad is None for p in model.transition_model.trunk.parameters())
+            assert any(p.grad is not None for p in model.transition_model.trunk.parameters() if p.requires_grad)
             current_mask=obs['actor_observed_mask'][...,-1]
             row={'scene':sample['scene'],'actors':int(current_mask.sum()),'loss':{k:float(v.detach()) for k,v in loss.items()},'gradient_tensors':len(grads)}
             if not current_mask.any():
@@ -65,7 +60,7 @@ def main():
                 model.train()
             results.append(row)
             print(json.dumps({'mode':mode,'scene':sample['scene'],'checked':len(results),'total':len(selected)}),flush=True)
-        report['modes'][mode]={'trunk_keys':loaded['trunk_key_count'],'new_branch_keys':len(loaded['new_branch_keys']),'sample_count':len(results),'examples':results}
+        report['modes'][mode]={'backbone':'dit','dit':model.transition_model.trunk.config,'sample_count':len(results),'examples':results}
         args.output.parent.mkdir(parents=True,exist_ok=True);args.output.write_text(json.dumps(report,indent=2)+'\n')
         del model
     report['status']='passed';args.output.write_text(json.dumps(report,indent=2)+'\n')

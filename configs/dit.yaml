@@ -1,0 +1,8 @@
+# Standard isotropic DiT; consumed by train_react_flow --dit-config.
+# 12 temporal slots * (50 / 5)^2 spatial patches = 1,200 global tokens.
+patch_size: 5
+hidden_size: 256
+depth: 8
+num_heads: 8
+mlp_ratio: 4.0
+activation_checkpointing: true

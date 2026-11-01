@@ -1,74 +1,80 @@
-# Pretrained occupancy baseline
+# Standard DiT and the occupancy VAE
 
-`OccupancyCodec` reproduces the copied OccFM VAE module names and operations.
-`encode(occupancy, visibility=None)` returns the posterior mean by default.
-Use `sample=True, generator=torch.Generator(device=...).manual_seed(seed)` for
-the upstream stochastic posterior. Inputs use B[,T],H,W,Z labels; outputs use
-B[,T],16,50,50 at the pretrained 200 by 200 resolution. `decode` returns labels;
-`return_logits=True` returns B[,T],H,W,Z,18 similarities.
-The optional visibility mask substitutes empty class 17 in hidden voxels,
-without adding a channel absent from pretrained weights.
+The runnable world model is `ReactFlow`, exported with `StandardDiT` and
+`OccupancyCodec` from `reactoccflow.models`. The former U-Net world model,
+compatibility wrapper, dedicated configurations and baseline commands have
+been removed. Historical weights, logs and source snapshots are audit material.
 
-`ConditionalFlowMatching(trajectory_length=6)` uses historical ego trajectory;
-length 12 loads the future-trajectory checkpoint. `sample(history, trajectory,
-initial_noise=noise, nfe=10, device='cuda:0')` accepts unscaled codec latents,
-multiplies history by 10, integrates future noise in scaled flow coordinates,
-and divides future output by 10. Alternatively supply `future_shape` and an
-explicit local generator. Sampling consumes no global RNG. History and future
-are separate tensors, and every Euler step leaves the observed history fixed.
-For the pretrained backbone, history + future must total 12 slots at 50x50;
-the wrapper supports unequal lengths for other backbones but does not invent
-new temporal embeddings for the checkpoint. Both batch 1 and batch 2 work.
+## DiT and actor interaction
 
-Classifier-free guidance blanks history in the unconditional branch but
-retains the exact same ego trajectory in both branches, as upstream does.
-It is not classifier-free guidance over ego trajectory. Users must provide
-observed ego trajectories for the historical checkpoint, or explicitly
-supplied candidate ego trajectories for future-conditioned prediction.
-No ground-truth future occupancy is accepted by the sampling API.
+`ReactFlow()` constructs a standard isotropic DiT: patch projection → eight
+fixed-width DiT blocks → conditioned output projection → unpatchify. Default
+inputs are 12 temporal slots of 16×50×50 latents. Spatial patch size 5 gives
+1,200 tokens, width 256, eight heads and MLP ratio 4. All occupancy tokens
+participate in global space-time self-attention. There are no down/up stages
+or encoder-to-decoder skips in the world model.
 
-The shifted grid is exactly `(1 - alpha*t/(1+(alpha-1)*t)).flip(0)` on a linear
-0..1 grid. Velocity is evaluated at current time multiplied by 1000.
-The default guidance scale is 2 and alpha is 3. This is the compatibility
-sampler itself, so a separately named compatibility sampler is unnecessary.
+Actor history/state/condition embeddings form 48 tokens (8 actors×6 future
+slots), width 128. Two `TokenInteraction` modules follow DiT block 4:
 
-Checkpoint loading strips repeated `module.` and `model.` wrappers and then
-loads strictly. CFM loading selects exactly `transition_model.*`, reports
-excluded compressor keys, rejects unknown partitions, and strictly checks
-all selected keys. EMA selection is explicit: pass `weights="ema_model"` to either
-loader to select the EMA partition and discard only its `n_averaged` counter.
-The default is `weights="state_dict"`, matching the upstream recovery API.
-Use an explicit converted tensor dict for other formats. Checkpoints load on CPU with `weights_only=True`.
+| Attention | Query | Keys and values | Updated modality |
+| --- | --- | --- | --- |
+| Occupancy self-attention | occupancy | occupancy | occupancy |
+| Masked actor self-attention | actor | actor | actor |
+| Occupancy-to-actor cross-attention | actor | occupancy | actor |
+| Actor-to-occupancy cross-attention | occupancy | actor | occupancy |
 
-Known upstream numerical concerns are deliberately preserved:
+Each interaction runs actor self-attention, simultaneous bidirectional
+cross-attention with gated residuals, and an actor FFN. Occupancy is projected
+256→128; only the exchanged delta is projected 128→256 into the original DiT
+sequence, followed by blocks 5–8. Modalities are separate token sequences.
+`joint` enables exchange, `parallel` disables exchange, and `occupancy_only`
+skips actors. Valid actor keys come from current observations, never future
+existence or target masks. Ego plans and generative time condition adaLN and
+the actor embeddings.
 
-* `DiTAttention` reshapes head-major SDPA output B,H,N,D directly into B,N,C.
-  It does not transpose heads and tokens first. The CPU fallback retains the
-  same reshape and has a regression test.
-* The backbone adds `x + init_temporal_attn(x)` even though that submodule
-  already includes a residual; the additional skip is preserved.
-* Frozen spatial positional embeddings use a 51x51 grid truncated to 2500
-  positions rather than constructing a 50x50 grid; the pretrained tensors and
-  constructor behavior are preserved.
-* Copied `VaeQuant.get_loss` stores posterior standard deviations in a field
-  named `logvars`, making its KL expression suspect. Bootstrap inference uses
-  explicit posterior mean/sample encoding and does not call this training loss.
-* The original video latent decoder and height/semantic channel ordering are
-  preserved, including the decoder's channel-last upsampling intermediates.
+DiT uses the copied block's correctly merged math attention path. Its adaLN
+and output layers are zero-initialized, so initial occupancy velocity is zero.
+Use `dit_config` or the training CLI's `--dit-config configs/dit.yaml` to set
+architecture options. `freeze_backbone=False` is the default; the optional
+`freeze_trunk()` method supports explicit inference/ablation setups. The removed
+pretrained world-backbone loader is not part of the API.
 
-Adaptations are package-relative imports, dynamic embedding height indexing,
-CPU-capable SDPA backend selection with the original output layout, explicit
-local generators, future-only integration with batch-safe times, and inference
-wrappers that avoid trainer, OpenMMLab and Lightning dependencies.
+## One independent occupancy VAE
 
-Source `.txt` snapshots and YAML files are documentation of copied reference
-implementations only; no source snapshot is imported or executed. Original
-commits and SHA256 values are in `docs/provenance/model_sources.json`.
+`OccupancyCodec.encode(occupancy, visibility=None)` accepts B[,T],200,200,16
+semantic labels and returns posterior-mean B[,T],16,50,50 latents by default.
+Optional stochastic posterior sampling requires `sample=True` and an explicit
+local `torch.Generator`. A visibility mask replaces hidden/unknown labels with
+empty class 17 for encoding; this is not evidence of free space.
 
-For training smoke checks, `training_loss(history, target, trajectory=None,
-generator=local_generator)` accepts unscaled history and training targets,
-returns a differentiable scalar future-only MSE, and preserves upstream
-sigmoid-normal time sampling, 0.2 per-example historical conditioning dropout,
-scaled targets and noise velocity. Targets enter this training API only; the
-sampling API has no target parameter. A supplied local generator controls every
-random draw. Set constructor `uncond_p` to configure conditioning dropout.
+`decode(latents)` returns semantic labels. `return_logits=True` returns
+B[,T],200,200,16,18 continuous class similarities. The copied Swin codec,
+its convolutional/residual/temporal layers and their weight names are retained;
+these shared codec components are not the removed world-model U-Net.
+
+Offline caching encodes history observations and future training labels using
+the same VAE. Training reads cached latents and decodes predicted endpoints
+for consistency losses. Patch projection maps 400 latent values to a 256-dim
+token; unpatchify restores latent shape. Neither operation is a second VAE.
+Actor tokens use state MLPs. The frozen VAE decoder still permits gradients
+to its input latent; its parameters are not optimized.
+
+## Flow and checkpoint boundary
+
+`ReactFlow.sample` accepts observed history latents and a separately supplied
+candidate plan. Future occupancy and actor states use independent Gaussian
+noise and a shared generative clock; Euler updates leave observed history
+fixed. Latents are scaled by 10 inside the flow and unscaled on output.
+Random draws use explicit local generators. Training targets never enter the
+sampling interface; predicted future existence comes from its own head.
+
+The formal trainer saves complete DiT/actor model, EMA, optimizer, scheduler,
+RNG and identity metadata. Resume requires identical configuration, data and
+source identity. Removed U-Net weights cannot be loaded by this package.
+Historical source archives retain the old code solely for provenance.
+
+See [removal and validation](../../docs/implementation/2026-10-31-remove-unet.md),
+[standard DiT architecture](../../docs/implementation/2026-10-31-standard-dit.md),
+[source provenance](../../docs/provenance/remove_unet_sources.json) and
+[architecture configuration](../../configs/dit.yaml).

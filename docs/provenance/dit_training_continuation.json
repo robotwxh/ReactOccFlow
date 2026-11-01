@@ -1,0 +1,94 @@
+{
+  "date": "2026-10-31",
+  "purpose": "Continue the standard DiT plan: real-data 200-step smoke, 32-window fitting, effective-batch-8 DDP exact resume and independent formal run.",
+  "reference_search": {
+    "repositories": [
+      "OccFM",
+      "IR-WM"
+    ],
+    "read_only": true,
+    "patterns": [
+      "resume",
+      "warmup",
+      "DiTBlock",
+      "torchrun"
+    ],
+    "results": "outputs/dit_training_acceptance/reference_search.txt",
+    "finding": "Reuse existing owned train_joint_smoke, train_react_flow and previous DDP acceptance orchestration. Upstream code provides layers and training examples, but no project-specific exact-resume acceptance or owned source export. No new reference dependency needed."
+  },
+  "reused_acceptance": {
+    "source": "outputs/architecture_migration/2026-10-31-standard-dit/check_ddp_resume.py",
+    "source_sha256": "6a03747d3f34516dfabc09cd54baf4ea1c40b000019863bcd377c970dd468a02",
+    "destination": "outputs/dit_training_acceptance/check_ddp_resume.py",
+    "sha256": "70b29451d8fba11bed3de7a6f46cf6dad6065c6576dba67c6e031dc627a4a5e6",
+    "changes": "Diagnostic batch 2/rank, accumulation 2, 32 train / 8 tune windows; fresh outputs and DiT-only evidence."
+  },
+  "reference_before": "outputs/dit_training_acceptance/reference_before.json",
+  "status": "formal_training_running",
+  "formal_training_started": true,
+  "smoke": {
+    "report": "outputs/dit_training_acceptance/single_gpu_200/results.json",
+    "report_sha256": "8a74dc7f9b0c00f51756633af3f368808b0f779cfb544da45d640363dfd94963",
+    "steps": 200,
+    "probe_initial": 3.195606231689453,
+    "probe_final": 1.2598179541528225,
+    "probe_decrease_fraction": 0.6057655847395247,
+    "peak_cuda_allocated_bytes": 8043910144,
+    "gradient_tensors": [
+      168,
+      168
+    ]
+  },
+  "ddp_resume": {
+    "report": "docs/implementation/dit_only_ddp_resume_acceptance.json",
+    "sha256": "363b2ee7ec3386fad92c8562c9514a8814deae0023f74c1271583afb900ab9ad",
+    "passed": true,
+    "compared_tensors": 855
+  },
+  "trained_exchange": {
+    "script": "outputs/dit_training_acceptance/check_trained_exchange.py",
+    "sha256": "6fefaa10d6c980c157a9c149175d23295f4b475eb5790c67821d9e936ee7b624",
+    "reused_components": [
+      "ReactFlow._observation",
+      "ReactFlow._predict",
+      "ReactFlow.sample",
+      "tests/test_standard_dit.py exchange assertions"
+    ],
+    "report": "docs/implementation/dit_trained_exchange_acceptance.json"
+  },
+  "source_export": {
+    "manifest": "outputs/reactflow_dit/source_seed_2026.manifest.json",
+    "sha256": "615ccc51adef993a58c8863c87716f62b20daa0726be380c46cb3d397ca3f871",
+    "ordinary_files": 81
+  },
+  "throughput_probe": {
+    "request": "\u5c3d\u91cf\u628a\u4e24\u5f20\u5361\u8dd1\u6ee1",
+    "reference_search": "outputs/dit_training_acceptance/throughput_reference_search.txt",
+    "script": "outputs/dit_training_acceptance/profile_cuda.py",
+    "sha256": "b533037094a3aada2dabbe66dcdf36287e7b717e5c54ef22c759480e0886e4ed",
+    "reused_owned_cuda_check": "outputs/architecture_migration/2026-10-31-standard-dit/cuda_check.py",
+    "changes": "Compare larger batches and batched continuous VAE decoding using existing model, objective, optimizer and deterministic helpers.",
+    "selection": "outputs/dit_training_acceptance/throughput_selection.json",
+    "optimized_resume_script_sha256": "8285318899f51b524dbee09e67b33a70975c74cd8226ef23088436ff397b2f86"
+  },
+  "formal_launch_record": "outputs/reactflow_dit/seed_2026.launch.json",
+  "optimized_ddp_resume": {
+    "report": "docs/implementation/dit_optimized_ddp_resume_acceptance.json",
+    "sha256": "52cc818339d95fda07cd354addc8cb1aa581ed14b51ef6d991e4f9959d4d2177",
+    "compared_tensors": 855,
+    "passed": true
+  },
+  "source_protection": "docs/implementation/dit_training_source_protection.json",
+  "formal_gpu_utilization": "docs/implementation/dit_formal_gpu_utilization.json",
+  "last_updated_at": "2026-10-31T20:04:21.378486+08:00",
+  "formal_bootstrap_resume": "docs/implementation/dit_formal_bootstrap_resume.json",
+  "acceptance_complete": true,
+  "formal_training_health": "docs/implementation/dit_formal_training_health.json",
+  "formal_training_complete": false,
+  "completed_acceptance_artifact_sha256": {
+    "docs/implementation/dit_formal_bootstrap_resume.json": "61ee1e81d90285bccb2cfef9da3515e4b22773879776a14a0ea7da4c0ce562b3",
+    "docs/implementation/dit_formal_gpu_utilization.json": "47c6fa14e64a308b3402d8237319cccbf6811b38aee44ad22d6b6062de863abc",
+    "docs/implementation/dit_training_source_protection.json": "6e8529d08d356cd3dae47af26a54a86090260fd41f1efb0264c24765d4c4dde4",
+    "outputs/dit_training_acceptance/throughput_selection.json": "dfdf2504de01bad3563cf558ef636e579cd5563d45e8aa1b9a0ff9e286495365"
+  }
+}

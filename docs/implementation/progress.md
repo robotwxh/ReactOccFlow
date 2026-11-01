@@ -1,6 +1,28 @@
 # ReactOccFlow 实施进展
 
-更新日期：2026-10-29。依据[完整实施计划](../superpowers/plans/2026-10-27-reactoccflow-implementation-plan.md)。本文件只记录已经运行并留有证据的工程结果；计划中的研究指标、反事实响应、校准和闭环结果不会提前写成结论。
+更新日期：2026-10-31。依据[完整实施计划](../superpowers/plans/2026-10-27-reactoccflow-implementation-plan.md)。本文件只记录已经运行并留有证据的工程结果；计划中的研究指标、反事实响应、校准和闭环结果不会提前写成结论。
+
+## 2026-10-31：按计划继续标准 DiT 训练
+
+根据用户最新指示，纯 DiT 的 200 步、32 窗口小样本训练与有效 batch=8 的双卡断点恢复验收已通过。固定噪声 probe 从 3.19560623169 降到 1.25981795415，下降 60.5766%；855 个恢复状态张量逐位一致，实际训练后双向交互与空 mask 检查通过。按用户充分使用两卡的要求比较 batch=2/4/8 后，选择吞吐最高的 batch=2、decode-chunk=4，保持累积=2、有效 batch=8，并将 workers 调至每 rank 4；该配置也重新通过双卡精确恢复。独立全量 seed=2026 实验已于 19:58 启动，20:01 保存第 50 步完整状态，19,722 项恢复身份摘要全部匹配，20:02 启动恢复续训；首次完整 tune 验证尚未到达。实际双卡 30 秒平均利用率约 91%/88%，峰值均为 100%。新训练使用独立输出目录及普通文件代码副本，旧 U-Net 实验继续停止。当前证据和恢复边界见 [DiT 训练验收](2026-10-31-dit-training-acceptance.md)。下方的停止记录、旧模型训练数值及迁移初期测试数均保留为历史记录。
+
+## 2026-10-31：删除 U-Net 运行代码
+
+按后续指示，U-Net 主干、分支、专用配置、旧 CFM 包装器与基线训练/评价入口已从当前工程移除，仅保留标准 DiT 和独立 VAE。通用流插值、时间网格及优化诊断工具已解耦保留，`TokenInteraction` 继续负责 actor self-attention 和双向 cross-attention。旧训练保持停止，历史输出与来源快照保留；本次没有启动模型训练。删除范围与最终验证见 [删除记录](2026-10-31-remove-unet.md)。下面的迁移阶段“保留兼容入口”描述现已由本次删除决定替代。
+
+## 2026-10-31 15:22：按用户要求停止全部训练
+
+旧 U-Net 的守护/启动进程、双卡训练及其数据加载进程已全部停止，训练 GPU 显存已释放；未启动新的 DiT 训练。最后日志步数为 51,400，实际保留的 `latest.pt` 和 `best.pt` 均为 50,000 步；之后的内存进度没有保存。当前 `ReactFlow()`、三个研究配置和正式训练入口的默认主干均已核验为标准 DiT。运行状态文件已标记 `stopped_by_user`，详见[停止与架构确认记录](2026-10-31-training-stopped.md)。
+
+## 2026-10-31：研究主干切换为标准 DiT
+
+按用户明确要求，ReactFlow 默认主干和三个研究模式配置现为标准 DiT：patch=5、hidden=256、depth=8、heads=8，1,200 个全局时空 token，actor 双向交互在固定分辨率的 Transformer 层间完成。迁移初期曾保留 U-Net 兼容分支，后按用户要求移除。新 DiT 从头训练，训练入口与输出目录已区分架构。
+
+注意力分工为 occupancy self-attention、masked actor self-attention 和双向 cross-attention。默认第 4 个 DiT Block 后进行两层交互，actor 更新的 Q 来自 actor、K/V 来自 occupancy；occupancy 更新的 Q 来自 occupancy、K/V 来自 actor。两条序列未拼接成共同 self-attention。VAE 仍只有一套，训练读取已缓存 latent，DiT patch 投影不构成第二次 VAE 编码。详见迁移记录中的注意力与 VAE 小节。
+
+实际验收为 350 项 CPU 测试通过、真实尺寸 CUDA 带一致性损失优化及可复现采样通过、双卡 NCCL 4 步与 2+2 步恢复的模型/EMA/优化器/调度器/RNG 状态逐位一致、安装 wheel 后的隔离真实样本训练/推理/解码通过；两个参考仓库相对本次实现前快照无变化。新 DiT 尚未开始全量训练。旧 seed=2026 U-Net 训练在迁移验收时曾继续运行，现已按用户要求停止，其曲线和权重不属于 DiT。旧源码已归档；旧检查点的源码身份约束及恢复限制见 [完整迁移记录](2026-10-31-standard-dit.md)。
+
+下面的阶段表和累计数字主要记录迁移前的基线与接口验收；新架构实际结果以本节和迁移记录为准。
 
 ## 已完成并验证的阶段
 
@@ -10,8 +32,8 @@
 | T3 | 完成 | 历史/未来兼容基线各 4,219 个验证窗口全部完成；camera-mask pooled mIoU 分别为 0.3281336254598147 和 0.38052406869179267。它们是带日志真实 ego 位移条件的预测基线，不是无未来信息规划结果。 |
 | T4 | 完成 | 官方 850 场景、34,149 帧的 E0 actor/ego/occupancy 标签；当前可见 actor 按当前状态选取，未来标签隔离；原始 3D warp 后再编码。 |
 | T5 | 完成 | 固定560/70/70/150场景与train-only统计；train17,468、tune2,176个完整E0窗口已全部生成，全部载荷SHA-256、rank清单、settings摘要及场景互斥审计通过。 |
-| T6 | 工程验收完成，正式训练中 | joint/parallel/occupancy-only接口可运行；主干参与训练的200步单卡与32窗口拟合检查通过，双卡NCCL及恢复通过；seed2026全量联合训练已启动，质量结论尚待正式评测。 |
-| T7 | 完成小样本验收 | 连续 decoder endpoint 上的一致性损失、静态时序和类别运动学约束可反传；200 步、32 个重叠窗口的 debug 训练 probe 从 4.58998449519 降到 3.09713234752（32.5241%），仅说明小样本拟合链路工作。冻结 VAE/预训练主干的梯度与状态校验通过。 |
+| T6 | DiT 工程验收完成，正式训练中 | joint/parallel/occupancy-only 接口可运行；随机初始化 DiT 的 200 步、32 窗口拟合、实际权重双向交互与双卡精确恢复通过；新的 seed=2026 全量训练已启动，质量结论尚待正式评测。 |
+| T7 | DiT 小样本验收完成 | 连续 decoder endpoint 的一致性、静态时序和类别运动学约束可反传；DiT 200 步/32 个重叠窗口 probe 为 3.19560623169 → 1.25981795415（下降 60.5766%），仅说明小样本拟合。仅 VAE 冻结，DiT/actor/interaction 均训练；VAE 状态哈希未变。 |
 | T8 | 协议实现完成，仿真待条件 | 分支数据契约、origin/seed 分组、重置和失败保留规则已实现；没有 CARLA Python 模块或 server，因此没有真实 CARLA rollout。 |
 | T9/T11 | 指标接口完成 | 响应差异、footprint/occupancy 风险、平滑频率、校准、ECE/Brier/NLL 与阈值选择接口通过独立复审；缺少反事实标签，尚无响应或校准效果结论。 |
 | T10 | 候选规划接口完成 | PlanFlow 候选生成、显式刹停候选、实测时间运动学检查和离线选择器通过独立复审；尚无训练轨迹 head 或规划质量结论。 |
@@ -32,7 +54,7 @@
 
 桥接层独立验收记录于 [`isolation_final6.json`](isolation_final6.json)。本轮增加训练 package 后重新构建并安装 wheel（SHA-256 见 `docs/provenance/joint_training_sources.json`），从 `/tmp` 用 `python -I` 导入训练 adapter/engine；wheel 清单无 OccFM/IR-WM 路径。完整 CPU 测试现为 330 项通过。参考审计记录于 [`reference_audit_final6.json`](reference_audit_final6.json)：OccFM 无差异；IR-WM 只有原快照缺少的空 `data/` 目录，原有文件、HEAD 和 Git 工作区状态保持一致，没有删除或重置。
 
-## 当前运行与后续
+## 历史运行快照与后续
 
 最新运行快照（2026-10-29T11:21:39+08:00）：正式训练第100步已记入日志；第50步检查点已保存并成功自动恢复，两张GPU继续运行。19,726项恢复身份摘要全部一致；尚未到达首次完整tune评价。见 [运行健康记录](formal_training_health_2026-10-29.json)。
 

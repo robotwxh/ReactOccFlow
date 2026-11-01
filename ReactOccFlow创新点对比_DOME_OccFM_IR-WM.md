@@ -2,6 +2,8 @@
 
 核对日期：2026-10-31。依据三篇原论文的方法章节、本项目权威实施计划及实际源码。
 
+架构同步：研究主干现为标准 DiT，采用 occupancy/actor 模态内 self-attention 与模态间双向 cross-attention。新 DiT 从随机初始化训练；旧 U-Net 的检查点和训练记录单独保留。新架构的工程验收及证据边界见 [迁移说明](docs/implementation/2026-10-31-standard-dit.md)。
+
 **明确结论：本项目最有分量的新增设计，是“候选自车动作条件下的 occupancy–邻居 actor 双向耦合联合 Flow Matching”，以及“作用于连续生成端点的局部跨表示一致性”。动作干预验证、事件级风险校准和候选筛选是进一步的研究贡献目标，当前不能写成已经验证的效果。**
 
 与这三篇方法存在设计差异，可以通过论文和源码核对；是否构成全领域首次、是否优于已有方法，需要更广泛查新和公平实验。本文件不使用“首次”“显著提升”“已解决反应式因果建模”等尚无证据的表述。
@@ -12,7 +14,7 @@
 
 | 比较维度 | DOME | OccFM | IR-WM | ReactOccFlow 的新增设计／目标 |
 | --- | --- | --- | --- | --- |
-| 核心表示与生成机制 | 连续 occupancy latent，时空扩散 Transformer | 高压缩 latent，条件 Flow Matching 与 U-Net 式时空主干 | 视觉 BEV、流式记忆、自回归残差演化与特征对齐；默认半耦合规划 | 在 occupancy latent 上新增显式邻居运动状态，并在同一生成过程中耦合两者 |
+| 核心表示与生成机制 | 连续 occupancy latent，时空扩散 Transformer | 高压缩 latent，条件 Flow Matching 与 U-Net 式时空主干 | 视觉 BEV、流式记忆、自回归残差演化与特征对齐；默认半耦合规划 | 标准 DiT occupancy 主干与显式邻居运动流，模态内 self-attention、模态间双向 cross-attention |
 | 自车动作条件 | 已有轨迹条件及轨迹重采样 | 已有历史／未来自车轨迹条件设置 | 已有 ego 动作条件和预测—规划耦合 | 将每个候选动作作为联合世界的条件；“加入动作条件”本身不算创新 |
 | 本文件关注的联合对象 | occupancy 序列 | occupancy／LiDAR 世界状态 | 场景 BEV、occupancy 与自车规划 | **occupancy 场景 + 周围 actor 位置、航向、速度；存在性独立预测** |
 | 新机制应体现在哪里 | — | — | — | 生成中间态的双向交换、同一世界样本的几何／运动对应、每候选多世界事件风险 |
@@ -51,14 +53,14 @@ $$
 
 具体实现如下：
 
-1. occupancy 主干在 25×25 中层提供场景 tokens，投影到 128 维。
+1. occupancy 主干为 8 层、256 维、8 头标准 DiT。12 个 latent 槽按 `5×5` patch 形成 1,200 个 token，进行全局时空 self-attention；第 4 个 DiT Block 后将场景 token 投影到 128 维用于交互。
 2. actor tokens 编入历史、当前观测 mask、类别、尺寸、带噪运动状态、未来槽位、共享 t 和候选 τₖ。
-3. 两层交互模块先做 actor 自注意力，再从同一轮状态同步计算两路 cross-attention：actor 查询 occupancy；occupancy 查询 actor。两路结果分别经过可学习门控和残差连接。
-4. occupancy 交互增量回投并加回原主干，actor 分支输出运动速度场与独立存在性 logits。
+3. 两层交互模块先对 48 个 actor token 做 masked self-attention，再从同一轮状态同步计算两路 cross-attention：actor 更新为 `Q=actor, K/V=occupancy`；occupancy 更新为 `Q=occupancy, K/V=actor`。两路结果分别经过可学习门控和残差连接，actor 随后经过 FFN。
+4. occupancy 交互增量回投到 256 维并加回原 DiT token，继续后 4 层 DiT，再经输出投影及 unpatchify 得到 occupancy 速度场；actor 分支输出运动速度场与独立存在性 logits。两组模态 token 保持独立，没有拼接后共同做 self-attention。
 
 默认 8 个 actor、6 个未来时刻、128 维、4 个交互注意力头和2层交互，是实现配置；**这些数值本身不是创新**。显式 actor 集合只覆盖当前观测选中的目标，未选中／新进入目标仍需由 occupancy 表示覆盖。
 
-源码依据：[MiddleInteraction 与 JointTransition](reactoccflow/models/joint_transition.py)，尤其是 `MiddleInteraction.forward`、`_actor_tokens`、`_middle_forward`；[ReactFlow.training_loss / sample](reactoccflow/models/react_flow.py)。
+源码依据：[StandardDiT](reactoccflow/models/standard_dit.py)、[TokenInteraction 与 JointTransition](reactoccflow/models/joint_transition.py)，尤其是 `TokenInteraction.forward`、`_actor_tokens`、`_dit_forward`；[ReactFlow.training_loss / sample](reactoccflow/models/react_flow.py)。VAE 编解码与 DiT patch 投影分别承担表示压缩和 token 化，未新增第二套 VAE。
 
 **相对三篇工作的差异落点：**核对上表所列方法章节后，新增的是“场景占据与显式邻居运动的耦合向量场”。不能把它缩写成新提出 VAE、时空 Transformer、FM、轨迹条件或通用 cross-attention。
 
@@ -137,7 +139,7 @@ $$
 | 对比对象 | 推荐强调的新增点 | 应避免的表述 |
 | --- | --- | --- |
 | DOME | 显式邻居状态与occupancy在生成中耦合；局部跨表示约束；通过执行分支检验动作响应 | “首次实现轨迹控制”“首次使用连续latent／时空Transformer”；将扩散换成FM后直接宣称新颖或更快 |
-| OccFM | 在其代码与表示基础上新增邻居状态流、双向中层交换和端点一致性 | “首次将FM用于occupancy”“首次加入未来ego轨迹”；把新增actor head直接等同于反应式联合分布 |
+| OccFM | 在其代码与表示基础上新增邻居状态流、标准 DiT 层间双向交换和端点一致性 | “首次将FM用于occupancy”“首次加入未来ego轨迹”；把新增actor head直接等同于反应式联合分布 |
 | IR-WM | 显式occupancy–邻居状态的随机联合生成；候选特定多世界事件风险与独立概率校准目标 | “首次让预测服务规划”“首次用occupancy筛候选”“首次做动作条件／残差／对齐” |
 
 对 OccFM 还应公平指出：其附录G已将前景连续性和周围主体多模态预测列为局限与后续方向。本项目可以研究这些问题，但不能把“提出这个问题”本身作为新贡献。依据：[OccFM 附录G](https://arxiv.org/html/2506.23434v2)。
@@ -147,7 +149,7 @@ $$
 | 项目设计 | 应如何归类 |
 | --- | --- |
 | occupancy VAE、语义／高度编码、Swin、16×50×50 latent | 表示基础与复用组件 |
-| 时空DiT、AdaLN、U-Net式主干、Fourier轨迹编码 | 基座设计与已有技术组合；不能直接列作原创 |
+| 标准DiT、AdaLN、patch投影、Fourier轨迹编码；已移除运行代码的历史U-Net对照 | 基座设计与已有技术组合；替换主干本身不能直接列作原创 |
 | 线性CFM路径、速度回归、Euler ODE、少步采样 | 通用生成方法；实际质量／效率仍需测量 |
 | 128维、4头、2层、8个actor、6未来帧 | 配置与预算，不构成贡献 |
 | PlanFlow模块命名、确定性候选、刹停候选 | 规划接口／工程设计；学习式head当前未实现 |
@@ -161,7 +163,7 @@ $$
 
 以下表述适合开题、方法介绍及尚无正式效果结论的论文初稿：
 
-> 1. 我们提出候选自车动作条件下的 occupancy–actor 联合 Flow Matching，在共享生成时间的场景与邻居运动状态之间引入双向中层交互，建模同一候选动作下相互关联的未来。
+> 1. 我们提出候选自车动作条件下的 occupancy–actor 联合 Flow Matching，在共享生成时间的场景与邻居运动状态之间引入 DiT 层间双向交互，建模同一候选动作下相互关联的未来。
 > 2. 我们设计作用于连续生成端点的局部占据—主体、静态时序与类别运动学约束，使场景几何与显式运动保持对应，并保留未显式建模目标和危险未来。
 > 3. 我们设计受控动作分支验证与事件级风险评价流程，拟通过独立执行标签检验响应真实性、概率可靠性，以及多世界预测对候选筛选的实际价值。
 
@@ -180,7 +182,7 @@ $$
 
 比较 DOME、OccFM、IR-WM 时需另行对齐输入模态、oracle／感知条件、预训练、网格、时域、可见性mask和采样预算。当前oracle研究结果不能直接与IR-WM的相机端到端结果作优劣排名。预训练OccFM权重曾接触官方700个训练场景，因此项目后来划出的70个tune／70个calibration场景不能自动称为该预训练模型的未见数据；严格独立校准需要处理这一暴露问题。依据：[README](README.md)、[实施记录](docs/implementation/progress.md)。
 
-核对使用 DOME v1、OccFM v2、IR-WM v3 的官方原文与本地PDF；重点检查 DOME §3、OccFM §3／§4.2／附录G、IR-WM §III及实验协议。本项目实现状态依据已核对的源码、README和2026-10-29实施记录；本次未重新训练、未运行仿真、未复现三篇实验，也不据此判断训练进程的实时状态。
+核对使用 DOME v1、OccFM v2、IR-WM v3 的官方原文与本地PDF；重点检查 DOME §3、OccFM §3／§4.2／附录G、IR-WM §III及实验协议。架构同步依据当前源码、README和2026-10-31 DiT 迁移记录，旧实验事实仍按原始记录归属。此次仅同步文档，未新增训练、仿真或三篇论文复现实验，也不据此判断训练进程的实时状态。
 
 对原文“未见该机制”的判断仅限上述方法与目标定义；不外推为作者所有版本、所有仓库分支或全领域都不存在。三个原始研究是方法事实的一手来源，不能独立证明本项目优越性。更广泛相关工作见既有[科学问题与解决机制](ReactOccFlow科学问题与解决机制.md)与[参考文献清单](ReactOccFlow参考文献.md)，本次未重新核验其中其余文献。
 

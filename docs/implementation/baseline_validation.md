@@ -1,5 +1,7 @@
 # 完整兼容基线评测
 
+> 历史实验记录：本页结果由移除前的原始基线生成，输出和来源归档保留。用户已要求删除 U-Net，当前包不再提供该主干、包装器或评测命令。本页不代表新 DiT 的预测成绩，当前状态见 [删除记录](2026-10-31-remove-unet.md)。
+
 日期：2026-10-28。两个模型均完成 **4219/4219** 个窗口，来自官方 validation 的150个场景。使用独立复制的原始权重与逐帧 ego latent 缓存；不是 E0 联合模型的性能结果。
 
 | 条件模型 | camera-mask standard pooled mIoU | camera-mask逐时刻mIoU均值 | unmasked legacy逐时刻mIoU均值 |

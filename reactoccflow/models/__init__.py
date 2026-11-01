@@ -1,5 +1,6 @@
-"""Self-contained pretrained occupancy models."""
+"""Standard DiT world model and its independent occupancy VAE."""
 from .codec import OccupancyCodec
-from .flow import ConditionalFlowMatching
+from .react_flow import ReactFlow
+from .standard_dit import StandardDiT
 
-__all__ = ['OccupancyCodec', 'ConditionalFlowMatching']
+__all__ = ['OccupancyCodec', 'ReactFlow', 'StandardDiT']

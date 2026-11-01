@@ -1,8 +1,8 @@
 # ReactOccFlow：科学问题、解决机制与验证方案
 
-**文档日期：2026-10-27****对应方案**：[ReactOccFlow方案.md](./ReactOccFlow方案.md)**对应计划**：[ReactOccFlow 独立工程详细实施计划](./docs/superpowers/plans/2026-10-27-reactoccflow-implementation-plan.md)**文献依据**：[ReactOccFlow 参考文献（30 篇）](./ReactOccFlow参考文献.md)
+**创建日期：2026-10-27；架构同步：2026-10-31。** 对应[方案](./ReactOccFlow方案.md)、[实施计划](./docs/superpowers/plans/2026-10-27-reactoccflow-implementation-plan.md)与[参考文献](./ReactOccFlow参考文献.md)。当前实现采用标准 DiT，旧 U-Net 训练与新 DiT 的证据分别记录于[迁移说明](./docs/implementation/2026-10-31-standard-dit.md)。
 
-> 本文是研究设计说明，不是实验结果报告。“解决”指拟采用的建模与验证路径；所有性能收益、机制解释和贡献强度都需要实验确认。文献编号沿用已有的 30 篇参考文献清单。本次只保存说明文档，不开展代码开发、安装、训练或数据生成。
+> 本文是研究设计说明，不是实验结果报告。“解决”指拟采用的建模与验证路径；所有性能收益、机制解释和贡献强度都需要实验确认。文献编号沿用已有的 30 篇参考文献清单。本次同步修改 Markdown，不新增训练或实验结果。
 
 ## 1. 本篇论文究竟研究什么
 
@@ -212,7 +212,20 @@ $$
 
 存在性采用单独的概率输出，训练时监督可见/有效状态；不能通过删除困难目标来规避预测误差。航向在解码时归一化正余弦并恢复角度，静止目标需要稳定的方向处理。
 
-网络保留 occupancy 时空主干，在中间特征层引入 actor tokens 与双向 cross-attention：occupancy 为主体运动提供道路与障碍上下文，actor 状态为局部 occupancy 提供可解释的动态信息。首版交互维度为 128、4 个注意力头、2 层交互模块；这些是工程起点，不是理论最优值。
+当前 occupancy 网络为标准 DiT：`16×50×50` latent 按 `5×5` 空间 patch 投影到 256 维，12 个历史/带噪未来槽共形成 1,200 个 token，经 8 层、8 头 DiT 的全局时空 self-attention 建模。所有层保持固定 token 数与宽度；没有 U-Net 的多尺度编码/解码及跨尺度跳连。生成时间与候选自车轨迹用于条件调制。
+
+actor 历史、当前观测 mask、类别、尺寸、带噪未来运动状态、物理未来槽位、生成时间和候选轨迹共同组成 48 个 128 维 token。默认在第 4 个 DiT Block 后插入两层、4 头交互模块，分别执行 actor self-attention、同步双向 cross-attention 和 actor FFN：
+
+| 计算 | Q 来源 | K/V 来源 | 更新内容 |
+| --- | --- | --- | --- |
+| occupancy self-attention | occupancy | occupancy | 场景空间与时间关联 |
+| actor self-attention | actor | actor | 参与者及其未来槽位关联，屏蔽无效 actor |
+| occupancy → actor cross-attention | actor | occupancy | 用场景上下文更新 actor |
+| actor → occupancy cross-attention | occupancy | actor | 用主体运动更新场景 |
+
+两路 cross-attention 从同一轮归一化状态计算，再分别通过可学习门控残差更新。occupancy 先由 256 维投影到 128 维，经过两层交互后只将增量回投至 256 维并继续后 4 层 DiT。两组模态 token 没有拼接成一条共同做 self-attention 的序列；候选轨迹通过条件编码注入，也不是第三组 cross-attention token。配置数值属于工程起点，不是理论最优值。
+
+VAE 仍只有一套：历史观测和未来训练标签分别经同一 encoder 生成缓存，训练 step 读取 latent；DiT patch 投影和输出 unpatchify 只在 latent/token 之间转换。预测 occupancy 端点经原 VAE decoder 得到连续 logits 后计算一致性，actor 则使用状态 MLP 和独立输出头。采样仅编码已有观测，不使用未来 occupancy 标签。
 
 ### 6.3 Flow Matching 的训练目标
 

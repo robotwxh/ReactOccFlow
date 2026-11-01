@@ -1,5 +1,7 @@
 # ReactOccFlow：面向闭环驾驶的反应式占据流世界模型
 
+更新日期：2026-10-31。研究主干现为标准 DiT，采用模态内 self-attention 与 occupancy–actor 双向 cross-attention。本文中的 PlanFlow 学习、动作干预、风险校准及闭环收益属于研究目标；当前 DiT 已通过工程短跑验收，尚无全量训练或研究效果结论。旧 U-Net 实验独立保留，不能作为 DiT 的训练进度。实现与验证边界见 [标准 DiT 迁移记录](docs/implementation/2026-10-31-standard-dit.md)。
+
 ## 1. 研究动机
 
 Flow Matching（FM）已经被用于驾驶视频、LiDAR、occupancy 以及 world-action 模型，但现有工作对“自车动作如何改变周围交通参与者反应”的显式建模仍然不足。
@@ -44,7 +46,7 @@ $$
 
 ### 3.1 场景编码器
 
-输入包括：
+完整系统拟使用的输入包括：
 
 - 历史多相机和 LiDAR 特征；
 - 当前 BEV/occupancy 特征；
@@ -53,6 +55,8 @@ $$
 - 当前自车状态。
 
 编码器输出场景 latent $S_0$，并保留 scene-centric 坐标系和 ego-centric 坐标系之间的 SE(2) 变换。
+
+当前研究实现使用 E0 坐标下的 oracle occupancy latent 和当前/历史 actor 观测。真实传感器前端、地图/导航接入和训练后的感知质量仍需后续验证。只有一套 occupancy VAE：历史观测与未来训练标签各自经同一编码器离线缓存，未来标签只用于监督。actor 通过状态编码 MLP 构造 token，不经过 occupancy VAE。
 
 ### 3.2 PlanFlow：自车候选轨迹生成
 
@@ -76,7 +80,34 @@ $$
 
 - $O$：未来语义 occupancy latent；
 - $A$：周围车辆和行人的轨迹 token；
-- $D$：动态目标的速度、加速度或其他运动状态。
+- $D$：由 actor 状态中的速度及其时间差分得到的运动量；当前不另设独立的 $D$ 生成分支。
+
+当前 occupancy 速度网络采用标准 DiT：
+
+- 将 6 个历史槽与 6 个带噪未来槽组成的 latent 序列切成空间 patch；单帧 latent 为 `16×50×50`，patch 为 `5×5`，每块 `400→256` 线性投影，共得到 1,200 个 token。
+- 在固定 token 分辨率上堆叠 8 层、256 维、8 头的 DiT Block。occupancy token 之间做全局时空 self-attention；生成时间和候选轨迹通过条件编码调制 adaLN。
+- 8 个当前观测选中 actor、6 个未来槽构成 48 个 128 维 token。第 4 个 DiT Block 后接两层、4 头交互模块，每层先做 masked actor self-attention，再同步计算两路 cross-attention，最后更新 actor FFN。
+- actor 更新使用 `Q=actor, K/V=occupancy`；occupancy 更新使用 `Q=occupancy, K/V=actor`。occupancy 在交互前投影为 128 维，交互增量回投到 256 维后进入后 4 层 DiT。
+- occupancy 和 actor 保持两条 token 序列；分别输出 occupancy/actor 的生成流速度，actor 存在性由独立 head 输出。occupancy 输出投影与 unpatchify 恢复 latent 张量形状，随后通过 FM 采样得到未来 latent，再交给原 VAE decoder。
+
+```mermaid
+flowchart LR
+    H[历史 occupancy] --> V[同一 VAE 编码器／离线缓存]
+    V --> P[历史 latent 与带噪未来 latent 的 patch 投影]
+    P --> D1[DiT 第 1–4 层：occupancy self-attention]
+    AH[actor 历史、带噪状态、时间与候选条件] --> AT[48 个 actor token]
+    AT --> X[交互 ×2：actor self-attention＋双向 cross-attention＋actor FFN]
+    D1 --> X
+    X --> D2[DiT 第 5–8 层：occupancy self-attention]
+    D2 --> O[输出投影与 unpatchify：occupancy 速度]
+    X --> A[actor 速度与存在性 head]
+    O --> F[仅积分未来的 FM 采样]
+    A --> F
+    F --> Z[未来 latent 与 actor 状态]
+    Z --> VD[同一 VAE 的 decoder：恢复 occupancy]
+```
+
+DiT patch 投影是 latent 到 token 的线性映射，不是第二套 VAE。训练 step 不重新运行 VAE encoder；冻结的 decoder 对预测端点解码，以计算可微一致性损失。
 
 Flow Matching 目标为：
 
@@ -143,7 +174,7 @@ $$
 建议先限制规模：
 
 - 预测时长 3 秒；
-- occupancy 分辨率 0.5 m；
+- 当前主实验 occupancy 分辨率 0.4 m，保持 `200×200×16` 网格与已有 VAE 兼容；0.5 m 作为重新制备标签与缓存后的单独消融；
 - 最近 8 个交通参与者；
 - 每个场景 8 条候选自车轨迹；
 - 4 或 8 步 ODE 采样。
@@ -216,6 +247,8 @@ $$
 ### 阶段二：加入联合生成
 
 将邻居轨迹 token 接入 occupancy flow，并比较并行生成和联合生成两种结构。
+
+研究主干采用上述标准 DiT，从随机初始化训练 occupancy 与 actor 分支；VAE 保持冻结。OccFM/U-Net 的可运行兼容分支已按用户要求删除；其既有检查点、训练曲线和源码档案仅作为历史对照，不属于新 DiT。
 
 ### 阶段三：加入交互约束
 

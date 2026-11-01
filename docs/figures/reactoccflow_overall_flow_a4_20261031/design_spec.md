@@ -1,5 +1,7 @@
 # ReactOccFlow - Design Spec
 
+> 2026-10-31：本规格内容已同步为标准 DiT 与 occupancy–actor 注意力分工。现有 SVG/预览/导出文件仍反映旧 U-Net 版本；本次仅更新 Markdown，下列网络内容是重生成图件的依据，不是已有图件已经同步的声明。
+
 ## I. Project Information
 
 | Item | Value |
@@ -107,7 +109,7 @@ Formula policy: text-only。使用 Unicode 与 tspan 结构，保持公式可编
 - ① y174–524：观测→候选条件→未来输出；给出输入尺寸和目标定义。
 - ② y540–950：类别/高度编码→Swin encoder→μ latent→decoder→semantic logits。
 - ③ y966–1346：双模态噪声/目标→共享线性流→条件向量场→损失；下排连续端点约束。
-- ④ y1362–2712：上排实际 U-Net/actor 分支；下排 DiT、双向 interaction、Swin 三张模块展开图。
+- ④ y1362–2712：上排标准 DiT/actor 两分支，标明第 4 层后的双向 cross-attention；下排 DiT self-attention、双向 interaction、Swin 三张模块展开图。
 - ⑤ y2728–3168：候选→ODE→解码→碰撞事件→校准→筛选；下排控制、回退与闭环目标。
 - ⑥ y3184–3446：数据划分、动作干预、评价与消融。
 - 分区间距16；普通模块内边距16–24；连线不穿过文字；残差连线绕行模块边缘。
@@ -123,7 +125,7 @@ Formula policy: text-only。使用 Unicode 与 tspan 结构，保持公式可编
 | ---- | -------- | ---- | ------------- | ----- |
 | P01 | no-template-match | none | 用户提供的两张对话图片是样式参考 | 按实际源码手工构建网络与流程，无数据图表模板 |
 
-不使用通用时间线、金字塔或循环模板：这些结构不能表达本项目的 U-Net skip、张量重排与同步双向交互。
+版式须表达固定分辨率的 DiT 层堆叠、token 编解码、条件调制与同步双向交互；不再绘制旧 U-Net 的下采样、上采样与跨尺度 skip。DiT Block 内的残差仍需保留。
 
 ## VIII. Image Resource List
 
@@ -137,10 +139,10 @@ Formula policy: text-only。使用 Unicode 与 tspan 结构，保持公式可编
 - Source: sources/source_intake.md；来源路径与对应事实由该文件列明。
 - 核心信息：候选 ego 动作条件下，以共享时间的联合流生成 occupancy 与 actor 世界，交由事件风险与候选筛选支持规划。
 - ①输入：6槽occupancy历史/4有效、8actor×4时刻、6未来时刻、候选8+停车1。当前actor选择只取观测。
-- ②VAE：18类8维+高度4维；BEV128；Swin encoder depths2/6、200→100→50；μ16×50×50；decoder50→200；18类logits。
+- ②VAE：同一套18类8维+高度4维编码、Swin encoder depths2/6、200→100→50、μ16×50×50、decoder50→200、18类logits。历史观测与未来训练标签离线编码；训练读取 latent，预测端点解码；patch 投影不画成第二套 VAE。
 - ③训练：独立模态噪声，共享t；直线插值；velocity回归与existence；连续端点经冻结decoder取得三类一致性；显示总损失权重。
-- ④核心：occupancy stem、两个down层、25×25中层、两个up层与skip；actor51维历史及噪声/时间/动作/slot编码；middle7500 occ tokens和48 actor tokens；128维4头2层双向interaction；输出v_Z/v_A/existence。
-- ④细节：时空reshape、8头AdaLN DiT、QKV与FFN残差；actor自注意力、同步双向cross的Q/K/V、门控残差与delta回投；VAE W-MSA/SW-MSA与残差。
+- ④核心：occupancy latent 按5×5 patch线性投影400→256，12槽共1200 token；DiT第1–4层→两层interaction→第5–8层→adaLN输出投影/unpatchify。actor51维历史及噪声/时间/动作/slot编码形成48个128维token；cross交互为128维4头，delta回投256维。输出v_Z/v_A/existence。
+- ④细节：occupancy全局时空self-attention为1200 token、8头；actor masked self-attention为48 token、4头；双向cross分别标注Q=actor/KV=occupancy与Q=occupancy/KV=actor，计算来自同轮状态；门控残差、actor FFN、delta回投均展开。两模态不拼接做共同self-attention。VAE另展W-MSA/SW-MSA与残差。
 - ⑤推理：每候选8世界、8次ODE、future-only积分；decoded occupancy与actor车体风险；平滑频率与独立校准；冻结阈值；轨迹选择和刹停；bridge/control与目标闭环。
 - ⑥支持：数据划分与训练统计；CARLA反事实按origin分组；occ/actor/响应/校准/闭环指标及结构/预算消融。
 - 实现边界：learned PlanFlow、真实LiDAR latent学习、反事实采集和闭环实验均显式待完成；不陈述当前实时或因果效果。

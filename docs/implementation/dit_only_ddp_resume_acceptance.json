@@ -1,0 +1,30 @@
+{
+  "passed": true,
+  "backbone": "dit",
+  "dit": {
+    "in_channels": 16,
+    "input_size": 50,
+    "frames": 12,
+    "trajectory_length": 6,
+    "patch_size": 5,
+    "hidden_size": 256,
+    "depth": 8,
+    "num_heads": 8,
+    "mlp_ratio": 4.0,
+    "activation_checkpointing": true
+  },
+  "world_size": 2,
+  "global_step": 4,
+  "continuous_vs_2_plus_2_steps": "bitwise equal model, EMA, optimizer, scheduler and both rank RNG states",
+  "compared_tensors": 855,
+  "continuous_best_tune_loss": 4.4885978014785595,
+  "resumed_best_tune_loss": 4.488597743830838,
+  "configuration_matches": true,
+  "elapsed_seconds": 177.44233684497885,
+  "concurrent_dit_smoke": true,
+  "effective_batch_size": 8,
+  "scope": "4 optimizer steps, 32 real train and 8 real tune windows; engineering subset, not formal training",
+  "validation_scalar_absolute_difference": 5.764772126326534e-08,
+  "validation_scalar_absolute_tolerance": 1e-06,
+  "validation_scalars_bitwise_equal": false
+}

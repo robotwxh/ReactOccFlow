@@ -3,6 +3,22 @@
 - Canvas format: a4
 - Created: 20261031
 
+## Architecture documentation update: 2026-10-31
+
+Markdown source facts, layout specifications and speaker notes now describe the
+standard DiT model: 1,200 occupancy tokens, eight 256-dimensional blocks with
+eight attention heads, and two actor interaction modules after block 4. The
+model uses modality-internal self-attention and bidirectional cross-attention
+between occupancy and actor tokens, with one shared occupancy VAE.
+
+**The existing SVG/rendered/exported artifacts were generated for the earlier
+U-Net architecture and have not been regenerated in this Markdown update.**
+They must not be presented as diagrams of the current DiT. Regeneration should
+use the updated `sources/source_intake.md`, `design_spec.md`, `spec_lock.md` and
+`notes/` documents. Original export/source-hash records remain historical evidence
+for the earlier artifacts. Current code and acceptance are described in the
+[DiT migration record](../../implementation/2026-10-31-standard-dit.md).
+
 ## Directories
 
 - `svg_output/`: raw SVG output

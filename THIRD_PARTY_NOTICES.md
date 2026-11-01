@@ -10,6 +10,10 @@ Copied Swin source files retain their Microsoft copyright and MIT license header
 
 Pretrained resources were copied into independent ordinary files. Their original paths, sizes and content hashes are in `docs/provenance/resources.json`. Dataset and pretrained model access remain subject to the respective upstream terms.
 
+The standard isotropic DiT added on 2026-10-31 reuses the independently migrated OccFM `DiTBlock`, attention, MLP and position/time/trajectory embedding dependency closure. Its source snapshots and adaptation details are in `docs/provenance/standard_dit_sources.json`. Project-owned patchification, output layer and actor integration do not remove the upstream licensing restrictions on reused components. No DiT image-generation weights or external DiT repository were imported.
+
+At the user's later request, the copied U-Net world backbone, its wrapper and dedicated runtime commands/configurations were removed. The remaining VAE, DiT blocks and shared mathematical/diagnostic utilities retain their upstream attribution and restrictions. Removal inventory, pre-removal hashes and the helper relocation are recorded in `docs/provenance/remove_unet_sources.json`; earlier source manifests describe historical copies and are not declarations that removed files remain executable.
+
 Academic reference: Tianran Liu, Shengwen Zhao, Nicholas Rhinehart, *Towards foundational LiDAR world models with efficient latent flow matching*, arXiv:2506.23434. Full references: `ReactOccFlow参考文献.md`.
 
 ## IR-WM

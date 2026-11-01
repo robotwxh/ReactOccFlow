@@ -1,0 +1,80 @@
+{
+  "passed": true,
+  "backbone": "dit",
+  "loss": 3.3301944732666016,
+  "decoded_logits_shape": [
+    1,
+    200,
+    200,
+    16,
+    18
+  ],
+  "sample_shapes": {
+    "future_latents": [
+      1,
+      1,
+      6,
+      16,
+      50,
+      50
+    ],
+    "actor_future": [
+      1,
+      1,
+      8,
+      6,
+      6
+    ],
+    "actor_existence": [
+      1,
+      1,
+      8,
+      6
+    ]
+  },
+  "loaded_modules": {
+    "reactoccflow": "/tmp/reactoccflow-standard-dit-isolation-y97qlpj_/env/lib/python3.10/site-packages/reactoccflow/__init__.py",
+    "reactoccflow.models.modules": "/tmp/reactoccflow-standard-dit-isolation-y97qlpj_/env/lib/python3.10/site-packages/reactoccflow/models/modules/__init__.py",
+    "reactoccflow.models.modules.embedding.voxel_height_sem_embed": "/tmp/reactoccflow-standard-dit-isolation-y97qlpj_/env/lib/python3.10/site-packages/reactoccflow/models/modules/embedding/voxel_height_sem_embed.py",
+    "reactoccflow.models.modules.embedding": "/tmp/reactoccflow-standard-dit-isolation-y97qlpj_/env/lib/python3.10/site-packages/reactoccflow/models/modules/embedding/__init__.py",
+    "reactoccflow.models.modules.base": "/tmp/reactoccflow-standard-dit-isolation-y97qlpj_/env/lib/python3.10/site-packages/reactoccflow/models/modules/base/__init__.py",
+    "reactoccflow.models.modules.base.swin_transformerbase": "/tmp/reactoccflow-standard-dit-isolation-y97qlpj_/env/lib/python3.10/site-packages/reactoccflow/models/modules/base/swin_transformerbase.py",
+    "reactoccflow.models._utils": "/tmp/reactoccflow-standard-dit-isolation-y97qlpj_/env/lib/python3.10/site-packages/reactoccflow/models/_utils.py",
+    "reactoccflow.models.modules.base.others": "/tmp/reactoccflow-standard-dit-isolation-y97qlpj_/env/lib/python3.10/site-packages/reactoccflow/models/modules/base/others.py",
+    "reactoccflow.models.modules.base.res_layersbase": "/tmp/reactoccflow-standard-dit-isolation-y97qlpj_/env/lib/python3.10/site-packages/reactoccflow/models/modules/base/res_layersbase.py",
+    "reactoccflow.models.ops": "/tmp/reactoccflow-standard-dit-isolation-y97qlpj_/env/lib/python3.10/site-packages/reactoccflow/models/ops/__init__.py",
+    "reactoccflow.models.ops.flash_attention": "/tmp/reactoccflow-standard-dit-isolation-y97qlpj_/env/lib/python3.10/site-packages/reactoccflow/models/ops/flash_attention/__init__.py",
+    "reactoccflow.models.ops.flash_attention.flash_attention": "/tmp/reactoccflow-standard-dit-isolation-y97qlpj_/env/lib/python3.10/site-packages/reactoccflow/models/ops/flash_attention/flash_attention.py",
+    "reactoccflow.models.modules.base.attn_base": "/tmp/reactoccflow-standard-dit-isolation-y97qlpj_/env/lib/python3.10/site-packages/reactoccflow/models/modules/base/attn_base.py",
+    "reactoccflow.models.modules.base.temporal_base": "/tmp/reactoccflow-standard-dit-isolation-y97qlpj_/env/lib/python3.10/site-packages/reactoccflow/models/modules/base/temporal_base.py",
+    "reactoccflow.models.modules.encoders.SwinSingleFrameDownV2": "/tmp/reactoccflow-standard-dit-isolation-y97qlpj_/env/lib/python3.10/site-packages/reactoccflow/models/modules/encoders/SwinSingleFrameDownV2.py",
+    "reactoccflow.models.modules.encoders": "/tmp/reactoccflow-standard-dit-isolation-y97qlpj_/env/lib/python3.10/site-packages/reactoccflow/models/modules/encoders/__init__.py",
+    "reactoccflow.models.modules.decoders.SwinSingleFrameUpV2": "/tmp/reactoccflow-standard-dit-isolation-y97qlpj_/env/lib/python3.10/site-packages/reactoccflow/models/modules/decoders/SwinSingleFrameUpV2.py",
+    "reactoccflow.models.modules.decoders": "/tmp/reactoccflow-standard-dit-isolation-y97qlpj_/env/lib/python3.10/site-packages/reactoccflow/models/modules/decoders/__init__.py",
+    "reactoccflow.models.modules.quantization.vae_quant": "/tmp/reactoccflow-standard-dit-isolation-y97qlpj_/env/lib/python3.10/site-packages/reactoccflow/models/modules/quantization/vae_quant.py",
+    "reactoccflow.models.modules.quantization": "/tmp/reactoccflow-standard-dit-isolation-y97qlpj_/env/lib/python3.10/site-packages/reactoccflow/models/modules/quantization/__init__.py",
+    "reactoccflow.models.codec": "/tmp/reactoccflow-standard-dit-isolation-y97qlpj_/env/lib/python3.10/site-packages/reactoccflow/models/codec.py",
+    "reactoccflow.models.modules.base.dit": "/tmp/reactoccflow-standard-dit-isolation-y97qlpj_/env/lib/python3.10/site-packages/reactoccflow/models/modules/base/dit.py",
+    "reactoccflow.models.modules.base.postion_embed": "/tmp/reactoccflow-standard-dit-isolation-y97qlpj_/env/lib/python3.10/site-packages/reactoccflow/models/modules/base/postion_embed.py",
+    "reactoccflow.models.modules.transition_models.FlowMatchingV2": "/tmp/reactoccflow-standard-dit-isolation-y97qlpj_/env/lib/python3.10/site-packages/reactoccflow/models/modules/transition_models/FlowMatchingV2.py",
+    "reactoccflow.models.modules.transition_models": "/tmp/reactoccflow-standard-dit-isolation-y97qlpj_/env/lib/python3.10/site-packages/reactoccflow/models/modules/transition_models/__init__.py",
+    "reactoccflow.models.flow": "/tmp/reactoccflow-standard-dit-isolation-y97qlpj_/env/lib/python3.10/site-packages/reactoccflow/models/flow.py",
+    "reactoccflow.models": "/tmp/reactoccflow-standard-dit-isolation-y97qlpj_/env/lib/python3.10/site-packages/reactoccflow/models/__init__.py",
+    "reactoccflow.models.standard_dit": "/tmp/reactoccflow-standard-dit-isolation-y97qlpj_/env/lib/python3.10/site-packages/reactoccflow/models/standard_dit.py",
+    "reactoccflow.models.joint_transition": "/tmp/reactoccflow-standard-dit-isolation-y97qlpj_/env/lib/python3.10/site-packages/reactoccflow/models/joint_transition.py",
+    "reactoccflow.models.react_flow": "/tmp/reactoccflow-standard-dit-isolation-y97qlpj_/env/lib/python3.10/site-packages/reactoccflow/models/react_flow.py",
+    "reactoccflow.geometry": "/tmp/reactoccflow-standard-dit-isolation-y97qlpj_/env/lib/python3.10/site-packages/reactoccflow/geometry/__init__.py",
+    "reactoccflow.losses.consistency": "/tmp/reactoccflow-standard-dit-isolation-y97qlpj_/env/lib/python3.10/site-packages/reactoccflow/losses/consistency.py",
+    "reactoccflow.losses": "/tmp/reactoccflow-standard-dit-isolation-y97qlpj_/env/lib/python3.10/site-packages/reactoccflow/losses/__init__.py",
+    "reactoccflow.training.joint": "/tmp/reactoccflow-standard-dit-isolation-y97qlpj_/env/lib/python3.10/site-packages/reactoccflow/training/joint.py",
+    "reactoccflow.training": "/tmp/reactoccflow-standard-dit-isolation-y97qlpj_/env/lib/python3.10/site-packages/reactoccflow/training/__init__.py"
+  },
+  "isolated_python": "/tmp/reactoccflow-standard-dit-isolation-y97qlpj_/env/bin/python",
+  "scope": "Installed wheel: real-cache CPU optimization with decoded consistency, sampling and VAE decoding; no checkout or reference code loaded",
+  "wheel": "outputs/architecture_migration/2026-10-31-standard-dit/dist/reactoccflow-0.1.0-py3-none-any.whl",
+  "wheel_sha256": "a3594da9b96e9a68e6273e4d4d6399956ba0bb6791f8e21d057f4dc72b10c6bd",
+  "wheel_entries": 64,
+  "isolated_root": "/tmp/reactoccflow-standard-dit-isolation-y97qlpj_",
+  "reference_directories_present": false,
+  "installed_training_environment_modified": false
+}

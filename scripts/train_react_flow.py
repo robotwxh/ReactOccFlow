@@ -19,6 +19,7 @@ import time
 
 import numpy as np
 import torch
+import yaml
 import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel
 from torch.utils.data import DataLoader, Dataset, Sampler, Subset
@@ -185,14 +186,14 @@ def _gather_rng(generator, device, rank, world_size):
     return gathered if rank == 0 else None
 
 
-def _runtime_fingerprint(train_cache, tune_cache, trunk_checkpoint, codec_checkpoint):
+def _runtime_fingerprint(train_cache, tune_cache, codec_checkpoint):
     root = Path(__file__).resolve().parents[1]
     paths = {
         train_cache / "manifest.json", train_cache / "settings.json",
         tune_cache / "manifest.json", tune_cache / "settings.json",
-        Path(trunk_checkpoint), Path(codec_checkpoint),
+        Path(codec_checkpoint),
         root / "scripts/train_react_flow.py", root / "scripts/train_joint_smoke.py",
-        root / "scripts/train_smoke.py",
+        root / "reactoccflow/training/diagnostics.py",
         root / "reactoccflow/training/engine.py", root / "reactoccflow/training/joint.py",
         root / "pyproject.toml", root / "requirements-lock.txt",
         *root.joinpath("reactoccflow").rglob("*.py"),
@@ -350,9 +351,10 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--train-cache", default="data/research/e0_full/train")
     parser.add_argument("--tune-cache", default="data/research/e0_full/tune")
-    parser.add_argument("--trunk-checkpoint", default="assets/checkpoints/occfm_history.ckpt")
+    parser.add_argument("--backbone", choices=["dit"], default="dit")
+    parser.add_argument("--dit-config", type=Path, help="Optional flat YAML of standard DiT architecture options")
     parser.add_argument("--codec-checkpoint", default="assets/checkpoints/occfm_vae.ckpt")
-    parser.add_argument("--output", default="outputs/reactflow_joint")
+    parser.add_argument("--output", help="Fresh run directory; defaults to outputs/reactflow_dit/seed_<seed>")
     parser.add_argument("--resume", default=None)
     parser.add_argument("--max-steps", type=int, default=100_000)
     parser.add_argument("--warmup-steps", type=int, default=1000)
@@ -371,6 +373,14 @@ def main(argv=None):
     parser.add_argument("--seed", type=int, default=2026)
     parser.add_argument("--device", choices=("cuda", "cpu"), default="cuda")
     args = parser.parse_args(argv)
+    dit_options = None
+    if args.dit_config is not None:
+        dit_options = yaml.safe_load(args.dit_config.read_text())
+        allowed = {'patch_size', 'hidden_size', 'depth', 'num_heads', 'mlp_ratio', 'activation_checkpointing'}
+        if not isinstance(dit_options, dict) or set(dit_options) - allowed:
+            parser.error('--dit-config must contain only patch_size, hidden_size, depth, num_heads, mlp_ratio, activation_checkpointing')
+    if args.output is None:
+        args.output = f'outputs/reactflow_dit/seed_{args.seed}'
     if min(args.max_steps, args.eval_interval, args.patience, args.batch_size, args.grad_accum, args.decode_chunk) < 1:
         parser.error("steps, intervals, batch sizes, patience and decode chunk must be positive")
     if args.warmup_steps < 0 or args.warmup_steps >= args.max_steps or args.workers < 0:
@@ -424,14 +434,16 @@ def main(argv=None):
                                    sampler=RankPartitionSampler(tune_dataset, rank, world_size), device=device,
                                    seed=args.seed + 900_001 + rank)
 
-        flow = ReactFlow(normalization=normalization).to(device)
-        loading = flow.load_pretrained_trunk(args.trunk_checkpoint, weights="state_dict")
+        flow = ReactFlow(normalization=normalization, backbone=args.backbone,
+                         dit_config=dit_options).to(device)
+        loading = {'initialization': 'standard DiT from scratch'}
         flow.freeze_trunk(frozen=False)
         codec = OccupancyCodec().to(device).eval()
         codec.load_pretrained(args.codec_checkpoint, weights="state_dict")
         objective = JointTrainingAdapter(flow, codec, decode_chunk=args.decode_chunk,
                                          require_frozen_trunk=False, record_components=False).to(device)
-        optimizer = build_react_flow_optimizer(flow, trunk_lr=2e-5, new_lr=1e-4, weight_decay=0.01)
+        trunk_lr = 1e-4
+        optimizer = build_react_flow_optimizer(flow, trunk_lr=trunk_lr, new_lr=1e-4, weight_decay=0.01)
         scheduler = build_warmup_cosine_scheduler(optimizer, total_steps=args.max_steps,
                                                   warmup_steps=args.warmup_steps, min_lr_ratio=0.01)
         if world_size > 1:
@@ -449,7 +461,7 @@ def main(argv=None):
                   "batch_size_per_rank": args.batch_size, "gradient_accumulation": args.grad_accum,
                   "effective_batch_size": args.batch_size * args.grad_accum * world_size,
                   "workers": args.workers, "decode_chunk": args.decode_chunk,
-                  "trunk_lr": 2e-5, "new_branch_lr": 1e-4, "weight_decay": 0.01,
+                  "trunk_lr": trunk_lr, "new_branch_lr": 1e-4, "weight_decay": 0.01,
                   "max_grad_norm": 1.0, "ema_decay": 0.9999, "precision": "float32",
                   "minimum_lr_ratio": 0.01, "seed": args.seed, "world_size": world_size,
                   "device_type": args.device, "condition": "logged_ego_action_supervision",
@@ -462,7 +474,10 @@ def main(argv=None):
                   "train_batches_per_rank": training_batch_count,
                   "dropped_tail_microbatches_per_rank": len(train_loader) - training_batch_count}
         config["numerical_settings"] = numerical_settings
-        data_fingerprint = _runtime_fingerprint(train_cache, tune_cache, args.trunk_checkpoint, args.codec_checkpoint)
+        config['backbone'] = args.backbone
+        config['dit'] = (getattr(getattr(flow.transition_model, 'trunk', None), 'config', None)
+                         if hasattr(flow, 'transition_model') else dit_options)
+        data_fingerprint = _runtime_fingerprint(train_cache, tune_cache, args.codec_checkpoint)
         progress = {"global_step": 0, "epoch": 0, "next_batch": 0,
                     "best_tune_loss": math.inf, "bad_evaluations": 0, "evaluations": 0}
         if args.resume:

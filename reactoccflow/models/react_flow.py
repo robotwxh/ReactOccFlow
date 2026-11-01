@@ -17,8 +17,9 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-from .flow import ConditionalFlowMatching, interpolate, shifted_time_grid
+from .flow import interpolate, shifted_time_grid
 from .joint_transition import JointTransition
+from .standard_dit import StandardDiT
 
 
 _OBSERVATION_KEYS = frozenset({
@@ -48,11 +49,9 @@ class ReactFlow(nn.Module):
     actor mask selects slots. ``normalization`` is the train-only statistics
     dictionary with actor_xy/actor_velocity mean/std pairs; None is identity.
 
-    ``transition_model`` optionally supplies a small test/research field with
-    JointTransition's dictionary interface; ``trunk`` supplies a source-compatible
-    occupancy backbone. They are mutually exclusive. No codec/VAE is registered.
-    By default the trunk is trainable in occupancy_only and frozen in joint/parallel.
-    Explicitly freezing the only active occupancy branch is an inference-only setup.
+    The default backbone is a standard isotropic DiT, initialized from scratch
+    and trainable in all modes. ``transition_model`` supplies a custom field; ``trunk``
+    supplies an explicit backbone. No codec/VAE is registered in this module.
     """
     def __init__(self, mode='joint', *, transition_model=None, trunk=None,
                  normalization=None, latent_shape=(16, 50, 50), history_frames=6,
@@ -60,14 +59,14 @@ class ReactFlow(nn.Module):
                  actor_hidden=128, actor_heads=4, interaction_layers=2,
                  latent_scale=10., time_scalar=1000., alpha=3.,
                  occ_weight=1., actor_weight=1., existence_weight=.1,
-                 freeze_pretrained_trunk=None):
+                 freeze_backbone=False, backbone='dit', dit_config=None):
         super().__init__()
         if mode not in {'joint', 'parallel', 'occupancy_only'}:
             raise ValueError('mode must be joint, parallel, or occupancy_only')
         if transition_model is not None and trunk is not None:
             raise ValueError('Provide either transition_model or trunk')
-        if history_frames + future_frames != 12 and transition_model is None:
-            raise ValueError('The source-compatible trunk requires 12 total temporal slots')
+        if backbone != 'dit':
+            raise ValueError('Only standard DiT is supported')
         if len(latent_shape) != 3 or any(int(x) != x or x <= 0 for x in latent_shape):
             raise ValueError('latent_shape must contain positive C,H,W')
         if min(history_frames, future_frames, max_actors, actor_history_frames) < 1:
@@ -85,7 +84,9 @@ class ReactFlow(nn.Module):
         self.transition_model = transition_model if transition_model is not None else JointTransition(
             trunk, mode=mode, future_frames=future_frames, history_frames=history_frames,
             actor_history_frames=actor_history_frames, actor_hidden=actor_hidden,
-            actor_heads=actor_heads, interaction_layers=interaction_layers)
+            actor_heads=actor_heads, interaction_layers=interaction_layers,
+            backbone=backbone, dit_config=dit_config, latent_shape=self.latent_shape)
+        self.backbone = getattr(self.transition_model, 'backbone', 'custom')
         means, scales = [], []
         for name in ('actor_xy', 'actor_velocity'):
             stats = None if normalization is None else normalization.get(name)
@@ -99,35 +100,23 @@ class ReactFlow(nn.Module):
             scales.append(scale)
         self.register_buffer('actor_mean', torch.tensor([*means[0], 0., 0., *means[1]], dtype=torch.float32))
         self.register_buffer('actor_std', torch.tensor([*scales[0], 1., 1., *scales[1]], dtype=torch.float32))
-        if freeze_pretrained_trunk is None:
-            freeze_pretrained_trunk = mode != 'occupancy_only'
         if hasattr(self.transition_model, 'trunk'):
-            self.freeze_trunk(frozen=freeze_pretrained_trunk)
+            self.freeze_trunk(frozen=freeze_backbone)
 
     def freeze_trunk(self, frozen=True):
-        """Freeze the original trunk only; research heads/exchange stay trainable.
+        """Freeze the selected trunk only; actor heads/exchange stay trainable.
 
         In occupancy_only, frozen=True is for inference: all active loss paths
         are then frozen. Pass frozen=False to train that mode.
         """
         if not hasattr(self.transition_model, 'trunk'):
-            raise ValueError('The supplied transition_model has no pretrained trunk')
+            raise ValueError('The supplied transition_model has no DiT trunk')
         self.transition_model.trunk.requires_grad_(not frozen)
         # Source fixed positional embeddings are never trainable.
         self.transition_model.trunk.pos_embed.requires_grad_(False)
         self.transition_model.trunk.temp_embed.requires_grad_(False)
         return self
 
-    def load_pretrained_trunk(self, path, *, weights='state_dict'):
-        """Strict original partition loading; report every newly initialized key."""
-        if not hasattr(self.transition_model, 'trunk'):
-            raise ValueError('The supplied transition_model has no pretrained trunk')
-        trunk = self.transition_model.trunk
-        report = ConditionalFlowMatching(trunk).load_pretrained(path, weights=weights)
-        report['trunk_key_count'] = len(trunk.state_dict())
-        report['new_branch_keys'] = [key for key in self.transition_model.state_dict() if not key.startswith('trunk.')]
-        report['new_branch_initialization'] = 'fresh PyTorch initialization; small nonzero cross-attention gates'
-        return report
 
     def _normalise_actor(self, state):
         return (state - self.actor_mean.to(state)) / self.actor_std.to(state)

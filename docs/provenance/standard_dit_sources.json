@@ -1,0 +1,115 @@
+{
+  "date": "2026-10-31",
+  "request": "Replace research world-model U-Net backbone with standard isotropic DiT.",
+  "searches": [
+    {
+      "repositories": [
+        "OccFM",
+        "IR-WM"
+      ],
+      "patterns": [
+        "class .*DiT",
+        "def (unpatchify|patchify)",
+        "PatchEmbed",
+        "FinalLayer",
+        "adaLN"
+      ],
+      "result": "OccFM supplies DiTBlock, DiTAttention, Mlp, timestep/Fourier/position embeddings and a Swin patch embed; no complete isotropic DiT or unpatchify/adaLN final layer. IR-WM supplies no matching DiT. Existing independently copied dependency closure is reused."
+    }
+  ],
+  "sources": [
+    {
+      "source": "OccFM/forecast/models/modules/base/dit.py",
+      "source_commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "source_sha256": "4d8f7e7f70601afc7f0149e2a1d38b40ab6bec3e59c9eed9193d6333925f419b",
+      "snapshot": "reactoccflow/models/source_snapshots/standard_dit/dit.txt",
+      "snapshot_sha256": "4d8f7e7f70601afc7f0149e2a1d38b40ab6bec3e59c9eed9193d6333925f419b"
+    },
+    {
+      "source": "OccFM/forecast/models/modules/base/attn_base.py",
+      "source_commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "source_sha256": "64289056ad8ad2b07cc2a18df7f5771bbd8f8411e21a1d41f829f794115d8fb8",
+      "snapshot": "reactoccflow/models/source_snapshots/standard_dit/attn_base.txt",
+      "snapshot_sha256": "64289056ad8ad2b07cc2a18df7f5771bbd8f8411e21a1d41f829f794115d8fb8"
+    },
+    {
+      "source": "OccFM/forecast/models/modules/base/others.py",
+      "source_commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "source_sha256": "07473ba923b4a86fd89d69bbb0eb4e1e0ccf905acce958cd8a7240c619013592",
+      "snapshot": "reactoccflow/models/source_snapshots/standard_dit/others.txt",
+      "snapshot_sha256": "07473ba923b4a86fd89d69bbb0eb4e1e0ccf905acce958cd8a7240c619013592"
+    },
+    {
+      "source": "OccFM/forecast/models/modules/base/postion_embed.py",
+      "source_commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "source_sha256": "ac9140d712616df71d5a0851150f68273d44e2a44ad113901c00814c565efdda",
+      "snapshot": "reactoccflow/models/source_snapshots/standard_dit/postion_embed.txt",
+      "snapshot_sha256": "ac9140d712616df71d5a0851150f68273d44e2a44ad113901c00814c565efdda"
+    },
+    {
+      "source": "OccFM/forecast/models/modules/base/swin_transformerbase.py",
+      "source_commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "source_sha256": "0f1a099bbe2569060fd234ab4b4b382663568a406f1b3a5457211d5c2aaa8a9c",
+      "snapshot": "reactoccflow/models/source_snapshots/standard_dit/swin_transformerbase.txt",
+      "snapshot_sha256": "0f1a099bbe2569060fd234ab4b4b382663568a406f1b3a5457211d5c2aaa8a9c"
+    }
+  ],
+  "adaptation_notes": [
+    "Use the already migrated DiTBlock with attention_mode=math; its math branch correctly transposes attention heads before merging. The upstream flash branch flattens B,H,N,D as B,N,H*D without transpose; that branch is not used by the new DiT.",
+    "New linear patchify/unpatchify, zero-initialized adaLN final layer, fixed-resolution global space-time token stack and strict schema are project-owned after reference search. Swin PatchEmbed has a different windowed image contract and is audit-only.",
+    "Reuse owned actor-conditioning and safe bidirectional attention from JointTransition; insert exchanges between DiT blocks instead of an encoder-decoder bottleneck.",
+    "Preserve existing reference notices; unresolved OccFM redistribution terms remain in THIRD_PARTY_NOTICES.md."
+  ],
+  "legacy_source_archive": "outputs/architecture_migration/2026-10-31-standard-dit/legacy_unet_sources.tar.gz",
+  "owned_implementation_sha256": {
+    "reactoccflow/models/standard_dit.py": "bfd7c74b4e1c7b8d6ba0f51bdc85e78f0e78717089a5eb37a478c87246ef02b7",
+    "reactoccflow/models/joint_transition.py": "346dfcd87b4f5d5731c2cb6559a05df35e383bcb2ccb9fb8e2c4540e3e6c7908",
+    "reactoccflow/models/react_flow.py": "3d6a5e255fb7dec7354d88cb819a327669797e930a125ec3629a3618375aa7a4",
+    "scripts/train_react_flow.py": "6c87c9ed6fe4b83c289b7b78a97f7a7766ff50e90a570a87830fcfe2378c394d",
+    "scripts/check_react_flow.py": "47c179923f655a900597012b2c4e291e8cf68574e7881152adc247f8733c0d7c",
+    "scripts/check_consistency.py": "bc172fbf24707576451f2fa50dc621647d979d36b767e23848ecd72b43d49c74",
+    "scripts/train_joint_smoke.py": "2434dfc2ee6ce9e7d185e069a3026231af962802682e8aab149b751f634a861f",
+    "scripts/verify_isolation.py": "daf067d35a4d28f9f051e82106715f64d7a1d662bff9669a0d7eba2d556e077f",
+    "tests/test_standard_dit.py": "04767aec17b7f9f19a3f2e82286a1c544bacb4064f68422e1d438badb2e89eb8",
+    "tests/test_react_flow.py": "96eb723f3f3a769edf708bd45a8698004bbca47acb3cb80d8514045deb95e28b",
+    "configs/dit.yaml": "9b5ecd7ae1862e621d08a51f1d0547c6afb51d6767a33e68766404448a0059d6",
+    "configs/react_flow_joint.yaml": "ed6dacaeb406907f478b28bb87e96d50a5b0299e273c484a7e981ae1cc722f4f",
+    "configs/react_flow_parallel.yaml": "5af1024793b1a41d7cac93e04949b14c90f076580db5d4163d705d1097f7a628",
+    "configs/react_flow_occupancy_only.yaml": "9de273a391ee8716300b68b502c1b16c7d8cc90381df6215973bc2f322a9259d"
+  },
+  "reused_dependency_closure": [
+    {
+      "owned_file": "reactoccflow/models/modules/base/dit.py",
+      "owned_sha256": "4d8f7e7f70601afc7f0149e2a1d38b40ab6bec3e59c9eed9193d6333925f419b",
+      "prior_provenance": "docs/provenance/model_sources.json"
+    },
+    {
+      "owned_file": "reactoccflow/models/modules/base/attn_base.py",
+      "owned_sha256": "4fac2f147c9e80c7dc26d3e48be24a68dd5485ef52ae6ca985a19795e1bcd761",
+      "prior_provenance": "docs/provenance/model_sources.json"
+    },
+    {
+      "owned_file": "reactoccflow/models/modules/base/others.py",
+      "owned_sha256": "85e431e651bc456e3b8b09a7c111161a4a93c18214fa42b57989e489cce93191",
+      "prior_provenance": "docs/provenance/model_sources.json"
+    },
+    {
+      "owned_file": "reactoccflow/models/modules/base/postion_embed.py",
+      "owned_sha256": "ac9140d712616df71d5a0851150f68273d44e2a44ad113901c00814c565efdda",
+      "prior_provenance": "docs/provenance/model_sources.json"
+    }
+  ],
+  "validation": {
+    "cpu_suite": {
+      "passed": 350,
+      "failed": 0,
+      "seconds": 16.43
+    },
+    "cuda": "docs/implementation/standard_dit_cuda_acceptance.json",
+    "ddp_resume": "docs/implementation/standard_dit_ddp_resume_acceptance.json",
+    "isolation": "docs/implementation/standard_dit_isolation_acceptance.json",
+    "reference_protection": "docs/implementation/standard_dit_reference_audit.json"
+  },
+  "record_status": "historical_initial_dit_migration",
+  "superseded_by": "docs/provenance/remove_unet_sources.json"
+}

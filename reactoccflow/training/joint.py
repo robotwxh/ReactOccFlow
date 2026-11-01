@@ -10,7 +10,7 @@ class JointTrainingAdapter(nn.Module):
     """Expose a scalar training-only API while retaining endpoint gradients."""
 
     def __init__(self, flow, codec, *, consistency=None, decode_chunk=1,
-                 require_frozen_trunk=True, record_components=True):
+                 require_frozen_trunk=False, record_components=True):
         super().__init__()
         self.flow = flow
         self.codec = codec.requires_grad_(False).eval()

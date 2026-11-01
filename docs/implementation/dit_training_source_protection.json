@@ -1,0 +1,21 @@
+{
+  "checked_at": "2026-10-31T20:00:06.202208+08:00",
+  "passed": true,
+  "references": {
+    "OccFM": {
+      "entry_count": 368,
+      "differences": [],
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853"
+    },
+    "IR-WM": {
+      "entry_count": 389,
+      "differences": [],
+      "commit": "94dbbf44d6c22e50db4080e986b3675eadbb4497"
+    }
+  },
+  "installed_package_matches_export": true,
+  "compared_package_files": 58,
+  "isolation_evidence": "docs/implementation/dit_only_isolation.json",
+  "unchanged_wheel_sha256": "2724ee0173760472246108db56872663015acdfcc506bd8c0cf4efa613230881",
+  "formal_runtime_source_manifest": "outputs/reactflow_dit/source_seed_2026.manifest.json"
+}

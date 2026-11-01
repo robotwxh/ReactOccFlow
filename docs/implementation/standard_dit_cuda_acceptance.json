@@ -1,0 +1,57 @@
+{
+  "passed": true,
+  "device": "cuda:0",
+  "backbone": "dit",
+  "configuration": {
+    "in_channels": 16,
+    "input_size": 50,
+    "frames": 12,
+    "trajectory_length": 6,
+    "patch_size": 5,
+    "hidden_size": 256,
+    "depth": 8,
+    "num_heads": 8,
+    "mlp_ratio": 4.0,
+    "activation_checkpointing": true
+  },
+  "parameters": 10878667,
+  "data_index": 8734,
+  "scene": "scene-0509",
+  "token": "3dbd72000fa04af995f5029b9c6fd98c",
+  "losses_fixed_noise": [
+    3.2753446102142334,
+    3.029620409011841,
+    2.873931646347046
+  ],
+  "all_trainable_parameter_tensors_have_finite_gradients": true,
+  "trainable_parameter_tensors": 168,
+  "vae_frozen": true,
+  "sample_shapes": {
+    "future_latents": [
+      1,
+      1,
+      6,
+      16,
+      50,
+      50
+    ],
+    "actor_future": [
+      1,
+      1,
+      8,
+      6,
+      6
+    ],
+    "actor_existence": [
+      1,
+      1,
+      8,
+      6
+    ]
+  },
+  "sampling_reproducible": true,
+  "peak_cuda_allocated_bytes": 4027846656,
+  "elapsed_seconds": 11.647753819008358,
+  "concurrent_legacy_training": true,
+  "scope": "3 real-size CUDA optimization steps with decoded endpoint consistency and 1-NFE inference; not a formal training or performance result"
+}
