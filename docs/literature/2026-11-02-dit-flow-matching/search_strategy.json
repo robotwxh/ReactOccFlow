@@ -1,0 +1,785 @@
+{
+  "checked_on": "2026-11-02",
+  "language": "zh-CN",
+  "workflow": "academic-research-suite/deep-research/lit-review",
+  "review_type": "targeted_integrative_search_not_exhaustive",
+  "scope": "DiT与FM/RF基础及方法创新、视频/物理动态扩展、驾驶与世界动作近邻；2022—2026-11-02",
+  "source_policy": "技术归纳使用论文、正式论文集、出版社记录、作者预印本/项目；待出版社核实的场所单列",
+  "read_scope": "逐篇核对摘要或作者公开方法概述与发表元数据；不声称全部阅读全文或复现",
+  "deduplication": "规范化题名、稳定论文URL/arXiv ID；合并预印本/正式版本及改题版本",
+  "semantic_scholar_status": "单篇Graph API访问不可用，未取得S2 ID，使用题名/稳定ID去重",
+  "queries": [
+    {
+      "q": "\"Scalable Diffusion Models with Transformers\" ICCV 2023"
+    },
+    {
+      "q": "\"Flow Matching for Generative Modeling\" ICLR 2023"
+    },
+    {
+      "q": "\"diffusion transformer\" 2026 architecture representation alignment flow matching site:openreview.net"
+    },
+    {
+      "q": "\"flow matching\" 2026 optimal transport manifold discrete site:proceedings.mlr.press"
+    },
+    {
+      "q": "\"Flow Straight and Fast\" \"ICLR\" 2023",
+      "domains": [
+        "openreview.net"
+      ]
+    },
+    {
+      "q": "\"Improving and generalizing flow-based generative models\" conditional flow matching",
+      "domains": [
+        "openreview.net",
+        "jmlr.org"
+      ]
+    },
+    {
+      "q": "\"Stochastic Interpolants\" \"Journal of Machine Learning Research\""
+    },
+    {
+      "q": "\"Scaling Rectified Flow Transformers\" \"2024\"",
+      "domains": [
+        "proceedings.mlr.press"
+      ]
+    },
+    {
+      "q": "\"Improving and generalizing flow-based generative models\" \"Transactions\"",
+      "domains": [
+        "openreview.net",
+        "arxiv.org"
+      ]
+    },
+    {
+      "q": "\"Scaling Rectified Flow Transformers for High-Resolution Image Synthesis\"",
+      "domains": [
+        "proceedings.mlr.press"
+      ]
+    },
+    {
+      "q": "\"Flow Straight and Fast\" \"ICLR 2023\"",
+      "domains": [
+        "openreview.net"
+      ]
+    },
+    {
+      "q": "\"Stochastic Interpolants: A Unifying Framework\" \"2025\"",
+      "domains": [
+        "jmlr.org"
+      ]
+    },
+    {
+      "q": "\"All are Worth Words\" diffusion",
+      "domains": [
+        "openaccess.thecvf.com"
+      ]
+    },
+    {
+      "q": "\"FiT: Flexible Vision Transformer\" diffusion",
+      "domains": [
+        "proceedings.mlr.press"
+      ]
+    },
+    {
+      "q": "\"SiT: Exploring Flow and Diffusion\" ECCV",
+      "domains": [
+        "ecva.net",
+        "eccv.ecva.net",
+        "openaccess.thecvf.com",
+        "arxiv.org"
+      ]
+    },
+    {
+      "q": "\"PixArt\" \"alpha\" ICLR 2024",
+      "domains": [
+        "openreview.net"
+      ]
+    },
+    {
+      "q": "\"Representation Alignment for Generation\" ICLR",
+      "domains": [
+        "openreview.net"
+      ]
+    },
+    {
+      "q": "\"Diffusion Transformers with Representation Autoencoders\"",
+      "domains": [
+        "openreview.net",
+        "arxiv.org",
+        "papers.nips.cc",
+        "neurips.cc"
+      ]
+    },
+    {
+      "q": "\"Deep Compression Autoencoder\" ICLR 2025",
+      "domains": [
+        "openreview.net"
+      ]
+    },
+    {
+      "q": "\"Scalable Autoencoders for Diffusion Models\"",
+      "domains": [
+        "openaccess.thecvf.com",
+        "openreview.net"
+      ]
+    },
+    {
+      "q": "\"SANA\" \"Linear Diffusion Transformers\" ICLR",
+      "domains": [
+        "openreview.net"
+      ]
+    },
+    {
+      "q": "\"Lumina-T2X\" NeurIPS",
+      "domains": [
+        "papers.nips.cc",
+        "proceedings.neurips.cc",
+        "openreview.net"
+      ]
+    },
+    {
+      "q": "\"Lumina-Next\" conference",
+      "domains": [
+        "openreview.net",
+        "proceedings.mlr.press",
+        "arxiv.org"
+      ]
+    },
+    {
+      "q": "\"Hunyuan-DiT\" conference",
+      "domains": [
+        "openreview.net",
+        "openaccess.thecvf.com",
+        "arxiv.org"
+      ]
+    },
+    {
+      "q": "\"Riemannian Flow Matching\" ICLR 2024",
+      "domains": [
+        "openreview.net"
+      ]
+    },
+    {
+      "q": "\"Discrete Flow Matching\" NeurIPS 2024",
+      "domains": [
+        "proceedings.neurips.cc",
+        "papers.nips.cc"
+      ]
+    },
+    {
+      "q": "\"Fisher Flow Matching\" NeurIPS 2024",
+      "domains": [
+        "proceedings.neurips.cc",
+        "papers.nips.cc"
+      ]
+    },
+    {
+      "q": "\"Flow Matching on General Geometries\" ICLR",
+      "domains": [
+        "openreview.net"
+      ]
+    },
+    {
+      "q": "\"Multisample Flow Matching\" ICLR 2024",
+      "domains": [
+        "openreview.net"
+      ]
+    },
+    {
+      "q": "\"Simulation-Free Schrödinger Bridges\" flow matching",
+      "domains": [
+        "proceedings.mlr.press",
+        "openreview.net"
+      ]
+    },
+    {
+      "q": "\"Functional Flow Matching\" NeurIPS",
+      "domains": [
+        "proceedings.neurips.cc",
+        "papers.nips.cc"
+      ]
+    },
+    {
+      "q": "\"D-Flow: Differentiating\" controlled generation",
+      "domains": [
+        "proceedings.mlr.press"
+      ]
+    },
+    {
+      "q": "\"One Step Diffusion via Shortcut Models\"",
+      "domains": [
+        "openreview.net"
+      ]
+    },
+    {
+      "q": "\"Mean Flows for One-step Generative Modeling\"",
+      "domains": [
+        "openreview.net",
+        "proceedings.neurips.cc",
+        "neurips.cc"
+      ]
+    },
+    {
+      "q": "\"Flow Map Matching\" \"stochastic interpolants\"",
+      "domains": [
+        "openreview.net",
+        "proceedings.mlr.press"
+      ]
+    },
+    {
+      "q": "\"Consistency Flow Matching\" conference",
+      "domains": [
+        "openreview.net",
+        "proceedings.neurips.cc",
+        "proceedings.mlr.press",
+        "arxiv.org"
+      ]
+    },
+    {
+      "q": "\"ToCa\" \"Token-wise Feature Caching\" diffusion",
+      "domains": [
+        "openreview.net",
+        "openaccess.thecvf.com"
+      ]
+    },
+    {
+      "q": "\"FasterCache\" diffusion video generation",
+      "domains": [
+        "openreview.net",
+        "openaccess.thecvf.com"
+      ]
+    },
+    {
+      "q": "\"TeaCache\" \"Timestep Embedding\" diffusion",
+      "domains": [
+        "openaccess.thecvf.com",
+        "openreview.net"
+      ]
+    },
+    {
+      "q": "\"Scalable Autoencoders for Diffusion Models\" LightningDiT",
+      "domains": [
+        "openaccess.thecvf.com",
+        "arxiv.org"
+      ]
+    },
+    {
+      "q": "\"Multisample Flow Matching: Straightening Flows with Minibatch Couplings\""
+    },
+    {
+      "q": "\"Functional Flow Matching for Generative Modeling\""
+    },
+    {
+      "q": "\"FasterCache\" ICLR 2025"
+    },
+    {
+      "q": "\"Scalable Autoencoders for Diffusion Models\""
+    },
+    {
+      "q": "\"PixArt-alpha\" ICLR 2024 paper"
+    },
+    {
+      "q": "\"PixArt-Sigma\" ECCV 2024 paper"
+    },
+    {
+      "q": "\"Latte: Latent Diffusion Transformer\" TMLR"
+    },
+    {
+      "q": "\"Rectified Diffusion: Straightness\" ICLR 2025"
+    },
+    {
+      "q": "\"Diffusion Forcing\" NeurIPS 2024",
+      "domains": [
+        "proceedings.neurips.cc",
+        "papers.nips.cc"
+      ]
+    },
+    {
+      "q": "\"Self Forcing\" \"NeurIPS 2025\"",
+      "domains": [
+        "proceedings.neurips.cc",
+        "papers.nips.cc"
+      ]
+    },
+    {
+      "q": "\"CausVid\" CVPR 2025",
+      "domains": [
+        "openaccess.thecvf.com"
+      ]
+    },
+    {
+      "q": "\"CogVideoX\" ICLR 2025",
+      "domains": [
+        "openreview.net"
+      ]
+    },
+    {
+      "q": "\"flow matching\" \"2026\" geometry trajectory coupling",
+      "domains": [
+        "proceedings.mlr.press"
+      ]
+    },
+    {
+      "q": "\"diffusion transformer\" \"2026\" representation architecture",
+      "domains": [
+        "openreview.net"
+      ]
+    },
+    {
+      "q": "\"MeanFlow Transformers with Representation Autoencoders\"",
+      "domains": [
+        "openaccess.thecvf.com"
+      ]
+    },
+    {
+      "q": "\"DDT: Decoupled Diffusion Transformer\"",
+      "domains": [
+        "openaccess.thecvf.com"
+      ]
+    },
+    {
+      "q": "\"Towards foundational LiDAR world models\" conference"
+    },
+    {
+      "q": "\"DOME\" \"Taming Diffusion\" CVPR",
+      "domains": [
+        "openaccess.thecvf.com"
+      ]
+    },
+    {
+      "q": "\"AutoWorld\" \"Learning Multi-Agent Traffic Simulation\" conference"
+    },
+    {
+      "q": "\"Interactive Residual World Model\" conference"
+    },
+    {
+      "q": "\"GoalFlow\" CVPR 2025",
+      "domains": [
+        "openaccess.thecvf.com"
+      ]
+    },
+    {
+      "q": "\"DiffusionDrive\" CVPR 2025",
+      "domains": [
+        "openaccess.thecvf.com"
+      ]
+    },
+    {
+      "q": "\"MotionDiffuser\" CVPR 2023",
+      "domains": [
+        "openaccess.thecvf.com"
+      ]
+    },
+    {
+      "q": "\"ManiFlow\" ICCV 2025",
+      "domains": [
+        "openaccess.thecvf.com"
+      ]
+    },
+    {
+      "q": "\"Functional Flow Matching for Generative Modeling\"",
+      "domains": [
+        "papers.nips.cc",
+        "proceedings.neurips.cc",
+        "arxiv.org"
+      ]
+    },
+    {
+      "q": "\"Latent Flow Matching\" \"High-Resolution\" publication",
+      "domains": [
+        "openreview.net",
+        "arxiv.org",
+        "proceedings.mlr.press"
+      ]
+    },
+    {
+      "q": "\"Probabilistic Forecasting with Stochastic Interpolants\" ",
+      "domains": [
+        "proceedings.mlr.press"
+      ]
+    },
+    {
+      "q": "\"Scalable Autoencoders for Diffusion Models\" \"ICCV\""
+    },
+    {
+      "q": "\"REPA-E\" \"Representation Alignment\" conference"
+    },
+    {
+      "q": "\"EDiT: Efficient Diffusion Transformers with Linear Compressed Attention\"",
+      "domains": [
+        "openaccess.thecvf.com"
+      ]
+    },
+    {
+      "q": "\"ManiFlow\" \"ICCV 2025\""
+    },
+    {
+      "q": "\"CogVideoX: Text-to-Video Diffusion Models with An Expert Transformer\" ICLR"
+    },
+    {
+      "q": "\"DOME: Taming Diffusion Model\" conference journal"
+    },
+    {
+      "q": "\"AutoWorld: Learning Multi-Agent Traffic Simulation\" NeurIPS ICLR"
+    },
+    {
+      "q": "\"Interactive Residual World Model\" CVPR 2026"
+    },
+    {
+      "q": "\"Consistency Flow Matching: Defining Straight Flows\" conference"
+    },
+    {
+      "q": "\"Functional Flow Matching\" paper"
+    },
+    {
+      "q": "\"Scalable Autoencoders for Diffusion Models\" LightningDiT"
+    },
+    {
+      "q": "\"REPA-E\" conference"
+    },
+    {
+      "q": "\"Latte: Latent Diffusion Transformer for Video Generation\" publication"
+    },
+    {
+      "q": "\"ManiFlow\" \"Distillation\""
+    },
+    {
+      "q": "\"CogVideoX\" site:proceedings.iclr.cc/paper_files/paper/2025"
+    },
+    {
+      "q": "\"AutoWorld\" \"Learning Multi-Agent\" site:arxiv.org"
+    },
+    {
+      "q": "\"Interactive Residual World Models\""
+    },
+    {
+      "q": "\"LightningDiT\" \"VA-VAE\" conference"
+    },
+    {
+      "q": "\"Scalable\" \"Autoencoders\" \"LightningDiT\" arxiv"
+    },
+    {
+      "q": "\"ManiFlow: A General Robot Manipulation Policy\" site:openreview.net"
+    },
+    {
+      "q": "\"Implicit Residual World Models\" site:openaccess.thecvf.com"
+    },
+    {
+      "q": "\"AutoWorld\" \"Rhinehart\" conference"
+    },
+    {
+      "q": "\"Towards foundational LiDAR world models\" site:proceedings.neurips.cc"
+    },
+    {
+      "q": "\"Flow Matching in Latent Space\" journal conference"
+    },
+    {
+      "q": "\"Categorical Flow Matching on Statistical Manifolds\" site:proceedings.neurips.cc"
+    },
+    {
+      "q": "\"InstaFlow: One Step is Enough\" ICLR",
+      "domains": [
+        "openreview.net",
+        "proceedings.iclr.cc"
+      ]
+    },
+    {
+      "q": "\"Improving the Training of Rectified Flows\" conference",
+      "domains": [
+        "openreview.net",
+        "proceedings.neurips.cc",
+        "proceedings.mlr.press"
+      ]
+    },
+    {
+      "q": "\"Inductive Moment Matching\" conference",
+      "domains": [
+        "openreview.net",
+        "proceedings.mlr.press",
+        "proceedings.neurips.cc"
+      ]
+    },
+    {
+      "q": "\"Back to Basics\" \"Denoising\" \"2026\"",
+      "domains": [
+        "openreview.net",
+        "proceedings.iclr.cc"
+      ]
+    },
+    {
+      "q": "\"DDT: Decoupled Diffusion Transformer\" arxiv"
+    },
+    {
+      "q": "\"Improved Baselines with Representation Autoencoders\" conference"
+    },
+    {
+      "q": "\"Multimodal Flow Matching\" \"2025\" \"2026\"",
+      "domains": [
+        "proceedings.mlr.press",
+        "openreview.net",
+        "proceedings.neurips.cc"
+      ]
+    },
+    {
+      "q": "\"mixed\" \"continuous\" \"discrete\" \"flow matching\"",
+      "domains": [
+        "proceedings.mlr.press",
+        "openreview.net",
+        "proceedings.neurips.cc"
+      ]
+    },
+    {
+      "q": "\"Masked Diffusion Transformer Is a Strong Image Synthesizer\"",
+      "domains": [
+        "openaccess.thecvf.com"
+      ]
+    },
+    {
+      "q": "\"DiffiT: Diffusion Vision Transformers for Image Generation\"",
+      "domains": [
+        "ecva.net",
+        "eccv.ecva.net"
+      ]
+    },
+    {
+      "q": "\"GenTron\" diffusion transformers",
+      "domains": [
+        "openaccess.thecvf.com"
+      ]
+    },
+    {
+      "q": "\"DiT-3D: Exploring Plain Diffusion Transformers\"",
+      "domains": [
+        "proceedings.neurips.cc",
+        "openaccess.thecvf.com",
+        "openreview.net"
+      ]
+    },
+    {
+      "q": "\"U-DiT\" \"Downsample\" conference"
+    },
+    {
+      "q": "\"Back to Basics: Let Denoising Generative Models Denoise\""
+    },
+    {
+      "q": "\"ManiFlow\" \"ICLR 2026\" \"accepted\""
+    },
+    {
+      "q": "\"pi0\" \"Flow Model\" RSS 2025",
+      "domains": [
+        "roboticsproceedings.org",
+        "roboticsconference.org"
+      ]
+    },
+    {
+      "q": "\"Variational Flow Matching\" ICLR 2025",
+      "domains": [
+        "openreview.net",
+        "proceedings.iclr.cc"
+      ]
+    },
+    {
+      "q": "\"Unbalanced Flow Matching\"",
+      "domains": [
+        "openreview.net",
+        "proceedings.mlr.press",
+        "proceedings.neurips.cc",
+        "arxiv.org"
+      ]
+    },
+    {
+      "q": "\"Back to Basics: Let Denoising Generative Models Denoise\" CVPR 2026",
+      "domains": [
+        "openaccess.thecvf.com",
+        "cvpr.thecvf.com"
+      ]
+    },
+    {
+      "q": "\"ManiFlow\" \"2025\" site:proceedings.mlr.press"
+    },
+    {
+      "q": "\"Implicit geometric regularization in flow matching via density weighted Stein operators\"",
+      "domains": [
+        "openreview.net",
+        "jmlr.org"
+      ]
+    },
+    {
+      "q": "\"Asynchronous\" \"Flow Matching\" multimodal",
+      "domains": [
+        "openreview.net",
+        "proceedings.mlr.press",
+        "proceedings.neurips.cc",
+        "arxiv.org"
+      ]
+    },
+    {
+      "q": "\"Preference Alignment with Flow Matching\"",
+      "domains": [
+        "proceedings.neurips.cc"
+      ]
+    },
+    {
+      "q": "\"flow matching\" \"uncertainty\" \"Bayesian\"",
+      "domains": [
+        "proceedings.mlr.press",
+        "proceedings.neurips.cc",
+        "openreview.net"
+      ]
+    },
+    {
+      "q": "\"Variational Flow Matching\" Eijkelboom \"2024\" paper"
+    },
+    {
+      "q": "\"Flow Matching Guide and Code\" arxiv"
+    },
+    {
+      "q": "\"Multimodal\" \"joint\" \"flow matching\" 2026",
+      "domains": [
+        "proceedings.mlr.press"
+      ]
+    },
+    {
+      "q": "\"FlowEdit: Inversion-Free\" ICCV 2025",
+      "domains": [
+        "openaccess.thecvf.com"
+      ]
+    },
+    {
+      "q": "\"Guided Flows for Generative Modeling\" 2024",
+      "domains": [
+        "proceedings.mlr.press",
+        "proceedings.neurips.cc",
+        "openreview.net"
+      ]
+    },
+    {
+      "q": "\"Diffusion Models without Classifier-free Guidance\"",
+      "domains": [
+        "openreview.net",
+        "proceedings.mlr.press"
+      ]
+    },
+    {
+      "q": "\"PixelDiT: Pixel Diffusion Transformers\" ",
+      "domains": [
+        "openaccess.thecvf.com"
+      ]
+    },
+    {
+      "q": "\"Flow Matching\" \"2026\" \"TPAMI\""
+    },
+    {
+      "q": "\"Action-Controlled Scale-Wise Flow Matching\""
+    },
+    {
+      "q": "\"FlowCritic: Bridging Value Estimation\""
+    },
+    {
+      "q": "\"One-Step Diffusion and Flow Distillation Through Implicit Generator Matching\""
+    },
+    {
+      "q": "\"On the Guidance of Flow Matching\" ICML"
+    },
+    {
+      "q": "\"Score-Regularized Joint Sampling with Importance Weights\""
+    },
+    {
+      "q": "\"Action-Controlled Scale-Wise Flow Matching\" site:ieeexplore.ieee.org"
+    },
+    {
+      "q": "\"FlowCritic\" site:ieeexplore.ieee.org"
+    },
+    {
+      "q": "\"Guided Flows for Generative Modeling and Decision Making\" journal"
+    },
+    {
+      "q": "\"MeanFlow\" \"Improved Mean Flows\" \"CVPR 2026\"",
+      "domains": [
+        "openaccess.thecvf.com"
+      ]
+    },
+    {
+      "q": "\"Goku: Flow Based Video Generative Foundation Models\"",
+      "domains": [
+        "openaccess.thecvf.com"
+      ]
+    },
+    {
+      "q": "\"Improved Mean Flows: On the Challenges\" abstract",
+      "domains": [
+        "arxiv.org"
+      ]
+    },
+    {
+      "q": "\"Action-Controlled Scale-Wise Flow Matching\" \"10.1109\" site:sanmumumu.github.io"
+    },
+    {
+      "q": "\"FlowCritic\" \"TPAMI\" site:arxiv.org"
+    },
+    {
+      "q": "\"counterfactual\" \"flow matching\" world model",
+      "domains": [
+        "arxiv.org",
+        "proceedings.mlr.press",
+        "openreview.net"
+      ]
+    },
+    {
+      "q": "\"occupancy\" \"actor\" \"flow matching\"",
+      "domains": [
+        "arxiv.org",
+        "openaccess.thecvf.com",
+        "proceedings.mlr.press",
+        "openreview.net"
+      ]
+    },
+    {
+      "q": "\"joint\" \"occupancy\" \"trajectory\" \"rectified flow\"",
+      "domains": [
+        "arxiv.org",
+        "openaccess.thecvf.com",
+        "proceedings.mlr.press",
+        "openreview.net"
+      ]
+    },
+    {
+      "q": "\"flow matching\" \"rare event\" sampling",
+      "domains": [
+        "arxiv.org",
+        "proceedings.mlr.press",
+        "openreview.net"
+      ]
+    },
+    {
+      "q": "\"counterfactual\" \"shared noise\" \"world model\"",
+      "domains": [
+        "arxiv.org",
+        "proceedings.mlr.press",
+        "openreview.net"
+      ]
+    },
+    {
+      "q": "\"EventFlow: Forecasting Temporal Point Processes with Flow Matching\"",
+      "domains": [
+        "proceedings.mlr.press"
+      ]
+    },
+    {
+      "q": "\"Sketch2Colab\" \"Sketch-Conditioned\" ",
+      "domains": [
+        "openaccess.thecvf.com"
+      ]
+    }
+  ],
+  "query_count": 144,
+  "unique_query_count": 144,
+  "paper_count": 100,
+  "limitations": [
+    "非数据库穷尽检索，无全领域总命中数或召回率",
+    "发表记录截至检索日，预印本标签表示本轮未核实正式发表，不是断言从未录用",
+    "部分OpenReview/IEEE/CVF直接页面受挑战或403限制；使用可检索正式PDF、会议目录和作者一手版本，记录具体证据等级",
+    "不将相关应用、Workshop或作者会议声明混同于已核实主会出版"
+  ],
+  "training_action": "none"
+}

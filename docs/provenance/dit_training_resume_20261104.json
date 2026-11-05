@@ -1,0 +1,42 @@
+{
+  "date": "2026-11-04",
+  "request": "Resume training with the standard DiT architecture",
+  "existing_implementation_reused": {
+    "launcher": "scripts/resume_dit_training.py",
+    "launcher_sha256": "cda716c0af4afdeb0330046250425ff78958b1bae334b6b5f1f7442a2deb529d",
+    "original_provenance": "docs/provenance/dit_training_pause_20261101.json",
+    "new_training_function_implemented": false,
+    "frozen_source_manifest": "outputs/reactflow_dit/source_seed_2026.manifest.json",
+    "source_manifest_sha256": "615ccc51adef993a58c8863c87716f62b20daa0726be380c46cb3d397ca3f871"
+  },
+  "preflight": {
+    "strict_checkpoint_step": 22000,
+    "file_identities_verified": 82,
+    "runtime_fingerprint_entries_verified": 19722,
+    "strict_flow_load": true,
+    "world_size": 2,
+    "rank_rng_states": 2
+  },
+  "reference_protection": {
+    "commits": {
+      "OccFM": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "IR-WM": "94dbbf44d6c22e50db4080e986b3675eadbb4497"
+    },
+    "before": "outputs/reactflow_dit/resume_20261104/reference_before.json",
+    "after": "outputs/reactflow_dit/resume_20261104/reference_after.json",
+    "unchanged": true
+  },
+  "actual_run": {
+    "torchrun_pid": 454609,
+    "started_step": 22000,
+    "verified_step": 22100,
+    "checkpoint_sha256": "b23778564e3098ae580a63979071b0f635127d24ccff70e373a03c2d696a4e68",
+    "health_record": "docs/implementation/standard_dit_resume_20261104_health.json",
+    "console": "outputs/reactflow_dit/seed_2026.resume_20261104T164126788165.log",
+    "source_files_unchanged": 81,
+    "cfm_checkpoints_unchanged": true,
+    "cfm_restarted": false,
+    "auto_restart": false
+  },
+  "scope": "Resume the original standard DiT joint experiment with complete optimizer/EMA/scheduler/RNG state; no reinitialization, no new seed or architecture change."
+}

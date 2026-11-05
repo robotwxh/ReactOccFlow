@@ -14,6 +14,8 @@ The standard isotropic DiT added on 2026-10-31 reuses the independently migrated
 
 At the user's later request, the copied U-Net world backbone, its wrapper and dedicated runtime commands/configurations were removed. The remaining VAE, DiT blocks and shared mathematical/diagnostic utilities retain their upstream attribution and restrictions. Removal inventory, pre-removal hashes and the helper relocation are recorded in `docs/provenance/remove_unet_sources.json`; earlier source manifests describe historical copies and are not declarations that removed files remain executable.
 
+On 2026-11-02, the user requested restoration of the U-shaped backbone alongside isotropic DiT. The previously migrated backbone and its dependency closure were restored from the verified owned archive; original attribution and unresolved upstream licensing restrictions remain in force. Sources, SHA-256 checksums and restoration boundaries are recorded in `docs/provenance/restore_unet_sources_20261102.json`.
+
 Academic reference: Tianran Liu, Shengwen Zhao, Nicholas Rhinehart, *Towards foundational LiDAR world models with efficient latent flow matching*, arXiv:2506.23434. Full references: `ReactOccFlow参考文献.md`.
 
 ## IR-WM

@@ -46,7 +46,8 @@ def module_fingerprint(module):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--cache', default='data/research/e0_full/train')
-    parser.add_argument('--output', default='outputs/dit_joint_training_acceptance')
+    parser.add_argument('--backbone', choices=['occfm_unet', 'dit'], default='occfm_unet')
+    parser.add_argument('--output')
     parser.add_argument('--codec-checkpoint', default='assets/checkpoints/occfm_vae.ckpt')
     parser.add_argument('--device', default='cuda:1')
     parser.add_argument('--windows', type=int, default=32)
@@ -58,6 +59,8 @@ def main():
     parser.add_argument('--decode-chunk', type=int, default=1)
     parser.add_argument('--allow-incomplete', action='store_true', help='Explicit partial-cache debug diagnostic only')
     args = parser.parse_args()
+    if args.output is None:
+        args.output = f'outputs/{args.backbone}_joint_training_acceptance'
     if args.steps < 1 or args.windows < 1 or args.batch_size < 1 or args.windows % args.batch_size:
         parser.error('Positive steps/windows/batch-size required; windows must be divisible by batch-size')
     # Refuse partial cache before creating outputs or allocating a model.
@@ -110,7 +113,7 @@ def main():
         candidate = target['ego_future'][..., :2].clone()
         batches.append((observation, target, candidate))
     del samples
-    flow = ReactFlow(normalization=normalization).to(device)
+    flow = ReactFlow(normalization=normalization, backbone=args.backbone).to(device)
     codec = OccupancyCodec().to(device)
     codec_loading = codec.load_pretrained(args.codec_checkpoint, weights='state_dict')
     adapter = JointTrainingAdapter(flow, codec, decode_chunk=args.decode_chunk, require_frozen_trunk=False)
@@ -146,7 +149,7 @@ def main():
     if frozen_before != frozen_after:
         raise RuntimeError('Frozen VAE tensors changed during diagnostic')
     config = {'mode': 'joint', 'steps': args.steps, 'windows': args.windows, 'batch_size': args.batch_size,
-              'backbone': 'dit', 'dit': flow.transition_model.trunk.config,
+              'backbone': flow.backbone, 'architecture': flow.transition_model.trunk.config,
               'optimizer': 'AdamW', 'lr': args.lr, 'weight_decay': .01, 'max_grad_norm': 1.,
               'gradient_accumulation': 1, 'precision': 'float32', 'decode_chunk': args.decode_chunk,
               'occ_weight': 1., 'actor_weight': 1., 'existence_weight': .1,
@@ -162,7 +165,8 @@ def main():
     input_paths = ['scripts/train_joint_smoke.py', 'reactoccflow/training/diagnostics.py', 'reactoccflow/models/react_flow.py',
                    'reactoccflow/models/joint_transition.py', 'reactoccflow/models/codec.py',
                    'reactoccflow/losses/consistency.py', 'reactoccflow/data/e0_dataset.py',
-                   'reactoccflow/models/standard_dit.py', args.codec_checkpoint]
+                   'reactoccflow/models/standard_dit.py',
+                   'reactoccflow/models/modules/transition_models/FlowMatchingV2.py', args.codec_checkpoint]
     report = {'version': 1, 'status': 'completed', 'started_utc': started_utc, 'config': config,
               'training': training, 'initial_probe': initial_probe, 'final_probe': final_probe,
               'probe_loss_decreased': final_probe['mean_loss'] < initial_probe['mean_loss'],

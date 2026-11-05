@@ -1,0 +1,210 @@
+{
+  "files": [
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/tools/cfgs/occfm_vae.yaml",
+      "copy": "source/tools/cfgs/occfm_vae.yaml",
+      "sha256": "793cc1008c8861c79761a37719bf5c6e8bf823830590af475ab99c9fad273a07"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/tools/cfgs/occfm_fut.yaml",
+      "copy": "source/tools/cfgs/occfm_fut.yaml",
+      "sha256": "9d4eb829b7de629ec89c1da7503ad90e19f0e202ed3ad551c65387e88e60562d"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/tools/cfgs/occfm.yaml",
+      "copy": "source/tools/cfgs/occfm.yaml",
+      "sha256": "e4d9733daad3f51dd76f1dedb14c83927269843a6c38154ae5dc8c123757eecb"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/tools/cfgs/occfm_3dvae.yaml",
+      "copy": "source/tools/cfgs/occfm_3dvae.yaml",
+      "sha256": "ca8e4e6e1bf38fddb9e4acaac8ab95579107a811debfb3cf9dbbea49441ddb1b"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/tools/cfgs/occfm_4c.yaml",
+      "copy": "source/tools/cfgs/occfm_4c.yaml",
+      "sha256": "97c92aaae289886614bec19e94c5b8f941893cbe593796c1e479800e5e9d4ae3"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/tools/cfgs/occfm_64c.yaml",
+      "copy": "source/tools/cfgs/occfm_64c.yaml",
+      "sha256": "3bd805c7894ea60df581c5ade776ba63ff06c2913f7c361dc0f877e53aae475f"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/tools/cfgs/occfm_8c.yaml",
+      "copy": "source/tools/cfgs/occfm_8c.yaml",
+      "sha256": "74431ddabbde41c3f1d07bbf2b613a94d18edeff29f617f7ea1b4aa026f371af"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/tools/cfgs/dataset_configs/nuscenes_dataset.yaml",
+      "copy": "source/tools/cfgs/dataset_configs/nuscenes_dataset.yaml",
+      "sha256": "dcab7ff97a508c3482ee78595855494aad388da39f824c9944c85f533a2c820f"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/tools/cfgs/compressor_configs/vae_swin_x16_h16.yaml",
+      "copy": "source/tools/cfgs/compressor_configs/vae_swin_x16_h16.yaml",
+      "sha256": "e8b204e391489126a78fcc40eec375d1403cb78934b065ba350fc93fd84de7c7"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/tools/cfgs/compressor_configs/vae_swin_x64_h16.yaml",
+      "copy": "source/tools/cfgs/compressor_configs/vae_swin_x64_h16.yaml",
+      "sha256": "499a4a136a518867e7255685daed80de843e24720fb87467060d448e42dcaf44"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/tools/cfgs/compressor_configs/vae_swin_x4_h16.yaml",
+      "copy": "source/tools/cfgs/compressor_configs/vae_swin_x4_h16.yaml",
+      "sha256": "a09f0322a915e1b9b7ae11d9c6f7586d81842583bba07e48dcd34de3a5602f0b"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/tools/cfgs/compressor_configs/vae_swin_x8_h16.yaml",
+      "copy": "source/tools/cfgs/compressor_configs/vae_swin_x8_h16.yaml",
+      "sha256": "9e94565fa92fd7124a689931ef31ab060fbd49197a4a01e4d6062498431c0382"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/tools/cfgs/compressor_configs/vae_swin_x16_h16_3d.yaml",
+      "copy": "source/tools/cfgs/compressor_configs/vae_swin_x16_h16_3d.yaml",
+      "sha256": "5470156f7851aaf63b224c6139af94416cd3c01d59c0ab19f167c0831b029f71"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/tools/cfgs/transition_configs/cfm_64c.yaml",
+      "copy": "source/tools/cfgs/transition_configs/cfm_64c.yaml",
+      "sha256": "e7e8dd7377cd50962ec080b094f7da4d08cf1096afc0bc4ca711b58cf1ed3c39"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/tools/cfgs/transition_configs/cfm_fut_traj.yaml",
+      "copy": "source/tools/cfgs/transition_configs/cfm_fut_traj.yaml",
+      "sha256": "f6da2c1fc05efd725878ad72fdf08d4167c074bd1b32f4bcdd9037ab47acc9e9"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/tools/cfgs/transition_configs/cfm_4c.yaml",
+      "copy": "source/tools/cfgs/transition_configs/cfm_4c.yaml",
+      "sha256": "962cb353c328b483c60f90843723619ce32ac2053a8b8e36559cda4a9a459286"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/tools/cfgs/transition_configs/cfm.yaml",
+      "copy": "source/tools/cfgs/transition_configs/cfm.yaml",
+      "sha256": "1e41bd3eadeffb943c277f36eaa95092181d8baed6ed40e4056e8af1403727dc"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/tools/cfgs/transition_configs/cfm_8c.yaml",
+      "copy": "source/tools/cfgs/transition_configs/cfm_8c.yaml",
+      "sha256": "654b22b686bf60c0c80e788940519a9bb25f6fe2d1a945a2733a5b1596c2f88d"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/logs/occfm/2s_3s_nusc_hist_traj/ckpt/epoch=000137.ckpt",
+      "copy": "source/logs/occfm/2s_3s_nusc_hist_traj/ckpt/epoch=000137.ckpt",
+      "sha256": "cf3ae31f2d2e5e25c9aff71a0659185b3ed880dba3ad07c8c62834fbe2ee0ee2"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/logs/occfm/2s_3s_nusc_hist_traj/occfm.yaml",
+      "copy": "source/logs/occfm/2s_3s_nusc_hist_traj/occfm.yaml",
+      "sha256": "e4d9733daad3f51dd76f1dedb14c83927269843a6c38154ae5dc8c123757eecb"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/logs/occfm/2s_3s_nusc_hist_traj/ckpt/epoch=000171.ckpt",
+      "copy": "source/logs/occfm/2s_3s_nusc_hist_traj/ckpt/epoch=000171.ckpt",
+      "sha256": "7996ef3f04d2e311859f78ad06338b769e719d31dfa16b1daa1e5e5979301b4f"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/logs/occfm/2s_3s_nusc_hist_traj/occfm.yaml",
+      "copy": "source/logs/occfm/2s_3s_nusc_hist_traj/occfm.yaml",
+      "sha256": "e4d9733daad3f51dd76f1dedb14c83927269843a6c38154ae5dc8c123757eecb"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/logs/occfm/2s_3s_nusc_hist_traj/ckpt/epoch=000199.ckpt",
+      "copy": "source/logs/occfm/2s_3s_nusc_hist_traj/ckpt/epoch=000199.ckpt",
+      "sha256": "1a9002f9a9ac74948dd69dd34277a867c98d3ac551087d554bd2732c8b26ac59"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/logs/occfm/2s_3s_nusc_hist_traj/occfm.yaml",
+      "copy": "source/logs/occfm/2s_3s_nusc_hist_traj/occfm.yaml",
+      "sha256": "e4d9733daad3f51dd76f1dedb14c83927269843a6c38154ae5dc8c123757eecb"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/logs/occfm_3dvae/ori/ckpt/epoch=000038.ckpt",
+      "copy": "source/logs/occfm_3dvae/ori/ckpt/epoch=000038.ckpt",
+      "sha256": "1aafb96a4908e60f98ec0c6cfa45e8a8803147763e37ac015871d5833076cee4"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/logs/occfm_3dvae/ori/occfm_3dvae.yaml",
+      "copy": "source/logs/occfm_3dvae/ori/occfm_3dvae.yaml",
+      "sha256": "ca8e4e6e1bf38fddb9e4acaac8ab95579107a811debfb3cf9dbbea49441ddb1b"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/logs/occfm_3dvae/ori/ckpt/epoch=000039.ckpt",
+      "copy": "source/logs/occfm_3dvae/ori/ckpt/epoch=000039.ckpt",
+      "sha256": "46bab6424a23ac8d8d2d913a39bc74669aa457056ef05c469c1c0d6e8cd7a8c9"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/logs/occfm_3dvae/ori/occfm_3dvae.yaml",
+      "copy": "source/logs/occfm_3dvae/ori/occfm_3dvae.yaml",
+      "sha256": "ca8e4e6e1bf38fddb9e4acaac8ab95579107a811debfb3cf9dbbea49441ddb1b"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/logs/occfm_3dvae/ori/ckpt/epoch=000040.ckpt",
+      "copy": "source/logs/occfm_3dvae/ori/ckpt/epoch=000040.ckpt",
+      "sha256": "b41fc10d43c67d7ed4d7c17648703b9374a41a07a00741c10524254eedf3dd21"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/logs/occfm_3dvae/ori/occfm_3dvae.yaml",
+      "copy": "source/logs/occfm_3dvae/ori/occfm_3dvae.yaml",
+      "sha256": "ca8e4e6e1bf38fddb9e4acaac8ab95579107a811debfb3cf9dbbea49441ddb1b"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/logs/occfm_fut/2s_3s_nusc_fut_traj/ckpt/epoch=000098.ckpt",
+      "copy": "source/logs/occfm_fut/2s_3s_nusc_fut_traj/ckpt/epoch=000098.ckpt",
+      "sha256": "c50f5030deaf84bcfa318abde5b5dbcf0cc194df127e23dba3dc70614754da62"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/logs/occfm_fut/2s_3s_nusc_fut_traj/occfm_fut.yaml",
+      "copy": "source/logs/occfm_fut/2s_3s_nusc_fut_traj/occfm_fut.yaml",
+      "sha256": "9d4eb829b7de629ec89c1da7503ad90e19f0e202ed3ad551c65387e88e60562d"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/logs/occfm_fut/2s_3s_nusc_fut_traj/ckpt/epoch=000107.ckpt",
+      "copy": "source/logs/occfm_fut/2s_3s_nusc_fut_traj/ckpt/epoch=000107.ckpt",
+      "sha256": "d952f4e37268139fe265df9a3420c2998123f5d734d99247ba7c96693145a518"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/logs/occfm_fut/2s_3s_nusc_fut_traj/occfm_fut.yaml",
+      "copy": "source/logs/occfm_fut/2s_3s_nusc_fut_traj/occfm_fut.yaml",
+      "sha256": "9d4eb829b7de629ec89c1da7503ad90e19f0e202ed3ad551c65387e88e60562d"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/logs/occfm_fut/2s_3s_nusc_fut_traj/ckpt/epoch=000196.ckpt",
+      "copy": "source/logs/occfm_fut/2s_3s_nusc_fut_traj/ckpt/epoch=000196.ckpt",
+      "sha256": "b1ada765a3991d1011ebe259db55dcb69a37a3a8c4ad92187c67a8f684a5bd4b"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/logs/occfm_fut/2s_3s_nusc_fut_traj/occfm_fut.yaml",
+      "copy": "source/logs/occfm_fut/2s_3s_nusc_fut_traj/occfm_fut.yaml",
+      "sha256": "9d4eb829b7de629ec89c1da7503ad90e19f0e202ed3ad551c65387e88e60562d"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/logs/occfm_vae/100ep_3docc_sem_voxel/ckpt/epoch=000100.ckpt",
+      "copy": "source/logs/occfm_vae/100ep_3docc_sem_voxel/ckpt/epoch=000100.ckpt",
+      "sha256": "85c5a2566b3fa8a1ebb785af3113c6674fe9811e5eda2402b1959ce6cd66ef10"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/logs/occfm_vae/100ep_3docc_sem_voxel/occfm_vae.yaml",
+      "copy": "source/logs/occfm_vae/100ep_3docc_sem_voxel/occfm_vae.yaml",
+      "sha256": "abccbd1efa2676bdce69e41455f4479f6252a497dcea857a2961336c28032352"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/data/nuscenes_infos_val_temporal_v3_scene.pkl",
+      "copy": "input/validation_info.pkl",
+      "sha256": "d174b9563adcfc2b0450d164dce108b11742197208436f70781d4187251da566"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/data/nusc_latent_vae/x16/nus_sem_occ_validation.pkl",
+      "copy": "input/validation_latent.pkl",
+      "sha256": "39f20210b2d3c6d0e0fb0fae0a434802ca0a7304b7d4eb807b038b0a1880ca9a"
+    }
+  ],
+  "counts": {
+    "vae2d_frames": 6019,
+    "vae3d_windows": 5269,
+    "flow_windows": 4219,
+    "unique_latent_frames": 5869
+  }
+}

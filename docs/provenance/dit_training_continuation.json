@@ -24,7 +24,7 @@
     "changes": "Diagnostic batch 2/rank, accumulation 2, 32 train / 8 tune windows; fresh outputs and DiT-only evidence."
   },
   "reference_before": "outputs/dit_training_acceptance/reference_before.json",
-  "status": "formal_training_running",
+  "status": "paused_by_user",
   "formal_training_started": true,
   "smoke": {
     "report": "outputs/dit_training_acceptance/single_gpu_200/results.json",
@@ -80,7 +80,7 @@
   },
   "source_protection": "docs/implementation/dit_training_source_protection.json",
   "formal_gpu_utilization": "docs/implementation/dit_formal_gpu_utilization.json",
-  "last_updated_at": "2026-10-31T20:04:21.378486+08:00",
+  "last_updated_at": "2026-11-01T13:01:00.246937+08:00",
   "formal_bootstrap_resume": "docs/implementation/dit_formal_bootstrap_resume.json",
   "acceptance_complete": true,
   "formal_training_health": "docs/implementation/dit_formal_training_health.json",
@@ -90,5 +90,11 @@
     "docs/implementation/dit_formal_gpu_utilization.json": "47c6fa14e64a308b3402d8237319cccbf6811b38aee44ad22d6b6062de863abc",
     "docs/implementation/dit_training_source_protection.json": "6e8529d08d356cd3dae47af26a54a86090260fd41f1efb0264c24765d4c4dde4",
     "outputs/dit_training_acceptance/throughput_selection.json": "dfdf2504de01bad3563cf558ef636e579cd5563d45e8aa1b9a0ff9e286495365"
-  }
+  },
+  "latest_pause_record": "docs/implementation/2026-11-01-dit-training-paused.md",
+  "pause_provenance": "docs/provenance/dit_training_pause_20261101.json",
+  "last_verified_checkpoint_step": 22000,
+  "last_verified_log_step": 22550,
+  "training_active": false,
+  "auto_restart": false
 }

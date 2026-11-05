@@ -1,0 +1,47 @@
+{
+  "status": "passed",
+  "checked_at": "2026-11-04T11:32:18.425235+08:00",
+  "checkpoint_step": 52000,
+  "training_final_step": 72000,
+  "training_finish_reason": "patience10",
+  "windows": 4219,
+  "scenes": 150,
+  "rank_exit_codes": [
+    0,
+    0
+  ],
+  "generation_elapsed_seconds": 3402.0102811999386,
+  "metric_per_horizon_percent": [
+    33.46759381458927,
+    28.08375517813561,
+    24.470446280395354
+  ],
+  "metric_mean_percent": 28.673931757706743,
+  "delta_paper_future_percentage_points": 0.18393175770674475,
+  "full_grid_gt_counts_equal_original_occfm": true,
+  "all6019_gt_grids_equal_per_voxel": true,
+  "reference_before_after_equal": true,
+  "reference_entry_counts": {
+    "OccFM": 370,
+    "IR-WM": 389
+  },
+  "original_training_source_files_unchanged": 114,
+  "evaluation_source_files_unchanged": 115,
+  "best_latest_checkpoint_bytes_unchanged": true,
+  "new_evaluation_cpu_tests_passed": 8,
+  "pilot_windows_completed": 16,
+  "standard_dit_training_restarted": false,
+  "optimizer_steps_this_task": 0,
+  "results_are_single_seed_and_not_controlled_architecture_claim": true,
+  "report_files": {
+    "outputs/evaluation/2026-11-04-reactflow-best52000/full/result.json": "274a3697b71eb37b18dfb55dba4832a7dfc43e3ae8afe49ab886fb1f49cbfba5",
+    "outputs/evaluation/2026-11-04-reactflow-best52000/comparison.json": "1cc08a6ba6a44e77557620d5ec09ba2a59aa22aeef43b8f0f1e3785b4cf010f3",
+    "outputs/evaluation/2026-11-04-reactflow-best52000/comparison.csv": "b6699e07eafb7245db0c5e109465682eb9f20d2d5182d9f323ad0f21fedd9ff7",
+    "outputs/evaluation/2026-11-04-reactflow-best52000/per_class_comparison.csv": "97a2159ca01d345715d4c69e3eb378da716736fc57db907c348e0dd0dbdfae6a",
+    "outputs/evaluation/2026-11-04-reactflow-best52000/mIoU\u8bc4\u6d4b\u4e0eOccFM\u5bf9\u7167.md": "d382af86d6fb2f7470c0152eeb3c94c2fee762770585e7da5abc1ce969a48a4d"
+  },
+  "independent_export_import": "passed",
+  "independent_export_owned_modules": 35,
+  "standard_dit_paused_source_checkpoint_files_verified": 82,
+  "full_grid_report_gt_checks_passed": true
+}

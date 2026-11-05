@@ -1,0 +1,76 @@
+{
+  "date": "2026-11-03",
+  "request": "Continue training using the restored original CFM architecture",
+  "reference_search": {
+    "paths": [
+      "OccFM/tools/train_utils/train_utils.py",
+      "OccFM/tools/train.py",
+      "IR-WM/projects/mmdet3d_plugin/bevformer/apis/mmdet_train.py",
+      "IR-WM/projects/mmdet3d_plugin/core/hooks/ema.py"
+    ],
+    "patterns": [
+      "resume",
+      "checkpoint_state",
+      "load.*checkpoint",
+      "save.*checkpoint"
+    ],
+    "results": "outputs/reactflow_joint/resume_20261103/reference_search.txt",
+    "finding": "Upstream framework hooks do not support this owned archived joint run or relocating source identity. Reuse the owned exact trainer/archive and manual DiT launcher pattern. No upstream runtime dependency added.",
+    "files": {
+      "OccFM/tools/train_utils/train_utils.py": "16e7ea88467b3db368a8836a9fad9f910d2e164ca620bec7b9e53f2c1766c7ee",
+      "OccFM/tools/train.py": "b74cfb6113d2f8fee5e1383f8959e3e51cdb07a0f2a0e60b3c825bdc9be1d5c2",
+      "IR-WM/projects/mmdet3d_plugin/bevformer/apis/mmdet_train.py": "747489b7a1a92582f9cb639f51760b1b38616c139b72e306bcbf80c59ba47cd5",
+      "IR-WM/projects/mmdet3d_plugin/core/hooks/ema.py": "ee159e82a102fdd1ded032da04160014cdeba3ba8895ef99ce26aeb86db7e8be"
+    }
+  },
+  "source_archive": "outputs/architecture_migration/2026-10-31-standard-dit/legacy_unet_sources.tar.gz",
+  "source_archive_sha256": "698407927760ca842b37b11b93e5f4d60dfcd52da031a7d16ef4393a94666608",
+  "source_export": "outputs/reactflow_joint/source_seed_2026",
+  "source_files_verified": 114,
+  "checkpoint": {
+    "original": "outputs/reactflow_joint/seed_2026/stopped_step_050000_20261031.pt",
+    "original_sha256": "244208facfb667b6153198a0d407dd6ec2ed9f6b575c96b52261c3696f272edf",
+    "relocated": "outputs/reactflow_joint/seed_2026/resume_step_050000_source_relocated_20261103.pt",
+    "relocated_sha256": "0c5061a8b0e70597f767246b4b537598f8de4e50fc04e97054a35a2f39079d60",
+    "global_step": 50000,
+    "identity_files_verified": 19726,
+    "relocated_source_paths": 76,
+    "transformation": "Only data_fingerprint source path keys mapped to the ordinary-file frozen export; all hash values and all other state fields unchanged. No config/hash bypass. Original trainer remains byte-identical.",
+    "state_equality_comparisons": {
+      "tensors": 1395,
+      "values": 2866
+    }
+  },
+  "reference_snapshot": "outputs/reactflow_joint/resume_20261103/reference_before.json",
+  "auto_restart": false,
+  "reference_commits": {
+    "OccFM": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+    "IR-WM": "94dbbf44d6c22e50db4080e986b3675eadbb4497"
+  },
+  "reference_protection_passed": true,
+  "reference_after": "outputs/reactflow_joint/resume_20261103/reference_after.json",
+  "independent_source_preflight": {
+    "status": "passed",
+    "package": "/home/lthpc/wxh/Paper/outputs/reactflow_joint/source_seed_2026/reactoccflow/__init__.py",
+    "trunk": "FLOW_MATCHING_DOWN_X4_DiT",
+    "checkpoint_step": 50000,
+    "fingerprint_equal": true,
+    "fingerprint_entries": 19726,
+    "owned_modules": 38,
+    "weights_strict_load": true,
+    "training_started": false
+  },
+  "launcher": {
+    "path": "scripts/resume_cfm_training.py",
+    "sha256": "a971fd5017aa01e03a3b03aaa88e8ad9d276c827ba047f4c25e2be986e1f32e1",
+    "reused_owned_pattern": "scripts/resume_dit_training.py",
+    "reused_owned_pattern_sha256": "cda716c0af4afdeb0330046250425ff78958b1bae334b6b5f1f7442a2deb529d",
+    "dependency_closure": "Python standard library; original archived trainer supplies model, optimizer and strict resume logic. No reference code imported or new training function implemented.",
+    "dry_run_files_verified": 115
+  },
+  "status": "training_resumed_and_verified",
+  "health_record": "docs/implementation/cfm_training_resume_20261103_health.json",
+  "strict_original_trainer_resume_passed": true,
+  "confirmed_optimizer_steps": 50,
+  "standard_dit_frozen_identity_verified_files": 82
+}

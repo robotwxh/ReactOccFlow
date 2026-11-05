@@ -1,0 +1,60 @@
+# Standard DiT only; the independent VAE remains frozen.
+model:
+  kind: react_flow
+  mode: joint
+  history_frames: 6
+  future_frames: 6
+  latent_shape:
+  - 16
+  - 50
+  - 50
+  max_actors: 8
+  actor_history_frames: 4
+  actor_hidden: 128
+  actor_heads: 4
+  interaction_layers: 2
+  latent_scale: 10.0
+  time_scalar: 1000.0
+  alpha: 3.0
+  occ_weight: 1.0
+  actor_weight: 1.0
+  existence_weight: 0.1
+  backbone: dit
+  dit_config:
+    patch_size: 5
+    hidden_size: 256
+    depth: 8
+    num_heads: 8
+    mlp_ratio: 4.0
+    activation_checkpointing: true
+  freeze_backbone: false
+normalization: data/research/normalization.json
+sampling:
+  num_worlds: 1
+  nfe: 8
+  heading_normalization: endpoint_only
+  requires_local_generator: true
+research_status:
+  joint_trained: false
+  oracle_observations: true
+  physical_future_slots_s:
+  - 0.5
+  - 1.0
+  - 1.5
+  - 2.0
+  - 2.5
+  - 3.0
+  future_timestamps_are_targets_only: true
+  initialization_conditioning: Standard DiT initialized from scratch; generation time
+    and separately supplied ego candidate condition adaLN-Zero.
+  cli_integration: Full runner defaults to DiT; --dit-config configs/dit.yaml supplies
+    architecture options. This file also specifies research loss/sampling defaults.
+consistency:
+  occ_actor_weight: 0.1
+  temporal_weight: 0.05
+  kinematics_weight: 0.01
+  temperature: 0.4
+  roi_margin: 1.0
+  velocity_scale: 10.0
+  low_speed_threshold: 0.5
+  cycle_heading_weight: 0.5

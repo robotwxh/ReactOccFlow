@@ -1,4 +1,4 @@
-"""Check an installed DiT-only wheel with independent resources and inference.
+"""Check both installed backbones with independent resources and inference.
 
 Run in the dedicated ReactOccFlow environment after installing a clean wheel.
 No optimizer, training process, reference execution or path injection is used.
@@ -26,20 +26,20 @@ def main():
     parser.add_argument('--project-root', type=Path, default=Path(__file__).resolve().parents[1])
     parser.add_argument('--wheel', type=Path)
     parser.add_argument('--device', choices=['cpu'], default='cpu')
-    parser.add_argument('--output', type=Path, default=Path('docs/implementation/dit_only_isolation.json'))
+    parser.add_argument('--output', type=Path, default=Path('docs/implementation/dual_backbone_isolation.json'))
     parser.add_argument('--research-cache', type=Path)
     args = parser.parse_args()
     project = args.project_root.resolve()
     wheel = (args.wheel or project / 'dist/reactoccflow-0.1.0-py3-none-any.whl').resolve()
     with zipfile.ZipFile(wheel) as archive:
         names = archive.namelist()
-        forbidden = ('FlowMatchingV2', 'transition_models/', 'evaluation/baseline.py',
-                     'OccFM/', 'IR-WM/')
+        forbidden = ('evaluation/baseline.py', 'OccFM/', 'IR-WM/')
         if any(any(part in name for part in forbidden) for name in names):
-            raise RuntimeError('Wheel contains a removed world backbone or a reference repository')
+            raise RuntimeError('Wheel contains a stale baseline module or a reference repository')
         assert 'reactoccflow/models/standard_dit.py' in names
+        assert 'reactoccflow/models/modules/transition_models/FlowMatchingV2.py' in names
         assert 'reactoccflow/training/diagnostics.py' in names
-    with tempfile.TemporaryDirectory(prefix='reactoccflow-dit-only-') as temporary:
+    with tempfile.TemporaryDirectory(prefix='reactoccflow-dual-backbone-') as temporary:
         isolated = Path(temporary)
         resource = project / 'assets/checkpoints/occfm_vae.ckpt'
         copied = isolated / 'codec.ckpt'
@@ -78,40 +78,42 @@ else:
         'actor_class': torch.full((1, 8), -1, dtype=torch.long),
     }
     normalization = None
-model = ReactFlow(normalization=normalization).eval()
-assert isinstance(model.transition_model.trunk, StandardDiT)
-assert not hasattr(model, 'load_pretrained_trunk')
-assert not any(isinstance(m, (torch.nn.Conv2d, torch.nn.Conv3d, torch.nn.ConvTranspose3d))
-               for m in model.modules())
 assert importlib.util.find_spec('reactoccflow.evaluation.baseline') is None
 assert not hasattr(__import__('reactoccflow.models', fromlist=['x']), 'ConditionalFlowMatching')
 plan = torch.zeros(1, 6, 2)  # Explicit stationary candidate, independent of future labels.
 codec = OccupancyCodec().eval()
 codec.load_pretrained('codec.ckpt')
 with torch.inference_mode():
-    a = model.sample(obs, plan, generator=torch.Generator().manual_seed(7), nfe=1)
-    b = model.sample(obs, plan, generator=torch.Generator().manual_seed(7), nfe=1)
-    for key in a:
-        assert torch.isfinite(a[key]).all() and torch.equal(a[key], b[key])
-    torch.save(model.state_dict(), 'dit_state.pt')
-    clone = ReactFlow(normalization=normalization).eval()
-    clone.load_state_dict(torch.load('dit_state.pt', weights_only=True), strict=True)
-    c = clone.sample(obs, plan, generator=torch.Generator().manual_seed(7), nfe=1)
-    for key in a:
-        assert torch.equal(a[key], c[key])
     latent = codec.encode(torch.full((1, 200, 200, 16), 17, dtype=torch.long))
     assert latent.shape == (1, 16, 50, 50) and torch.isfinite(latent).all()
-    logits = codec.decode(a['future_latents'][:, 0, 0], return_logits=True)
-    assert logits.shape == (1, 200, 200, 16, 18) and torch.isfinite(logits).all()
+    backbones = {}
+    for backbone in ('occfm_unet', 'dit'):
+        model = ReactFlow(normalization=normalization, backbone=backbone).eval()
+        assert isinstance(model.transition_model.trunk, StandardDiT) == (backbone == 'dit')
+        a = model.sample(obs, plan, generator=torch.Generator().manual_seed(7), nfe=1)
+        b = model.sample(obs, plan, generator=torch.Generator().manual_seed(7), nfe=1)
+        for key in a:
+            assert torch.isfinite(a[key]).all() and torch.equal(a[key], b[key])
+        torch.save(model.state_dict(), 'state.pt')
+        clone = ReactFlow(normalization=normalization, backbone=backbone).eval()
+        clone.load_state_dict(torch.load('state.pt', weights_only=True), strict=True)
+        c = clone.sample(obs, plan, generator=torch.Generator().manual_seed(7), nfe=1)
+        for key in a:
+            assert torch.equal(a[key], c[key])
+        logits = codec.decode(a['future_latents'][:, 0, 0], return_logits=True)
+        assert logits.shape == (1, 200, 200, 16, 18) and torch.isfinite(logits).all()
+        backbones[backbone] = {'sample_shapes': {k: list(v.shape) for k, v in a.items()},
+                               'strict_checkpoint_round_trip': True,
+                               'decoded_logits_shape': list(logits.shape)}
+        del model, clone, a, b, c, logits
 modules = {name: module.__file__ for name, module in sys.modules.items()
            if name.startswith('reactoccflow') and getattr(module, '__file__', None)}
 assert all(not Path(file).resolve().is_relative_to(project) for file in modules.values())
 assert not Path('OccFM').exists() and not Path('IR-WM').exists()
-print(json.dumps({'passed': True, 'backbone': model.backbone,
+print(json.dumps({'passed': True, 'backbones': backbones,
                   'observations': 'real cached history' if Path('observations.npz').exists() else 'synthetic',
-                  'sample_shapes': {k: list(v.shape) for k, v in a.items()},
-                  'vae_encoded_shape': list(latent.shape), 'decoded_logits_shape': list(logits.shape),
-                  'strict_checkpoint_round_trip': True, 'removed_runtime_modules_absent': True,
+                  'vae_encoded_shape': list(latent.shape),
+                  'stale_baseline_modules_absent': True,
                   'loaded_modules': modules, 'training_started': False}, indent=2))
 '''
         (isolated / 'run.py').write_text(payload)

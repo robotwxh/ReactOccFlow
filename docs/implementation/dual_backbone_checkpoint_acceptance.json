@@ -1,0 +1,76 @@
+{
+  "training_started": false,
+  "optimizer_steps": 0,
+  "real_cache": "data/research/e0_full/tune",
+  "models": {
+    "occfm_unet": {
+      "checkpoint": "outputs/reactflow_joint/seed_2026/latest.pt",
+      "step": 50000,
+      "strict_load": true,
+      "sample_shapes": {
+        "future_latents": [
+          1,
+          1,
+          6,
+          16,
+          50,
+          50
+        ],
+        "actor_future": [
+          1,
+          1,
+          8,
+          6,
+          6
+        ],
+        "actor_existence": [
+          1,
+          1,
+          8,
+          6
+        ]
+      },
+      "repeated_sampling_identical": true,
+      "finite_real_shape_backward": true,
+      "base_loss_probe": 0.21769466996192932,
+      "peak_allocated_bytes": 3224509952
+    },
+    "dit": {
+      "checkpoint": "outputs/reactflow_dit/seed_2026/paused_step_022000_20261101.pt",
+      "step": 22000,
+      "strict_load": true,
+      "sample_shapes": {
+        "future_latents": [
+          1,
+          1,
+          6,
+          16,
+          50,
+          50
+        ],
+        "actor_future": [
+          1,
+          1,
+          8,
+          6,
+          6
+        ],
+        "actor_existence": [
+          1,
+          1,
+          8,
+          6
+        ]
+      },
+      "repeated_sampling_identical": true,
+      "finite_real_shape_backward": true,
+      "base_loss_probe": 0.5008451342582703,
+      "peak_allocated_bytes": 358691328
+    }
+  },
+  "upstream_trunk": {
+    "strict": true,
+    "key_count": 204,
+    "new_branch_keys": 74
+  }
+}

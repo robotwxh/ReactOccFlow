@@ -1,0 +1,83 @@
+{
+  "date": "2026-11-01",
+  "request": "Pause training, preserve resumable records and prepare a manual restart.",
+  "status": "paused_by_user",
+  "reference_search": {
+    "paths": [
+      "OccFM",
+      "IR-WM"
+    ],
+    "patterns": [
+      "signal.signal",
+      "SIGTERM",
+      "resume.*checkpoint",
+      "checkpoint.*resume"
+    ],
+    "results": "outputs/reactflow_dit/pause_resume_reference_search_20261101.txt",
+    "finding": "IR-WM contains framework checkpoint resume hooks. Neither reference provides a launcher for this owned frozen source export, run metadata and independent saved checkpoint. Reuse the existing owned launch command and SHA-256 checking procedure; no new reference dependency is needed."
+  },
+  "reference_audit": {
+    "OccFM": {
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "entry_count": 368,
+      "differences_from_20261031_snapshot": [],
+      "modifications_performed_by_this_task": false
+    },
+    "IR-WM": {
+      "commit": "94dbbf44d6c22e50db4080e986b3675eadbb4497",
+      "entry_count": 389,
+      "differences_from_20261031_snapshot": [
+        "changed: data"
+      ],
+      "modifications_performed_by_this_task": false,
+      "data_entry": {
+        "before": {
+          "mode": 16384,
+          "size": 4096,
+          "mtime_ns": 1793104919468061343,
+          "inode": 77493879
+        },
+        "current": {
+          "mode": 40960,
+          "size": 16,
+          "mtime_ns": 1793508907887164158,
+          "inode": 76415436,
+          "link": "/home/lthpc/data"
+        },
+        "entry_mtime_local": "2026-11-01T12:55:07.887164+08:00",
+        "pause_request_at": "2026-11-01T12:53:42.597322+08:00",
+        "entry_mtime_precedes_pause_request": false,
+        "disposition": "Observed historical-snapshot drift at the reference data entry; leave the reference path untouched. All other entries and the expected HEAD are unchanged. The training export/cache/weights are independent and all19,722 runtime fingerprints matched."
+      }
+    }
+  },
+  "owned_reuse": {
+    "launch_command_record": "outputs/reactflow_dit/seed_2026.launch.json",
+    "hash_helper_reference": "reactoccflow/provenance.py:sha256_file",
+    "dependency_closure": "Python standard library only; no reference imports or path injection."
+  },
+  "new_script": {
+    "path": "scripts/resume_dit_training.py",
+    "sha256": "cda716c0af4afdeb0330046250425ff78958b1bae334b6b5f1f7442a2deb529d",
+    "dry_run_passed": true,
+    "verified_files": 82,
+    "training_started": false
+  },
+  "paused_checkpoint": {
+    "path": "/home/lthpc/wxh/Paper/outputs/reactflow_dit/seed_2026/paused_step_022000_20261101.pt",
+    "sha256": "b23778564e3098ae580a63979071b0f635127d24ccff70e373a03c2d696a4e68",
+    "global_step": 22000,
+    "last_logged_step": 22550,
+    "logged_steps_beyond_checkpoint": 550,
+    "identity_files_verified": 19722
+  },
+  "pause_record": "outputs/reactflow_dit/seed_2026.paused_by_user.json",
+  "processes_stopped": 19,
+  "auto_restart": false,
+  "frozen_training_source_modified": false,
+  "limitations": [
+    "The running trainer had no signal-triggered save handler. Progress after the22,000-step checkpoint must be replayed; the22,550 log is not a checkpoint.",
+    "The manual resume script was checked with --dry-run only; no training was restarted.",
+    "IR-WM/data differs from the2026-10-31 snapshot as a symlink timestamped2026-11-01 12:55, after this pause request. The source of this concurrent change is unconfirmed; this task did not create or modify that entry. All other reference entries/HEADs and the independent runtime fingerprints matched."
+  ]
+}

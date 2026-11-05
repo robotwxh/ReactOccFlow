@@ -1,5 +1,8 @@
 # ReactOccFlow：面向闭环驾驶的反应式占据流世界模型
 
+> 2026-11-02 最新架构决定：恢复原 OccFM 式 U 形 DiT 为默认主干，同时保留 `backbone=dit` 的标准 DiT。两个分支均支持三种研究模式；原删除限制已被本次决定替代。训练继续暂停，既有 DiT 冻结源码和恢复入口保持不变。详见 [双架构恢复说明](docs/implementation/2026-11-02-restore-unet-and-keep-dit.md)。
+
+
 更新日期：2026-10-31。研究主干现为标准 DiT，采用模态内 self-attention 与 occupancy–actor 双向 cross-attention。本文中的 PlanFlow 学习、动作干预、风险校准及闭环收益属于研究目标；当前 DiT 已通过工程短跑验收，尚无全量训练或研究效果结论。旧 U-Net 实验独立保留，不能作为 DiT 的训练进度。实现与验证边界见 [标准 DiT 迁移记录](docs/implementation/2026-10-31-standard-dit.md)。
 
 ## 1. 研究动机
@@ -82,7 +85,7 @@ $$
 - $A$：周围车辆和行人的轨迹 token；
 - $D$：由 actor 状态中的速度及其时间差分得到的运动量；当前不另设独立的 $D$ 生成分支。
 
-当前 occupancy 速度网络采用标准 DiT：
+occupancy 速度网络现支持两种主干：默认恢复原 U 形时空 DiT，在瓶颈后交换 actor；标准 DiT 分支保留如下设计：
 
 - 将 6 个历史槽与 6 个带噪未来槽组成的 latent 序列切成空间 patch；单帧 latent 为 `16×50×50`，patch 为 `5×5`，每块 `400→256` 线性投影，共得到 1,200 个 token。
 - 在固定 token 分辨率上堆叠 8 层、256 维、8 头的 DiT Block。occupancy token 之间做全局时空 self-attention；生成时间和候选轨迹通过条件编码调制 adaLN。
@@ -248,7 +251,7 @@ $$
 
 将邻居轨迹 token 接入 occupancy flow，并比较并行生成和联合生成两种结构。
 
-研究主干采用上述标准 DiT，从随机初始化训练 occupancy 与 actor 分支；VAE 保持冻结。OccFM/U-Net 的可运行兼容分支已按用户要求删除；其既有检查点、训练曲线和源码档案仅作为历史对照，不属于新 DiT。
+研究主干可选择原 U 形时空 DiT（默认）或上述标准 DiT；VAE 保持冻结。两种结构均支持 occupancy–actor 联合训练。新实验默认随机初始化，U 形主干可显式使用原 OccFM 权重初始化；已有权重、训练曲线和暂停状态分别归属各自架构，不混用。
 
 ### 阶段三：加入交互约束
 

@@ -24,7 +24,7 @@ def main():
     observation={key:torch.from_numpy(value).unsqueeze(0).to(device) for key,value in sample['observation'].items()}
     target={key:torch.from_numpy(value).unsqueeze(0).to(device) for key,value in sample['target'].items()}
     stats=json.loads(Path('data/research/normalization.json').read_text())
-    model=ReactFlow(normalization=stats).to(device)
+    model=ReactFlow(normalization=stats,backbone='dit').to(device)
     base=model.training_loss(observation,target,target['ego_future'][...,:2],generator=torch.Generator(device=device).manual_seed(2026),return_endpoints=True)
     endpoints=base['endpoints'];occ=endpoints['future_latents'];actor=endpoints['actor_future']
     assert occ.requires_grad and actor.requires_grad

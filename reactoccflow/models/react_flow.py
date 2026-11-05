@@ -20,6 +20,8 @@ from torch.nn import functional as F
 from .flow import interpolate, shifted_time_grid
 from .joint_transition import JointTransition
 from .standard_dit import StandardDiT
+from ._utils import read_state_dict, strict_load
+from .modules.transition_models.FlowMatchingV2 import FLOW_MATCHING_DOWN_X4_DiT
 
 
 _OBSERVATION_KEYS = frozenset({
@@ -49,7 +51,8 @@ class ReactFlow(nn.Module):
     actor mask selects slots. ``normalization`` is the train-only statistics
     dictionary with actor_xy/actor_velocity mean/std pairs; None is identity.
 
-    The default backbone is a standard isotropic DiT, initialized from scratch
+    The default backbone is the restored OccFM-style U-shaped DiT. Both trunks
+    are initialized from scratch unless weights are explicitly supplied,
     and trainable in all modes. ``transition_model`` supplies a custom field; ``trunk``
     supplies an explicit backbone. No codec/VAE is registered in this module.
     """
@@ -59,14 +62,14 @@ class ReactFlow(nn.Module):
                  actor_hidden=128, actor_heads=4, interaction_layers=2,
                  latent_scale=10., time_scalar=1000., alpha=3.,
                  occ_weight=1., actor_weight=1., existence_weight=.1,
-                 freeze_backbone=False, backbone='dit', dit_config=None):
+                 freeze_backbone=False, backbone=None, dit_config=None, unet_config=None):
         super().__init__()
         if mode not in {'joint', 'parallel', 'occupancy_only'}:
             raise ValueError('mode must be joint, parallel, or occupancy_only')
         if transition_model is not None and trunk is not None:
             raise ValueError('Provide either transition_model or trunk')
-        if backbone != 'dit':
-            raise ValueError('Only standard DiT is supported')
+        if backbone not in {None, 'occfm_unet', 'dit'}:
+            raise ValueError('backbone must be occfm_unet or dit')
         if len(latent_shape) != 3 or any(int(x) != x or x <= 0 for x in latent_shape):
             raise ValueError('latent_shape must contain positive C,H,W')
         if min(history_frames, future_frames, max_actors, actor_history_frames) < 1:
@@ -85,7 +88,8 @@ class ReactFlow(nn.Module):
             trunk, mode=mode, future_frames=future_frames, history_frames=history_frames,
             actor_history_frames=actor_history_frames, actor_hidden=actor_hidden,
             actor_heads=actor_heads, interaction_layers=interaction_layers,
-            backbone=backbone, dit_config=dit_config, latent_shape=self.latent_shape)
+            backbone=backbone, dit_config=dit_config, unet_config=unet_config,
+            latent_shape=self.latent_shape)
         self.backbone = getattr(self.transition_model, 'backbone', 'custom')
         means, scales = [], []
         for name in ('actor_xy', 'actor_velocity'):
@@ -110,12 +114,36 @@ class ReactFlow(nn.Module):
         are then frozen. Pass frozen=False to train that mode.
         """
         if not hasattr(self.transition_model, 'trunk'):
-            raise ValueError('The supplied transition_model has no DiT trunk')
+            raise ValueError('The supplied transition_model has no backbone trunk')
         self.transition_model.trunk.requires_grad_(not frozen)
         # Source fixed positional embeddings are never trainable.
         self.transition_model.trunk.pos_embed.requires_grad_(False)
         self.transition_model.trunk.temp_embed.requires_grad_(False)
         return self
+
+    def load_pretrained_trunk(self, path, *, weights='state_dict'):
+        """Restore strict OccFM trunk loading, without loading actor/VAE weights.
+
+        Partition selection reuses the archived owned CFM loader. This is
+        initialization only, never an optimizer/cursor resume operation.
+        """
+        trunk = getattr(self.transition_model, 'trunk', None)
+        if not isinstance(trunk, FLOW_MATCHING_DOWN_X4_DiT):
+            raise ValueError('OccFM pretrained trunk loading requires backbone=occfm_unet')
+        state = read_state_dict(path, weights=weights)
+        prefix = 'transition_model.'
+        if any(key.startswith(prefix) for key in state):
+            selected = {key[len(prefix):]: value for key, value in state.items() if key.startswith(prefix)}
+            unrelated = [key for key in state if not key.startswith(prefix)]
+            unexpected = [key for key in unrelated if not key.startswith(('embedding.', 'encoder.', 'quantization.', 'decoder.'))]
+            if unexpected:
+                raise RuntimeError(f'Unexpected checkpoint partitions: {unexpected}')
+        else:
+            selected, unrelated = state, []
+        report = strict_load(trunk, selected)
+        report.update(excluded_compressor_keys=unrelated, trunk_key_count=len(trunk.state_dict()),
+                      new_branch_keys=[key for key in self.transition_model.state_dict() if not key.startswith('trunk.')])
+        return report
 
 
     def _normalise_actor(self, state):

@@ -1,14 +1,14 @@
 {
-  "checked_at": "2026-10-31T20:04:21.378486+08:00",
-  "status": "running",
+  "checked_at": "2026-11-01T12:56:03.377078+08:00",
+  "status": "paused_by_user",
   "backbone": "dit",
   "torchrun_pid": 2838011,
-  "last_verified_log_step": 50,
-  "last_verified_checkpoint_step": 50,
+  "last_verified_log_step": 22550,
+  "last_verified_checkpoint_step": 22000,
   "max_steps": 100000,
   "train_windows": 17468,
   "tune_windows": 2176,
-  "full_tune_evaluations": 0,
+  "full_tune_evaluations": 11,
   "runtime_source_directory": "/home/lthpc/wxh/Paper/outputs/reactflow_dit/source_seed_2026",
   "resumed_from_step": 50,
   "stop_after_steps": null,
@@ -44,5 +44,12 @@
     }
   },
   "training_log": "/home/lthpc/wxh/Paper/outputs/reactflow_dit/seed_2026/training.jsonl",
-  "scope": "Full dataset supervised logged-action oracle E0 training. GPU activity confirms resumed execution; logging every50 means unlogged in-memory progress is not reported as a verified step."
+  "scope": "All 19 owned training/loader/launcher processes stopped. Resume starts from the complete22,000-step state; later logged/in-memory steps are retained as historical logs but are not checkpointed.",
+  "resumable_checkpoint": "/home/lthpc/wxh/Paper/outputs/reactflow_dit/seed_2026/paused_step_022000_20261101.pt",
+  "checkpoint_sha256": "b23778564e3098ae580a63979071b0f635127d24ccff70e373a03c2d696a4e68",
+  "best_tune_loss": 0.7826553602260875,
+  "auto_restart": false,
+  "restart_disabled": true,
+  "stopped_process_count": 19,
+  "pause_record": "/home/lthpc/wxh/Paper/outputs/reactflow_dit/seed_2026.paused_by_user.json"
 }

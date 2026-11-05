@@ -3,6 +3,8 @@ import torch
 
 from .others import Normalize, exists, Mlp
 from einops import rearrange
+from einops_exts import rearrange_many
+from torch import einsum
 from einops_exts import check_shape, rearrange_many
 from torch.nn.attention import sdpa_kernel, SDPBackend
 
@@ -77,3 +79,83 @@ class DiTAttention(nn.Module):
         x = self.proj(x)
         x = self.proj_drop(x)
         return x
+
+
+class Attention(nn.Module):
+    def __init__(
+        self,
+        dim,
+        heads = 4,
+        dim_head = 32,
+        rotary_emb = None
+    ):
+        super().__init__()
+        self.scale = dim_head ** -0.5
+        self.heads = heads
+        hidden_dim = dim_head * heads
+
+        self.rotary_emb = rotary_emb
+        self.to_qkv = nn.Linear(dim, hidden_dim * 3, bias = False)
+        self.to_out = nn.Linear(hidden_dim, dim, bias = False)
+
+    def forward(
+        self,
+        x,
+        pos_bias = None,
+        focus_present_mask = None
+    ):
+        n, device = x.shape[-2], x.device
+
+        qkv = self.to_qkv(x).chunk(3, dim = -1)
+
+        if exists(focus_present_mask) and focus_present_mask.all():
+            # if all batch samples are focusing on present
+            # it would be equivalent to passing that token's values through to the output
+            values = qkv[-1]
+            return self.to_out(values)
+
+        # split out heads
+
+        q, k, v = rearrange_many(qkv, '... n (h d) -> ... h n d', h = self.heads)
+
+        # scale
+
+        q = q * self.scale
+
+        # rotate positions into queries and keys for time attention
+
+        if exists(self.rotary_emb):
+            q = self.rotary_emb.rotate_queries_or_keys(q)
+            k = self.rotary_emb.rotate_queries_or_keys(k)
+
+        # similarity
+
+        sim = einsum('... h i d, ... h j d -> ... h i j', q, k)
+
+        # relative positional bias
+
+        if exists(pos_bias):
+            sim = sim + pos_bias
+
+        if exists(focus_present_mask) and not (~focus_present_mask).all():
+            attend_all_mask = torch.ones((n, n), device = device, dtype = torch.bool)
+            attend_self_mask = torch.eye(n, device = device, dtype = torch.bool)
+
+            mask = torch.where(
+                rearrange(focus_present_mask, 'b -> b 1 1 1 1'),
+                rearrange(attend_self_mask, 'i j -> 1 1 1 i j'),
+                rearrange(attend_all_mask, 'i j -> 1 1 1 i j'),
+            )
+
+            sim = sim.masked_fill(~mask, -torch.finfo(sim.dtype).max)
+
+        # numerical stability
+
+        sim = sim - sim.amax(dim = -1, keepdim = True).detach()
+        attn = sim.softmax(dim = -1)
+
+        # aggregate values
+
+        out = einsum('... h i j, ... h j d -> ... h i d', attn, v)
+        out = rearrange(out, '... h n d -> ... n (h d)')
+        return self.to_out(out)

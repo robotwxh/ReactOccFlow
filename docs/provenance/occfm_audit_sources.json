@@ -1,0 +1,260 @@
+{
+  "source_commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+  "reference_before_status": " M .gitignore\n?? .gitattributes\n?? .vscode/\n?? \"\\351\\241\\271\\347\\233\\256\\350\\247\\243\\350\\257\\273.md\"\n",
+  "files": [
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/forecast/models/model_template.py",
+      "source_sha256": "01eb1eff23ab66d56764c3284e7fd9b663c6aab60102302f32bd3e45b5213796",
+      "destination": "reactoccflow/occfm_audit/vendor/models/model_template.py",
+      "destination_sha256": "efe3e9bb27fa4ccab70934022d9e4fa7f021636c8eb110f3afb7b2e992f43072",
+      "changes": "Import namespace only; numerical model code unchanged."
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/forecast/models/__init__.py",
+      "source_sha256": "cfa0a0fea6f02f2f08b2ae0ed3c43e3486d4362a0d6dade1337a7ed94b5f151a",
+      "destination": "reactoccflow/occfm_audit/vendor/models/__init__.py",
+      "destination_sha256": "cfa0a0fea6f02f2f08b2ae0ed3c43e3486d4362a0d6dade1337a7ed94b5f151a",
+      "changes": "Import namespace only; numerical model code unchanged."
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/forecast/models/compressors/occfm_vae.py",
+      "source_sha256": "a61e10d43fb892a302721239490ad9081ffd641ff33a0768a448a821800befba",
+      "destination": "reactoccflow/occfm_audit/vendor/models/compressors/occfm_vae.py",
+      "destination_sha256": "bd978704a8109bddfd190e774eca7a29851c2c746842d1fa9c3fa6fef9544a7f",
+      "changes": "Import namespace only; numerical model code unchanged."
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/forecast/models/compressors/occfm_vae3d.py",
+      "source_sha256": "4c85ce61961913067dbe1822759d379de07c38e455c8a02bde4519596d8674a7",
+      "destination": "reactoccflow/occfm_audit/vendor/models/compressors/occfm_vae3d.py",
+      "destination_sha256": "a611557a0f2f171f822de3857034b2b997e17d5d3fa8aa1e5c05858f6e0f28b7",
+      "changes": "Import namespace only; numerical model code unchanged."
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/forecast/models/compressors/__init__.py",
+      "source_sha256": "afcbab0c39395437ac33cd4c2349e2c4df2739d2ee7946e257fbd4b109a1e025",
+      "destination": "reactoccflow/occfm_audit/vendor/models/compressors/__init__.py",
+      "destination_sha256": "48b385ac379ec6784a736110584a79f44660bb06f339b05c649896de226e57a8",
+      "changes": "Import namespace only; numerical model code unchanged."
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/forecast/models/worldmodels/occfm.py",
+      "source_sha256": "32acddf3f166f341b5be69eb753fee3265e06974f1f2b6cbcbe7660e091ba301",
+      "destination": "reactoccflow/occfm_audit/vendor/models/worldmodels/occfm.py",
+      "destination_sha256": "a62c5a4486b7bb08bed64170a116ae4ab908192aea7373ad8bade1d388a6a311",
+      "changes": "Import namespace only; numerical model code unchanged."
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/forecast/models/worldmodels/__init__.py",
+      "source_sha256": "7586d7bf0b012cd2f2489adcdb31cd176433d1707ea07691431d65f3b3719dd9",
+      "destination": "reactoccflow/occfm_audit/vendor/models/worldmodels/__init__.py",
+      "destination_sha256": "64b3b54403b98f0926b8616830bcc4e6cdd87a760d68425049fb47ba9dcc0de4",
+      "changes": "Import namespace only; numerical model code unchanged."
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/forecast/models/modules/__init__.py",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "destination": "reactoccflow/occfm_audit/vendor/models/modules/__init__.py",
+      "destination_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "changes": "Import namespace only; numerical model code unchanged."
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/forecast/models/modules/planners/EmptyPlanner.py",
+      "source_sha256": "1f10261483e3fe37a9b777bf4c66bcb5f9f43e7b02007b09fd7050560c48fed1",
+      "destination": "reactoccflow/occfm_audit/vendor/models/modules/planners/EmptyPlanner.py",
+      "destination_sha256": "1f10261483e3fe37a9b777bf4c66bcb5f9f43e7b02007b09fd7050560c48fed1",
+      "changes": "Import namespace only; numerical model code unchanged."
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/forecast/models/modules/planners/__init__.py",
+      "source_sha256": "f952a8a93717143fc03b26ac051ccefca6180b50e979e8ba0b68b0a813b3fa64",
+      "destination": "reactoccflow/occfm_audit/vendor/models/modules/planners/__init__.py",
+      "destination_sha256": "f952a8a93717143fc03b26ac051ccefca6180b50e979e8ba0b68b0a813b3fa64",
+      "changes": "Import namespace only; numerical model code unchanged."
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/forecast/models/modules/quantization/vae_quant.py",
+      "source_sha256": "0090eb15aa248696d46fe0c6c95517d31aa048888a4b0de3ef55bf5c839b7148",
+      "destination": "reactoccflow/occfm_audit/vendor/models/modules/quantization/vae_quant.py",
+      "destination_sha256": "0090eb15aa248696d46fe0c6c95517d31aa048888a4b0de3ef55bf5c839b7148",
+      "changes": "Import namespace only; numerical model code unchanged."
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/forecast/models/modules/quantization/__init__.py",
+      "source_sha256": "c360ed4e468543009a7237543c99db8f090b7d7a0f8686e49fcd489aedafa9a7",
+      "destination": "reactoccflow/occfm_audit/vendor/models/modules/quantization/__init__.py",
+      "destination_sha256": "c360ed4e468543009a7237543c99db8f090b7d7a0f8686e49fcd489aedafa9a7",
+      "changes": "Import namespace only; numerical model code unchanged."
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/forecast/models/modules/decoders/SwinSingleFrameUpV2.py",
+      "source_sha256": "5bd3729defe6310d703d082aebd87d394a49ca950baf829030e922bafbdd076c",
+      "destination": "reactoccflow/occfm_audit/vendor/models/modules/decoders/SwinSingleFrameUpV2.py",
+      "destination_sha256": "5bd3729defe6310d703d082aebd87d394a49ca950baf829030e922bafbdd076c",
+      "changes": "Import namespace only; numerical model code unchanged."
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/forecast/models/modules/decoders/__init__.py",
+      "source_sha256": "c3c426692c9e4bc0b2cf746673cb012e7ceea15da9e2586e13ce358db04970ef",
+      "destination": "reactoccflow/occfm_audit/vendor/models/modules/decoders/__init__.py",
+      "destination_sha256": "c3c426692c9e4bc0b2cf746673cb012e7ceea15da9e2586e13ce358db04970ef",
+      "changes": "Import namespace only; numerical model code unchanged."
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/forecast/models/modules/embedding/voxel_height_sem_embed.py",
+      "source_sha256": "d844fb01eb201986f81ff15b5d2fecfbe8cf80a2dd660c8383837fa2b6240027",
+      "destination": "reactoccflow/occfm_audit/vendor/models/modules/embedding/voxel_height_sem_embed.py",
+      "destination_sha256": "d844fb01eb201986f81ff15b5d2fecfbe8cf80a2dd660c8383837fa2b6240027",
+      "changes": "Import namespace only; numerical model code unchanged."
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/forecast/models/modules/embedding/__init__.py",
+      "source_sha256": "5fa0083225473fd1b62214837197ed0a852f212328e296eb2d9614636acc4047",
+      "destination": "reactoccflow/occfm_audit/vendor/models/modules/embedding/__init__.py",
+      "destination_sha256": "5fa0083225473fd1b62214837197ed0a852f212328e296eb2d9614636acc4047",
+      "changes": "Import namespace only; numerical model code unchanged."
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/forecast/models/modules/transition_models/FlowMatchingV2.py",
+      "source_sha256": "89b73962947be5abcda56e13f2d305452bebfebf6ac0441d30ba21d2ad64dd1b",
+      "destination": "reactoccflow/occfm_audit/vendor/models/modules/transition_models/FlowMatchingV2.py",
+      "destination_sha256": "f3892a1bd4d4da9b8a1ccdbedbcb6e4353a4e51f8da4db98876740c25caa91b1",
+      "changes": "Import namespace only; numerical model code unchanged."
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/forecast/models/modules/transition_models/__init__.py",
+      "source_sha256": "b5ee3192dcc1a030cab861554ea7b153a9ba69e3e47bd9bda221abe36c8be62d",
+      "destination": "reactoccflow/occfm_audit/vendor/models/modules/transition_models/__init__.py",
+      "destination_sha256": "b5ee3192dcc1a030cab861554ea7b153a9ba69e3e47bd9bda221abe36c8be62d",
+      "changes": "Import namespace only; numerical model code unchanged."
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/forecast/models/modules/base/temporal_base.py",
+      "source_sha256": "f32f9f0942e719824750c2f2a85641b9d0dd2c326e56620e581b841791b653fb",
+      "destination": "reactoccflow/occfm_audit/vendor/models/modules/base/temporal_base.py",
+      "destination_sha256": "f32f9f0942e719824750c2f2a85641b9d0dd2c326e56620e581b841791b653fb",
+      "changes": "Import namespace only; numerical model code unchanged."
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/forecast/models/modules/base/others.py",
+      "source_sha256": "07473ba923b4a86fd89d69bbb0eb4e1e0ccf905acce958cd8a7240c619013592",
+      "destination": "reactoccflow/occfm_audit/vendor/models/modules/base/others.py",
+      "destination_sha256": "59824ad39bc8b83646c37b05282af494532a6e6f8198f709e5a356d0e2433fa6",
+      "changes": "Import namespace only; numerical model code unchanged."
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/forecast/models/modules/base/attn_base.py",
+      "source_sha256": "64289056ad8ad2b07cc2a18df7f5771bbd8f8411e21a1d41f829f794115d8fb8",
+      "destination": "reactoccflow/occfm_audit/vendor/models/modules/base/attn_base.py",
+      "destination_sha256": "5bbf35bf2505b8aa49a8a8de90cff12aa81ea11f21a14d46eae4a6ae63ebf0d2",
+      "changes": "Import namespace only; numerical model code unchanged."
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/forecast/models/modules/base/dit.py",
+      "source_sha256": "4d8f7e7f70601afc7f0149e2a1d38b40ab6bec3e59c9eed9193d6333925f419b",
+      "destination": "reactoccflow/occfm_audit/vendor/models/modules/base/dit.py",
+      "destination_sha256": "4d8f7e7f70601afc7f0149e2a1d38b40ab6bec3e59c9eed9193d6333925f419b",
+      "changes": "Import namespace only; numerical model code unchanged."
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/forecast/models/modules/base/__init__.py",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "destination": "reactoccflow/occfm_audit/vendor/models/modules/base/__init__.py",
+      "destination_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "changes": "Import namespace only; numerical model code unchanged."
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/forecast/models/modules/base/swin_transformerbase.py",
+      "source_sha256": "0f1a099bbe2569060fd234ab4b4b382663568a406f1b3a5457211d5c2aaa8a9c",
+      "destination": "reactoccflow/occfm_audit/vendor/models/modules/base/swin_transformerbase.py",
+      "destination_sha256": "0f1a099bbe2569060fd234ab4b4b382663568a406f1b3a5457211d5c2aaa8a9c",
+      "changes": "Import namespace only; numerical model code unchanged."
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/forecast/models/modules/base/res_layersbase.py",
+      "source_sha256": "f9836412f36499eb3784c831c3caf6e569871ae7f360a3c35b5839f02d025fe6",
+      "destination": "reactoccflow/occfm_audit/vendor/models/modules/base/res_layersbase.py",
+      "destination_sha256": "f9836412f36499eb3784c831c3caf6e569871ae7f360a3c35b5839f02d025fe6",
+      "changes": "Import namespace only; numerical model code unchanged."
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/forecast/models/modules/base/postion_embed.py",
+      "source_sha256": "ac9140d712616df71d5a0851150f68273d44e2a44ad113901c00814c565efdda",
+      "destination": "reactoccflow/occfm_audit/vendor/models/modules/base/postion_embed.py",
+      "destination_sha256": "ac9140d712616df71d5a0851150f68273d44e2a44ad113901c00814c565efdda",
+      "changes": "Import namespace only; numerical model code unchanged."
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/forecast/models/modules/encoders/SwinSingleFrameDownV2.py",
+      "source_sha256": "f8c02831de05a7971160542e78ee57076c8986d398964e2cfbfa1c43c76fdaaa",
+      "destination": "reactoccflow/occfm_audit/vendor/models/modules/encoders/SwinSingleFrameDownV2.py",
+      "destination_sha256": "f8c02831de05a7971160542e78ee57076c8986d398964e2cfbfa1c43c76fdaaa",
+      "changes": "Import namespace only; numerical model code unchanged."
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/forecast/models/modules/encoders/__init__.py",
+      "source_sha256": "db80a943c5b7070f2b3b7eb6d421e4b4b51ce08faf557485990e777331f74e77",
+      "destination": "reactoccflow/occfm_audit/vendor/models/modules/encoders/__init__.py",
+      "destination_sha256": "db80a943c5b7070f2b3b7eb6d421e4b4b51ce08faf557485990e777331f74e77",
+      "changes": "Import namespace only; numerical model code unchanged."
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/forecast/utils/common_utils.py",
+      "source_sha256": "bed7b2ea861d3cf04275b5d3e71fc5a2fd33836d3c8c1d4a12c82f86c532694d",
+      "destination": "reactoccflow/occfm_audit/vendor/utils/common_utils.py",
+      "destination_sha256": "bed7b2ea861d3cf04275b5d3e71fc5a2fd33836d3c8c1d4a12c82f86c532694d",
+      "changes": "Import namespace only; numerical model code unchanged."
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/forecast/utils/eval_utils.py",
+      "source_sha256": "11b60285639e569cb6555ba5ce63d999bdbbe19307c74f1c9afdbbf2518c3f68",
+      "destination": "reactoccflow/occfm_audit/vendor/utils/eval_utils.py",
+      "destination_sha256": "11b60285639e569cb6555ba5ce63d999bdbbe19307c74f1c9afdbbf2518c3f68",
+      "changes": "Import namespace only; numerical model code unchanged."
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/forecast/utils/__init__.py",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "destination": "reactoccflow/occfm_audit/vendor/utils/__init__.py",
+      "destination_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "changes": "Import namespace only; numerical model code unchanged."
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/forecast/utils/loss_utils.py",
+      "source_sha256": "95685a95c9c6215cbaa3c580d8c93036f7af92c31ccbc8ef2726728103834136",
+      "destination": "reactoccflow/occfm_audit/vendor/utils/loss_utils.py",
+      "destination_sha256": "95685a95c9c6215cbaa3c580d8c93036f7af92c31ccbc8ef2726728103834136",
+      "changes": "Import namespace only; numerical model code unchanged."
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/forecast/utils/model_utils.py",
+      "source_sha256": "b274c2902690836b390d39dc49291b58768dc28fb561241e218ffabfbbbd7b04",
+      "destination": "reactoccflow/occfm_audit/vendor/utils/model_utils.py",
+      "destination_sha256": "b274c2902690836b390d39dc49291b58768dc28fb561241e218ffabfbbbd7b04",
+      "changes": "Import namespace only; numerical model code unchanged."
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/forecast/ops/__init__.py",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "destination": "reactoccflow/occfm_audit/vendor/ops/__init__.py",
+      "destination_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "changes": "Import namespace only; numerical model code unchanged."
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/forecast/ops/flash_attention/flash_attention.py",
+      "source_sha256": "a4f4ae15a6195baa1b7225c58b29d27b2612bdf16d8ed7ab2dcb7d0c5006944c",
+      "destination": "reactoccflow/occfm_audit/vendor/ops/flash_attention/flash_attention.py",
+      "destination_sha256": "a4f4ae15a6195baa1b7225c58b29d27b2612bdf16d8ed7ab2dcb7d0c5006944c",
+      "changes": "Import namespace only; numerical model code unchanged."
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/forecast/ops/flash_attention/__init__.py",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "destination": "reactoccflow/occfm_audit/vendor/ops/flash_attention/__init__.py",
+      "destination_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "changes": "Import namespace only; numerical model code unchanged."
+    }
+  ],
+  "ir_wm_search": "Searched projects/*.py for checkpoint/FVD/evaluation; OccFM published architecture is needed for strict checkpoint compatibility. No IR-WM code used.",
+  "license": "Original headers retained. Upstream full repository license not found; local research evaluation only, redistribution status unresolved."
+}

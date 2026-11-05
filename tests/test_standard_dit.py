@@ -42,7 +42,7 @@ def test_patchify_round_trip_preserves_frames_channels_and_pixel_order():
 
 
 def test_default_flow_is_isotropic_dit_and_trainable_from_scratch():
-    flow = ReactFlow()
+    flow = ReactFlow(backbone='dit')
     trunk = flow.transition_model.trunk
     assert isinstance(trunk, StandardDiT) and flow.backbone == 'dit'
     assert trunk.token_count == 1200 and len(trunk.blocks) == 8
@@ -163,9 +163,8 @@ def test_strict_dit_state_round_trip_and_legacy_initialization_rejection(tmp_pat
     data = flow_inputs(obs, candidate)
     for name, value in a.transition_model(data).items():
         torch.testing.assert_close(value, b.transition_model(data)[name], rtol=0, atol=0)
-    assert not hasattr(a, 'load_pretrained_trunk')
-    with pytest.raises(ValueError, match='Only standard DiT'):
-        ReactFlow(backbone='occfm_unet')
+    with pytest.raises(ValueError, match='requires backbone=occfm_unet'):
+        a.load_pretrained_trunk(path)
 
 
 @pytest.mark.parametrize('options', [
@@ -192,7 +191,7 @@ def test_runner_rejects_cross_architecture_arguments_before_any_data_access():
         main(['--backbone', 'occfm_unet', '--dit-config', 'missing.yaml'])
 
 
-def test_removed_backbone_and_stale_constructors_are_absent_from_runtime():
+def test_both_backbones_are_available_without_reviving_stale_baseline_api():
     import ast
     import importlib.util
     from pathlib import Path
@@ -200,7 +199,7 @@ def test_removed_backbone_and_stale_constructors_are_absent_from_runtime():
 
     assert not hasattr(models, 'ConditionalFlowMatching')
     assert importlib.util.find_spec('reactoccflow.evaluation.baseline') is None
-    assert not Path('reactoccflow/models/modules/transition_models/FlowMatchingV2.py').exists()
+    assert Path('reactoccflow/models/modules/transition_models/FlowMatchingV2.py').exists()
     assert not Path('configs/occfm_history.yaml').exists()
     assert not Path('configs/occfm_future.yaml').exists()
     for folder in ('reactoccflow', 'scripts'):
@@ -209,4 +208,4 @@ def test_removed_backbone_and_stale_constructors_are_absent_from_runtime():
                 if isinstance(node, ast.Call) and getattr(node.func, 'id', None) == 'ReactFlow':
                     for keyword in node.keywords:
                         if keyword.arg == 'backbone' and isinstance(keyword.value, ast.Constant):
-                            assert keyword.value.value == 'dit', str(path)
+                            assert keyword.value.value in {'dit', 'occfm_unet'}, str(path)

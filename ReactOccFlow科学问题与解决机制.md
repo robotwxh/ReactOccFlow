@@ -1,6 +1,9 @@
 # ReactOccFlow：科学问题、解决机制与验证方案
 
-**创建日期：2026-10-27；架构同步：2026-10-31。** 对应[方案](./ReactOccFlow方案.md)、[实施计划](./docs/superpowers/plans/2026-10-27-reactoccflow-implementation-plan.md)与[参考文献](./ReactOccFlow参考文献.md)。当前实现采用标准 DiT，旧 U-Net 训练与新 DiT 的证据分别记录于[迁移说明](./docs/implementation/2026-10-31-standard-dit.md)。
+> 2026-11-02 最新架构决定：恢复原 OccFM 式 U 形 DiT 为默认主干，同时保留 `backbone=dit` 的标准 DiT。两个分支均支持三种研究模式；原删除限制已被本次决定替代。训练继续暂停，既有 DiT 冻结源码和恢复入口保持不变。详见 [双架构恢复说明](docs/implementation/2026-11-02-restore-unet-and-keep-dit.md)。
+
+
+**创建日期：2026-10-27；架构同步：2026-10-31。** 对应[方案](./ReactOccFlow方案.md)、[实施计划](./docs/superpowers/plans/2026-10-27-reactoccflow-implementation-plan.md)与[参考文献](./ReactOccFlow参考文献.md)。当前实现支持默认 U 形 DiT 和标准 DiT，两种架构的历史训练证据分别记录于[迁移说明](./docs/implementation/2026-10-31-standard-dit.md)。
 
 > 本文是研究设计说明，不是实验结果报告。“解决”指拟采用的建模与验证路径；所有性能收益、机制解释和贡献强度都需要实验确认。文献编号沿用已有的 30 篇参考文献清单。本次同步修改 Markdown，不新增训练或实验结果。
 
@@ -212,9 +215,9 @@ $$
 
 存在性采用单独的概率输出，训练时监督可见/有效状态；不能通过删除困难目标来规避预测误差。航向在解码时归一化正余弦并恢复角度，静止目标需要稳定的方向处理。
 
-当前 occupancy 网络为标准 DiT：`16×50×50` latent 按 `5×5` 空间 patch 投影到 256 维，12 个历史/带噪未来槽共形成 1,200 个 token，经 8 层、8 头 DiT 的全局时空 self-attention 建模。所有层保持固定 token 数与宽度；没有 U-Net 的多尺度编码/解码及跨尺度跳连。生成时间与候选自车轨迹用于条件调制。
+默认 occupancy 网络恢复原 U 形时空 DiT，保留瓶颈后的两层 actor 双向交互；标准 DiT 分支为：`16×50×50` latent 按 `5×5` 空间 patch 投影到 256 维，12 个历史/带噪未来槽共形成 1,200 个 token，经 8 层、8 头 DiT 的全局时空 self-attention 建模。所有层保持固定 token 数与宽度；没有 U-Net 的多尺度编码/解码及跨尺度跳连。生成时间与候选自车轨迹用于条件调制。
 
-actor 历史、当前观测 mask、类别、尺寸、带噪未来运动状态、物理未来槽位、生成时间和候选轨迹共同组成 48 个 128 维 token。默认在第 4 个 DiT Block 后插入两层、4 头交互模块，分别执行 actor self-attention、同步双向 cross-attention 和 actor FFN：
+actor 历史、当前观测 mask、类别、尺寸、带噪未来运动状态、物理未来槽位、生成时间和候选轨迹共同组成 48 个 128 维 token。标准 DiT 在第 4 个 Block 后、U 形 DiT 在 mid_block2 后插入两层、4 头交互模块，分别执行 actor self-attention、同步双向 cross-attention 和 actor FFN：
 
 | 计算 | Q 来源 | K/V 来源 | 更新内容 |
 | --- | --- | --- | --- |

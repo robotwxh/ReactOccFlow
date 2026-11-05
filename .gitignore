@@ -13,3 +13,4 @@ __pycache__/
 /outputs/
 docs/references/*.pdf
 docs/presentations/
+/resources/

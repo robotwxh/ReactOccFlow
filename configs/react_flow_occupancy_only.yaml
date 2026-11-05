@@ -1,4 +1,3 @@
-# Standard DiT only; the independent VAE remains frozen.
 model:
   kind: react_flow
   mode: occupancy_only
@@ -19,15 +18,19 @@ model:
   occ_weight: 1.0
   actor_weight: 1.0
   existence_weight: 0.1
-  backbone: dit
-  dit_config:
-    patch_size: 5
-    hidden_size: 256
-    depth: 8
-    num_heads: 8
-    mlp_ratio: 4.0
-    activation_checkpointing: true
+  backbone: occfm_unet
   freeze_backbone: false
+  unet_config:
+    model_channels: 128
+    channel_multi:
+    - 2
+    - 4
+    init_kernel_size: 7
+    init_3d_conv_channels: 64
+    attn_dim: 32
+    temporal_attn_head: 8
+    spatial_attn_head: 8
+    attention_mode: flash
 normalization: data/research/normalization.json
 sampling:
   num_worlds: 1
@@ -45,7 +48,7 @@ research_status:
   - 2.5
   - 3.0
   future_timestamps_are_targets_only: true
-  initialization_conditioning: Standard DiT initialized from scratch; generation time
-    and separately supplied ego candidate condition adaLN-Zero.
+  initialization_conditioning: Restored OccFM U-shaped spatial/temporal DiT; fresh
+    initialization unless an explicit trunk checkpoint is supplied.
   cli_integration: Full runner defaults to DiT; --dit-config configs/dit.yaml supplies
     architecture options. This file also specifies research loss/sampling defaults.

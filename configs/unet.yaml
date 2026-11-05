@@ -1,0 +1,11 @@
+# Restored OccFM-style U-shaped DiT. Legacy attention layout preserves old checkpoint numerics.
+model_channels: 128
+channel_multi:
+- 2
+- 4
+init_kernel_size: 7
+init_3d_conv_channels: 64
+attn_dim: 32
+temporal_attn_head: 8
+spatial_attn_head: 8
+attention_mode: flash

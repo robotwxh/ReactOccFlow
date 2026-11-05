@@ -351,10 +351,13 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--train-cache", default="data/research/e0_full/train")
     parser.add_argument("--tune-cache", default="data/research/e0_full/tune")
-    parser.add_argument("--backbone", choices=["dit"], default="dit")
+    parser.add_argument("--backbone", choices=["occfm_unet", "dit"], default="occfm_unet")
     parser.add_argument("--dit-config", type=Path, help="Optional flat YAML of standard DiT architecture options")
+    parser.add_argument("--unet-config", type=Path, help="Optional flat YAML of restored U-shaped DiT options")
+    parser.add_argument("--trunk-checkpoint", type=Path, help="Explicit OccFM U-shaped trunk initialization; not resume")
+    parser.add_argument("--trunk-weights", choices=["state_dict", "ema_model"], default="state_dict")
     parser.add_argument("--codec-checkpoint", default="assets/checkpoints/occfm_vae.ckpt")
-    parser.add_argument("--output", help="Fresh run directory; defaults to outputs/reactflow_dit/seed_<seed>")
+    parser.add_argument("--output", help="Fresh run directory; defaults to outputs/reactflow_<backbone>/seed_<seed>")
     parser.add_argument("--resume", default=None)
     parser.add_argument("--max-steps", type=int, default=100_000)
     parser.add_argument("--warmup-steps", type=int, default=1000)
@@ -373,6 +376,12 @@ def main(argv=None):
     parser.add_argument("--seed", type=int, default=2026)
     parser.add_argument("--device", choices=("cuda", "cpu"), default="cuda")
     args = parser.parse_args(argv)
+    if args.dit_config is not None and args.backbone != 'dit':
+        parser.error('--dit-config requires --backbone dit')
+    if (args.unet_config is not None or args.trunk_checkpoint is not None) and args.backbone != 'occfm_unet':
+        parser.error('--unet-config and --trunk-checkpoint require --backbone occfm_unet')
+    if args.resume and args.trunk_checkpoint is not None:
+        parser.error('--resume cannot be combined with --trunk-checkpoint initialization')
     dit_options = None
     if args.dit_config is not None:
         dit_options = yaml.safe_load(args.dit_config.read_text())
@@ -380,7 +389,14 @@ def main(argv=None):
         if not isinstance(dit_options, dict) or set(dit_options) - allowed:
             parser.error('--dit-config must contain only patch_size, hidden_size, depth, num_heads, mlp_ratio, activation_checkpointing')
     if args.output is None:
-        args.output = f'outputs/reactflow_dit/seed_{args.seed}'
+        args.output = f'outputs/reactflow_{args.backbone}/seed_{args.seed}'
+    unet_options = None
+    if args.unet_config is not None:
+        unet_options = yaml.safe_load(args.unet_config.read_text())
+        allowed = {'model_channels', 'channel_multi', 'init_kernel_size', 'init_3d_conv_channels',
+                   'attn_dim', 'temporal_attn_head', 'spatial_attn_head', 'attention_mode'}
+        if not isinstance(unet_options, dict) or set(unet_options) - allowed:
+            parser.error('--unet-config contains unknown U-shaped DiT architecture options')
     if min(args.max_steps, args.eval_interval, args.patience, args.batch_size, args.grad_accum, args.decode_chunk) < 1:
         parser.error("steps, intervals, batch sizes, patience and decode chunk must be positive")
     if args.warmup_steps < 0 or args.warmup_steps >= args.max_steps or args.workers < 0:
@@ -435,8 +451,13 @@ def main(argv=None):
                                    seed=args.seed + 900_001 + rank)
 
         flow = ReactFlow(normalization=normalization, backbone=args.backbone,
-                         dit_config=dit_options).to(device)
-        loading = {'initialization': 'standard DiT from scratch'}
+                         dit_config=dit_options, unet_config=unet_options).to(device)
+        loading = {'initialization': f'{args.backbone} from scratch'}
+        if args.trunk_checkpoint is not None:
+            loading = flow.load_pretrained_trunk(args.trunk_checkpoint, weights=args.trunk_weights)
+            loading.update(initialization='explicit OccFM trunk checkpoint',
+                           checkpoint=str(args.trunk_checkpoint.resolve()),
+                           checkpoint_sha256=sha256_file(args.trunk_checkpoint))
         flow.freeze_trunk(frozen=False)
         codec = OccupancyCodec().to(device).eval()
         codec.load_pretrained(args.codec_checkpoint, weights="state_dict")
@@ -475,8 +496,11 @@ def main(argv=None):
                   "dropped_tail_microbatches_per_rank": len(train_loader) - training_batch_count}
         config["numerical_settings"] = numerical_settings
         config['backbone'] = args.backbone
-        config['dit'] = (getattr(getattr(flow.transition_model, 'trunk', None), 'config', None)
+        config['dit'] = ((getattr(getattr(flow.transition_model, 'trunk', None), 'config', None)
                          if hasattr(flow, 'transition_model') else dit_options)
+                         if args.backbone == 'dit' else None)
+        if args.backbone == 'occfm_unet':
+            config['unet'] = getattr(getattr(getattr(flow, 'transition_model', None), 'trunk', None), 'config', unet_options)
         data_fingerprint = _runtime_fingerprint(train_cache, tune_cache, args.codec_checkpoint)
         progress = {"global_step": 0, "epoch": 0, "next_batch": 0,
                     "best_tune_loss": math.inf, "bad_evaluations": 0, "evaluations": 0}

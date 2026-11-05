@@ -1,21 +1,32 @@
 # ReactOccFlow
 
-面向候选自车动作的 occupancy–actor 联合 Flow Matching 研究工程。2026-10-31 起，研究模型使用标准 DiT：patch 编码、固定分辨率全局时空 Transformer、输出还原，并在 Transformer 层间加入 actor 双向交互。新 DiT 的 200 步、32 窗口拟合与双卡恢复验收已通过，独立的 seed=2026 全量双卡训练已启动，见[本轮训练记录](docs/implementation/2026-10-31-dit-training-acceptance.md)。旧 U-Net 实验继续停止，其权重不适用于 DiT；旧实验停止时日志到 51,400 步，保留的最近检查点为 50,000 步，详见[停止记录](docs/implementation/2026-10-31-training-stopped.md)。反事实采集、风险校准及实际感知/闭环结果仍待完成。
+> 当前训练状态（2026-11-05 17:18）：按用户“继续训练吧”的要求，从完整54,000步恢复标准DiT joint双卡实验；原训练器已记录`started, global_step=54000`并通过严格恢复检查，沿用原100,000步上限、patience=10及学习率计划，VAE冻结。详见 [本次续训记录](docs/implementation/2026-11-05-standard-dit-training-resumed.md)。此前暂停记录保留为历史。
 
-架构、训练命令、旧实验边界和验收见 [标准 DiT 迁移说明](docs/implementation/2026-10-31-standard-dit.md)。
+原U形CFM已在72,000步提前停止，其52,000步best EMA完成官方val150/4,219窗口评测，未来帧全网格Avg mIoU=28.67%（论文未来轨迹条件28.49%）；条件与表示差异见 [mIoU评测记录](docs/implementation/2026-11-04-reactflow-miou-evaluation.md)。该实验和评测结果保留。
 
-按用户后续要求，U-Net 实现、运行分支、专用配置、旧 CFM 包装器和基线命令已从当前工程移除，仅保留标准 DiT。旧实验与来源快照只作历史记录，见 [U-Net 删除记录](docs/implementation/2026-10-31-remove-unet.md)。
+产物统一保存在`outputs/`：[OccFM基线评测与核查](outputs/audits/README.md)、[项目A4概览](outputs/pdf/ReactOccFlow_项目概览_A4.pdf)、标准DiT参数与训练状态`outputs/reactflow_dit/seed_2026/`。2026-11-05已将旧`output/`全部196个文件完整迁移并移除空目录，六份全量预测与FVD特征均保留，详见 [迁移记录](docs/implementation/2026-11-05-output-directory-migration.md)。
 
-当前网络采用“模态内 self-attention＋模态间双向 cross-attention”：1,200 个 occupancy token 在 8 层 DiT 中进行全局时空 self-attention；48 个 actor token 使用 masked self-attention；第 4 层 DiT 后的两层交互分别以 actor 为 Q、occupancy 为 K/V 更新 actor，以 occupancy 为 Q、actor 为 K/V 更新 occupancy。两组 token 保持独立，没有拼接成一条共同做 self-attention 的序列。
+面向候选自车动作的 occupancy–actor 联合 Flow Matching 研究工程。2026-11-02 按最新要求恢复原 OccFM 式 U 形时空 DiT 为默认主干，同时保留标准全局时空 DiT。两种主干均支持 joint、parallel、occupancy_only，使用相同 RF 目标和单套冻结 VAE。
+
+| 主干选择 | 结构与 actor 交互 | 配置 |
+|---|---|---|
+| `occfm_unet`（默认） | 多尺度 down/up/skip；原瓶颈后两层双向 cross-attention | `configs/unet.yaml`、`configs/react_flow_joint.yaml` |
+| `dit` | 1,200 token、8 层；第 4 层后两层双向 cross-attention | `configs/dit.yaml`、`configs/react_flow_joint_dit.yaml` |
+
+恢复范围、命令、历史检查点边界和验证见 [双架构恢复说明](docs/implementation/2026-11-02-restore-unet-and-keep-dit.md)。之前的 [标准 DiT 迁移](docs/implementation/2026-10-31-standard-dit.md)及 [U-Net 删除](docs/implementation/2026-10-31-remove-unet.md)保留为历史记录；删除时的单架构限制已被本次要求替代。
+
+两条分支均采用 actor self-attention 与 occupancy–actor 双向 cross-attention；两组 token 保持独立，没有拼接成共同 self-attention 序列。U形实验已在72,000步提前停止；标准DiT现从完整54,000步恢复，暂停前未落盘的54,000～54,600步区间重跑。反事实采集、风险校准及实际感知/闭环结果仍待完成。
 
 只使用一套冻结的 occupancy VAE。缓存构建时分别编码历史观测与未来训练标签；训练 step 直接读取缓存 latent，并用 VAE decoder 计算连续端点一致性。DiT 的 patch 线性投影及 unpatchify 不构成第二次 VAE 编解码，actor 状态也不经过 occupancy VAE。
 
 实施计划：[完整计划](docs/superpowers/plans/2026-10-27-reactoccflow-implementation-plan.md)。科学问题：[问题与解决机制](ReactOccFlow科学问题与解决机制.md)。进展与已知限制见 [实施记录](docs/implementation/progress.md)。
 
+论文实验：[Baseline 与实验对照方案](ReactOccFlow论文Baseline实验方案.md)，包含外部论文、同骨干对照、评测协议、风险校准和结果表模板。
+
 ## 已实现
 
 - 独立 Python 包、专用环境、参考项目快照与复制来源记录。
-- 独立 occupancy VAE 编解码、标准 DiT occupancy–actor 联合 CFM；联合模型使用完整 state_dict/EMA 保存与恢复。
+- 独立 occupancy VAE 编解码、U 形/标准 DiT occupancy–actor 联合 CFM；联合模型使用完整 state_dict/EMA 保存与恢复。
 - future-only ODE 采样、局部随机数生成器、训练损失及反向传播。
 - 缓存迁移为 NumPy 分片和场景/token 索引；历史与未来标签分离。
 - occupancy/actor/风险评价接口；旧基线的已完成评测报告按历史保留，运行旧模型的命令已删除。
@@ -95,9 +106,9 @@ python -m scripts.cache_research --device cuda:0 --rank 0 --world-size 2 --outpu
 python -m scripts.cache_research --device cuda:1 --rank 1 --world-size 2 --output data/research/e0_full/train
 ```
 
-train 的 17,468 个窗口与 tune 的 2,176 个窗口已全部生成并通过全量载荷与 rank 清单审计。历史 U-Net 的 200 步、32 窗口、恢复和 330 项测试证据见 [原训练验收](docs/implementation/2026-10-29-training-acceptance.md)，该训练现已停止；新 DiT 的验收单独记录。T8 的分支协议、T9/T11 的指标接口和 T10 的候选规划器不会替代 CARLA 反事实采集、独立校准集或闭环评测。
+train 的 17,468 个窗口与 tune 的 2,176 个窗口已全部生成并通过全量载荷与 rank 清单审计。历史 U-Net 的 200 步、32 窗口、恢复和 330 项测试证据见 [原训练验收](docs/implementation/2026-10-29-training-acceptance.md)，此次已从其 50,000 步完整状态续训；标准 DiT 的验收单独记录。T8 的分支协议、T9/T11 的指标接口和 T10 的候选规划器不会替代 CARLA 反事实采集、独立校准集或闭环评测。
 
-标准 DiT 正式入口使用以下命令，默认从随机初始化训练，继续使用独立的冻结 VAE 和完整 E0 缓存。新输出目录与旧 U-Net 实验分开：
+原 U 形主干的新实验使用 `--backbone occfm_unet --unet-config configs/unet.yaml`，默认输出 `outputs/reactflow_occfm_unet/seed_<seed>`。标准 DiT 正式入口显式选择以下配置，默认从随机初始化训练，继续使用独立的冻结 VAE 和完整 E0 缓存。新输出目录与旧 U-Net 实验分开：
 
 ```bash
 torchrun --standalone --nproc_per_node=2 --module scripts.train_react_flow \
@@ -109,7 +120,9 @@ torchrun --standalone --nproc_per_node=2 --module scripts.train_react_flow \
 
 诊断可显式同时设置 `--diagnostic-train-windows 32 --diagnostic-tune-windows 8`，保留原 complete 缓存不变，并在配置中标记工程子集。`--stop-after-steps N` 会保存后暂停，恢复时沿用原学习率计划。
 
-DiT 恢复时增加 `--resume outputs/reactflow_dit/seed_2026/latest.pt` 并保留相同配置与源码身份。本机本轮实际运行使用 `outputs/reactflow_dit/source_seed_2026/` 的独立普通文件副本，每卡 batch=2、累积=2、decode-chunk=4、workers=4；恢复工作目录与完整绝对路径命令以 `outputs/reactflow_dit/seed_2026.launch.json` 为准。后续工作区改动不进入该训练副本。入口仅接受 `--backbone dit`，旧的主干权重加载参数、U-Net 分支和基线命令已删除。历史 U-Net 检查点不能由当前包加载或续跑，其日志、权重及源码归档保留作审计与实验记录。
+标准DiT当前续训使用 `outputs/reactflow_dit/source_seed_2026/` 的独立普通文件副本，每卡batch=2、累积=2、decode-chunk=4、workers=4；实际命令见 `outputs/reactflow_dit/seed_2026.launch.json`。已于2026-11-05通过`scripts/resume_dit_training.py`从54,000步启动恢复；运行中不重复执行恢复入口。入口接受 `--backbone occfm_unet|dit`；仅U形主干支持显式 `--trunk-checkpoint` 初始化。历史joint权重可由对应主干严格加载；完整续训还需要原配置、源码、优化器和RNG身份，不能直接把旧checkpoint交给已修改的工作区runner。
+
+本次 CFM 续训使用 `outputs/reactflow_joint/source_seed_2026/` 的原始归档副本，完整命令以 `outputs/reactflow_joint/seed_2026.resume_20261103.launch.json` 为准。源码摘要与检查点中仅源码路径键的显式重定位均已核验，严格恢复检查保留；后续工作区修改不进入该训练副本。原单模型 baseline CLI 仍不加入当前开发包。
 
 ## Observed-only perception frontend
 

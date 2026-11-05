@@ -1,0 +1,136 @@
+{
+  "date": "2026-11-04",
+  "task": "Generation mIoU of best trained ReactFlow EMA on exact official4219 validation windows, compared with published OccFM reference",
+  "reference_search": {
+    "repositories": [
+      "OccFM",
+      "IR-WM"
+    ],
+    "commits": {
+      "OccFM": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "IR-WM": "94dbbf44d6c22e50db4080e986b3675eadbb4497"
+    },
+    "search_patterns": [
+      "multi_step_MeanIou",
+      "mask_camera",
+      "MeanIoU",
+      "mIoU",
+      "transform",
+      "occ_size"
+    ],
+    "searched_source_sha256": {
+      "OccFM/tools/test.py": "fd5ad8a3e9564cb661f143470f82b6cd8afbdf339f2e53618358634da764f880",
+      "OccFM/forecast/utils/eval_utils.py": "11b60285639e569cb6555ba5ce63d999bdbbe19307c74f1c9afdbbf2518c3f68",
+      "IR-WM/projects/mmdet3d_plugin/datasets/pipelines/loading_occupancy.py": "de2bad112c0c93f9409a7c7bf1632601d03c2650d0e73cef3fa2c8d7cff9ec37",
+      "IR-WM/projects/mmdet3d_plugin/bevformer/utils/e2e_predictor_utils.py": "6f1292eec9748bb46f92b3d3b8b3f674e9f551f862dd441266b7edc739671c46"
+    },
+    "matches": [
+      "OccFM/forecast/utils/eval_utils.py:89:class multi_step_MeanIou:",
+      "OccFM/tools/test.py:9:from forecast.utils.eval_utils import multi_step_MeanIou, DistributedDictMeanCounter",
+      "OccFM/tools/test.py:16:    IoU_counter = multi_step_MeanIou([1], -100, ['occupied'], 'vox', times=frame)",
+      "OccFM/tools/test.py:18:    mIoU_counter = multi_step_MeanIou(unique_labels, -100, unique_label_str, 'sem', times=frame)",
+      "OccFM/tools/test.py:19:    mIoU_counter.reset()",
+      "OccFM/tools/test.py:20:    return IoU_counter, mIoU_counter",
+      "OccFM/tools/test.py:33:    IoU_counter, mIoU_counter = setup_occ_comparsion(label_name, sequence_length)",
+      "OccFM/tools/test.py:59:                        mIoU_counter._after_step(pred_occ, gt_occ)",
+      "OccFM/tools/test.py:70:                    #all_miou, cate_miou = mIoU_counter._after_epoch()",
+      "OccFM/tools/test.py:78:    all_miou, cate_miou = mIoU_counter._after_epoch()",
+      "IR-WM/projects/mmdet3d_plugin/datasets/pipelines/loading_occupancy.py:66:            untransformed_occ = copy.deepcopy(pcd_np_cor)",
+      "IR-WM/projects/mmdet3d_plugin/datasets/pipelines/loading_occupancy.py:95:            transformed_occ = copy.deepcopy(pcd_np_cor)",
+      "IR-WM/projects/mmdet3d_plugin/datasets/pipelines/loading_occupancy.py:177:        # from raw pixel to transformed pixel"
+    ],
+    "finding": "References provide count-based IoU and frame transforms, already copied and independently adapted in owned metrics/geometry. Neither supplies the joint trained ReactFlow online evaluator, strict shard identity, per-window seeded noise or fixedE0-to-future-frame scoring integration. Reuse owned primitives; implement new orchestration without reference imports/execution."
+  },
+  "owned_dependency_reuse": {
+    "reactoccflow/evaluation/occupancy.py": "7a4af0d8b5443bcaef8d8c755eb2fe4bf8a3328204894422205927a530a608c5",
+    "reactoccflow/geometry/__init__.py": "29c6e892fac5d14cdbb43fea11693f8ee50b6729a60e8240a8786056b8f23e44",
+    "reactoccflow/data/e0_dataset.py": "94a22a696052bd541874f8061bc500e3343585f719aa4d481e695203eaefcc39",
+    "reactoccflow/data/e0_cache.py": "712d0011b569cbcf09189b8614aae5f78213d5f2d2ba745b89f7dac37de197ad",
+    "reactoccflow/models/codec.py": "cc3b760e8dba4a435b4c5cf2e517561263d6b005074361d9299039fd375cc441",
+    "reactoccflow/occfm_audit/evaluate.py": "7098b5d6f06f8250ae8902aabb636cc1f7a1f610535fe2d45f6268287b80ac66"
+  },
+  "new_implementation": "reactoccflow/evaluation/reactflow_generation.py",
+  "new_tests": "tests/test_reactflow_generation.py",
+  "protocol": {
+    "window_count": 4219,
+    "official_validation_scenes": 150,
+    "NFE": 10,
+    "precision": "float32",
+    "known_condition": "oracle actor histories + supplied logged future ego XY, not planning inference",
+    "score_primary": "native E0 known overlap; additionally all original future ego grids after prediction backwarp with unsupported voxels empty17",
+    "source_of_future_pose": "Only in scorer coordinate transform; no future pose or semantics enter the predictor",
+    "reported_paper_average": "Arithmetic mean of slots2,4,6 at nominal1s,2s,3s, not pooled or allsix average",
+    "reference_directory_imports": false,
+    "normalization": "Train-only statistics; assert checkpoint mean/std buffers match before loading"
+  },
+  "tests": {
+    "command": "/home/lthpc/wxh/envs/ReactOccFlow/bin/python -m pytest -q tests/test_reactflow_generation.py",
+    "result": "8 passed"
+  },
+  "implementation_sha256": "37a31fa85e0f74fb4c56e3281fce15abe0d4759b9a28d72dd0610de8c3b7d63b",
+  "tests_sha256": "812a14ee2f323486b2a9c6bcf43220613bed991025a749e472dada0123b48f80",
+  "actual_source_sample_check": {
+    "scene": "scene-0003",
+    "anchor_token": "f286cdaef36648cba3b6a24d2178dc8a",
+    "observation_shapes_valid": true,
+    "history_semantics_shape": [
+      4,
+      200,
+      200,
+      16
+    ],
+    "candidate_shape": [
+      6,
+      2
+    ],
+    "native_known_fraction": 0.97122265625,
+    "cpu_geometry_seconds": 1.3545197900384665
+  },
+  "numerical_settings": {
+    "deterministic_algorithms": true,
+    "cudnn_deterministic": true,
+    "cudnn_benchmark": false,
+    "cublas_workspace_config": ":4096:8",
+    "matmul_allow_tf32": false,
+    "cudnn_allow_tf32": true
+  },
+  "runtime_compatibility": "Explicit model submodule imports and ReactFlow(normalization=...) support the exact frozen original training implementation without edits; parent will copy this evaluator into a fresh ordinary-file evaluation export.",
+  "report_renderer": {
+    "path": "reactoccflow/evaluation/generation_report.py",
+    "sha256": "713117a8593d87066b80f9ed45dcd2934be9b2bc1e9cae34a1637a019c5150a4",
+    "reference_search": [
+      "OccFM/tools/test.py: setup_occ_comparsion / val_model",
+      "OccFM/forecast/utils/eval_utils.py: multi_step_MeanIou",
+      "IR-WM/projects/mmdet3d_plugin/datasets/formating.py: cm_to_ious / format_results"
+    ],
+    "finding": "Upstream functions format their own IoU output, but no dual-native-E0/backwarped-generation experiment report exists. Reuse owned reactoccflow/occfm_audit/write_report.py formatting pattern and summaries; no upstream report code/runtime dependency required.",
+    "owned_report_pattern_sha256": "aacc8c72b0be8b328ec375d1c6575e14cbef05b0ed82f23d3f0d996383632eb7",
+    "dependency_closure": "Python stdlib, NumPy, owned static OCC3D class names; reads completed JSON/counts only, no GPU or model execution",
+    "additional_searched_source_sha256": {
+      "IR-WM/projects/mmdet3d_plugin/datasets/formating.py": "32114229789352e49b705f5cf69ba32e1de2ce877fc67728cf4923e1518a6dee"
+    }
+  },
+  "actual_evaluation": {
+    "source_export": "outputs/evaluation/2026-11-04-reactflow-best52000/evaluation_source",
+    "original_frozen_code_files": 114,
+    "added_evaluator_files": 1,
+    "strict_trained_checkpoint_sha256": "cda8ef28d1e90e03413fe6ef0b44e589957421b20fd8fd9940176d0cfe76782b",
+    "evaluation_implementation_sha256": "37a31fa85e0f74fb4c56e3281fce15abe0d4759b9a28d72dd0610de8c3b7d63b",
+    "full_result": "outputs/evaluation/2026-11-04-reactflow-best52000/full/result.json",
+    "full_result_sha256": "274a3697b71eb37b18dfb55dba4832a7dfc43e3ae8afe49ab886fb1f49cbfba5",
+    "acceptance": "docs/implementation/reactflow_miou_acceptance_20261104.json",
+    "window_count": 4219,
+    "scenes": 150,
+    "best_step": 52000,
+    "rank_exit_codes": [
+      0,
+      0
+    ],
+    "elapsed_seconds": 3402.0102811999386,
+    "independent_original_gt_check": "outputs/evaluation/2026-11-04-reactflow-best52000/baseline_gt_identity.json",
+    "reference_unchanged": true,
+    "default_freeze_flag_probe_note": "Both versions with all parameters frozen produce exactly equal outputs for one fixed engineering tune sample; the full evaluation nevertheless uses exact original training source.",
+    "independent_export_import_proof": "outputs/evaluation/2026-11-04-reactflow-best52000/independent_export_import.json",
+    "fully_frozen_default_source_probe_exact_outputs": true
+  }
+}

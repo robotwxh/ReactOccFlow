@@ -1,0 +1,71 @@
+{
+  "date": "2026-11-05",
+  "request": "Consolidate output into outputs, preserve all artifacts required for later benchmark comparisons, then remove empty output.",
+  "status": "completed",
+  "new_function_implemented": false,
+  "existing_owned_helpers": [
+    "reactoccflow.provenance.snapshot_tree",
+    "reactoccflow.provenance.sha256_file"
+  ],
+  "mapping": {
+    "output/pdf/": "outputs/pdf/",
+    "output/audits/": "outputs/audits/"
+  },
+  "moved_files": 196,
+  "moved_bytes": 97493685222,
+  "deleted_files": [],
+  "old_directory_removed": true,
+  "same_device_and_inode_for_every_moved_file": true,
+  "verification": {
+    "small_files_full_sha256": "matched",
+    "six_large_prediction_arrays": "same inode, size, mtime and first/last1MiB SHA256 matched; whole-file hashes not computed",
+    "completed_checkpoint_results": 10,
+    "full_prediction_arrays": 6,
+    "prediction_shape": [
+      4219,
+      6,
+      200,
+      200,
+      16
+    ],
+    "fvd_feature_arrays": 7,
+    "fvd_shape": [
+      4219,
+      2400
+    ],
+    "baseline_result_sha256_matches_existing_reactflow_comparison": true
+  },
+  "reference_heads": {
+    "OccFM": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+    "IR-WM": "94dbbf44d6c22e50db4080e986b3675eadbb4497"
+  },
+  "references_before_after_equal": true,
+  "frozen_source_exports": {
+    "outputs/reactflow_dit/source_seed_2026": {
+      "files": 81,
+      "unchanged": true
+    },
+    "outputs/reactflow_joint/source_seed_2026": {
+      "files": 114,
+      "unchanged": true
+    },
+    "outputs/evaluation/2026-11-04-reactflow-best52000/evaluation_source": {
+      "files": 115,
+      "unchanged": true
+    }
+  },
+  "current_source_path_changes": {
+    "scripts/build_project_overview_a4.py": "5e7c8d6bf4a6265d5d4f6b7ec0cc4115e4d5c0508a1649c9be594f27a8b1c5ff",
+    "reactoccflow/occfm_audit/verify.py": "b67f96f311fd9b9909de306b7816d7a851b0253440fd9a32ca87225a55b6f4c7",
+    "reactoccflow/occfm_audit/verify_fvd.py": "ef2c7cc31def08783b51d61430692f9b9fb8de0801e646b3808d6175ef808071",
+    "reactoccflow/occfm_audit/verify_model.py": "feb7fab46223856f154c0e6615627fa0f3068a9d287251a0560259608232ed04",
+    "reactoccflow/occfm_audit/verify_vae_coverage.py": "65976144f760b1e2e651b5ad46791485d355225bf0d0ad333c47bccc7b90bc2a",
+    "reactoccflow/occfm_audit/write_report.py": "8f0f10a7d10384a89ac2d7eef8f8122f3e3d962ef78068eeb49416eb9e7c6932"
+  },
+  "historical_artifact_bytes_edited": false,
+  "training_state": "paused_by_user",
+  "training_checkpoint_changed": false,
+  "training_started": false,
+  "manifest": "outputs/directory_migrations/2026-11-05-output-to-outputs/migration.json",
+  "historical_path_policy": "All original migrated file bytes and historical provenance/ledgers preserved. Resolve output/... as outputs/...; current source defaults and documentation use outputs/."
+}

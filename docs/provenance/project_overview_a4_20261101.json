@@ -1,0 +1,69 @@
+{
+  "created_at": "2026-11-01T15:09:19.077912+08:00",
+  "request": "Summarize the overall project idea on one A4 page.",
+  "reference_search": {
+    "repositories": [
+      "OccFM",
+      "IR-WM"
+    ],
+    "patterns": [
+      "reportlab",
+      "SimpleDocTemplate",
+      "platypus",
+      "TTFont",
+      "pdfmetrics"
+    ],
+    "matches": 0,
+    "result": "Neither reference supplies PDF layout utilities. Implement an independent document generator using ReportLab and read only owned project descriptions/model code."
+  },
+  "reference_commits": {
+    "OccFM": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+    "IR-WM": "94dbbf44d6c22e50db4080e986b3675eadbb4497"
+  },
+  "artifacts": {
+    "pdf": "output/pdf/ReactOccFlow_项目概览_A4.pdf",
+    "editable_text": "output/pdf/ReactOccFlow_项目概览_A4.md",
+    "generator": "scripts/build_project_overview_a4.py"
+  },
+  "sha256": {
+    "ReactOccFlow方案.md": "3bda76f0e25986a6feb1d6692482e39e4965858022ee41d115eb2937380ef230",
+    "ReactOccFlow科学问题与解决机制.md": "33f81cd29ec65b68895edaeb8dce890935034e0df06bbf2d78091a662a5a275d",
+    "docs/superpowers/plans/2026-10-27-reactoccflow-implementation-plan.md": "1594fd309861d75d1bd048a3b8e99afa2d39c1cbc43deab799871d4499633e67",
+    "docs/implementation/2026-11-01-dit-training-paused.md": "c6223b4566cf78620cd9bfc5681c595f5c211f02512b75b279827e11be504152",
+    "reactoccflow/models/codec.py": "cc3b760e8dba4a435b4c5cf2e517561263d6b005074361d9299039fd375cc441",
+    "reactoccflow/models/joint_transition.py": "72ec38dcd2150bf2d88a91d37e067b746ac8c23e5f01aa5b11ea62b5300d2086",
+    "scripts/build_project_overview_a4.py": "7deeccddcb8354393f30c58181e98cdc9d4dd56059353b4ac9393a53de5653ac",
+    "output/pdf/ReactOccFlow_项目概览_A4.md": "32bdc1a0317f84b144a978b0ee24d7812eb90567b3155c1a1fcec78379e299a5",
+    "output/pdf/ReactOccFlow_项目概览_A4.pdf": "589da0e16e86aaefd95c88106b11ef4ee9c310777adfef575d90250257daf879"
+  },
+  "validation": {
+    "page_count": 1,
+    "page_size_points": [
+      595.2756,
+      841.8898
+    ],
+    "paper": "A4 portrait",
+    "all_source_paragraphs_present": true,
+    "source_paragraphs_checked": 10,
+    "missing_font_glyphs": 0,
+    "latest_render_visually_reviewed": true,
+    "visual_defects_observed": false
+  },
+  "dependencies": {
+    "environment": "/home/lthpc/wxh/envs/ReactOccFlow",
+    "reportlab": "5.1.0",
+    "pypdf": "6.21.4",
+    "font_files": [
+      "/usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf",
+      "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+      "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+    ],
+    "model_dependencies_modified": false
+  },
+  "training": {
+    "status": "paused_by_user",
+    "training_started_by_this_task": false,
+    "frozen_runtime_source_modified": false
+  },
+  "scope": "Project idea and implementation boundary summary. Proposed reaction, calibration and closed-loop benefits are explicitly unverified; no publication or safety result claimed."
+}

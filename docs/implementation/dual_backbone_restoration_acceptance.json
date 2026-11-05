@@ -1,0 +1,119 @@
+{
+  "date": "2026-11-02",
+  "passed": true,
+  "default_backbone": "occfm_unet",
+  "available_backbones": [
+    "occfm_unet",
+    "dit"
+  ],
+  "training_started": false,
+  "optimizer_steps_in_real_checkpoint_checks": 0,
+  "cpu_tests": {
+    "passed": 347,
+    "seconds": 15.22
+  },
+  "checkpoint_checks": {
+    "training_started": false,
+    "optimizer_steps": 0,
+    "real_cache": "data/research/e0_full/tune",
+    "models": {
+      "occfm_unet": {
+        "checkpoint": "outputs/reactflow_joint/seed_2026/latest.pt",
+        "step": 50000,
+        "strict_load": true,
+        "sample_shapes": {
+          "future_latents": [
+            1,
+            1,
+            6,
+            16,
+            50,
+            50
+          ],
+          "actor_future": [
+            1,
+            1,
+            8,
+            6,
+            6
+          ],
+          "actor_existence": [
+            1,
+            1,
+            8,
+            6
+          ]
+        },
+        "repeated_sampling_identical": true,
+        "finite_real_shape_backward": true,
+        "base_loss_probe": 0.21769466996192932,
+        "peak_allocated_bytes": 3224509952
+      },
+      "dit": {
+        "checkpoint": "outputs/reactflow_dit/seed_2026/paused_step_022000_20261101.pt",
+        "step": 22000,
+        "strict_load": true,
+        "sample_shapes": {
+          "future_latents": [
+            1,
+            1,
+            6,
+            16,
+            50,
+            50
+          ],
+          "actor_future": [
+            1,
+            1,
+            8,
+            6,
+            6
+          ],
+          "actor_existence": [
+            1,
+            1,
+            8,
+            6
+          ]
+        },
+        "repeated_sampling_identical": true,
+        "finite_real_shape_backward": true,
+        "base_loss_probe": 0.5008451342582703,
+        "peak_allocated_bytes": 358691328
+      }
+    },
+    "upstream_trunk": {
+      "strict": true,
+      "key_count": 204,
+      "new_branch_keys": 74
+    }
+  },
+  "isolated_package": {
+    "passed": true,
+    "backbones": [
+      "occfm_unet",
+      "dit"
+    ],
+    "wheel_sha256": "c20c43f1c3e2f7eae1cda95d52dbd4c51b315c243ee7c0d6f836d849f769b115",
+    "matching_runtime_source_files": 111,
+    "dedicated_environment_installed": true
+  },
+  "reference_protection": {
+    "passed": true,
+    "differences": {
+      "OccFM": [],
+      "IR-WM": []
+    },
+    "heads": {
+      "OccFM": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "IR-WM": "94dbbf44d6c22e50db4080e986b3675eadbb4497"
+    }
+  },
+  "paused_dit": {
+    "status": "paused_by_user",
+    "checkpoint_step": 22000,
+    "checkpoint_sha256": "b23778564e3098ae580a63979071b0f635127d24ccff70e373a03c2d696a4e68",
+    "frozen_source_files_verified": 82,
+    "resume_dry_run_passed": true
+  }
+}

@@ -1,13 +1,10 @@
-# Standard DiT and the occupancy VAE
+# U-shaped / standard DiT and the occupancy VAE
 
-The runnable world model is `ReactFlow`, exported with `StandardDiT` and
-`OccupancyCodec` from `reactoccflow.models`. The former U-Net world model,
-compatibility wrapper, dedicated configurations and baseline commands have
-been removed. Historical weights, logs and source snapshots are audit material.
+`ReactFlow` supports `backbone='occfm_unet'` (restored default) and `backbone='dit'` (isotropic). The restored trunk is the independently migrated `FLOW_MATCHING_DOWN_X4_DiT`: convolutional residual blocks, spatial/temporal attention, down/up stages and skip connections, with actor exchange immediately after `mid_block2`. Both architectures retain the same observation/target boundary and three model modes. One frozen `OccupancyCodec` is shared. See [restoration](../../docs/implementation/2026-11-02-restore-unet-and-keep-dit.md) for configuration, legacy weights and numerical compatibility.
 
-## DiT and actor interaction
+## Standard DiT branch and actor interaction
 
-`ReactFlow()` constructs a standard isotropic DiT: patch projection → eight
+`ReactFlow(backbone="dit")` constructs a standard isotropic DiT: patch projection → eight
 fixed-width DiT blocks → conditioned output projection → unpatchify. Default
 inputs are 12 temporal slots of 16×50×50 latents. Spatial patch size 5 gives
 1,200 tokens, width 256, eight heads and MLP ratio 4. All occupancy tokens

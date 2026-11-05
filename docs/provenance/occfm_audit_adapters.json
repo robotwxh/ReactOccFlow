@@ -1,0 +1,47 @@
+{
+  "source_commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+  "adapters": {
+    "data.py": "Token ordering, first duplicate selection, scene-safe windows, history masking adapted from NuScenesDataset. Inputs rematerialized into independent NumPy resources.",
+    "evaluate.py": "Published model sampling/decoding retained in copied closure. int64 confusion counts implement the source class and occupied IoU rules.",
+    "fvd.py": "Published feature extraction, FP32 seed and pooling; prediction overwrite removed; symmetric PSD Frechet formula and tested noise-preserving GT reuse.",
+    "materialize.py": "Copied resource config snapshots resolved locally; copied cached fields rematerialized into memmaps.",
+    "runners": "Project-owned orchestration; searched OccFM/IR-WM for relevant checkpoint/FVD entry points; no suitable isolated full-weight audit runner found."
+  },
+  "snapshots": [
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/forecast/datasets/nuscenes_dataset.py",
+      "source_sha256": "11133c58522f5c3b2ed1b2fbffb8ff230d93bf74e2984135183bd4ad723957f0",
+      "snapshot": "reactoccflow/occfm_audit/source_snapshots/forecast__datasets__nuscenes_dataset.py.txt",
+      "snapshot_sha256": "11133c58522f5c3b2ed1b2fbffb8ff230d93bf74e2984135183bd4ad723957f0",
+      "role": "documentation only; never imported"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/forecast/config.py",
+      "source_sha256": "0459ff88c8c8040de0e9379cc97b192028b4c2cb7005dd3e238d216521130502",
+      "snapshot": "reactoccflow/occfm_audit/source_snapshots/forecast__config.py.txt",
+      "snapshot_sha256": "0459ff88c8c8040de0e9379cc97b192028b4c2cb7005dd3e238d216521130502",
+      "role": "documentation only; never imported"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/tools/test.py",
+      "source_sha256": "fd5ad8a3e9564cb661f143470f82b6cd8afbdf339f2e53618358634da764f880",
+      "snapshot": "reactoccflow/occfm_audit/source_snapshots/tools__test.py.txt",
+      "snapshot_sha256": "fd5ad8a3e9564cb661f143470f82b6cd8afbdf339f2e53618358634da764f880",
+      "role": "documentation only; never imported"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/tools/test_fid.py",
+      "source_sha256": "5d151379407b69c3864fd2a001b7514b627e2f7dcadb2f9880432ac0a3a12a31",
+      "snapshot": "reactoccflow/occfm_audit/source_snapshots/tools__test_fid.py.txt",
+      "snapshot_sha256": "5d151379407b69c3864fd2a001b7514b627e2f7dcadb2f9880432ac0a3a12a31",
+      "role": "documentation only; never imported"
+    },
+    {
+      "source": "/home/lthpc/wxh/Paper/OccFM/tools/cache_vae.py",
+      "source_sha256": "c1a9272bbd66b4ea9a37740d86e2884ceceb0d037d5236a60fa1a56d87f0713b",
+      "snapshot": "reactoccflow/occfm_audit/source_snapshots/tools__cache_vae.py.txt",
+      "snapshot_sha256": "c1a9272bbd66b4ea9a37740d86e2884ceceb0d037d5236a60fa1a56d87f0713b",
+      "role": "documentation only; never imported"
+    }
+  ]
+}

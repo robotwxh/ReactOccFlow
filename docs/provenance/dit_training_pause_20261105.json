@@ -1,0 +1,47 @@
+{
+  "date": "2026-11-05",
+  "request": "Pause training and preserve resumable progress for later restart.",
+  "new_training_or_resume_function_implemented": false,
+  "existing_implementation_reused": {
+    "launcher": "scripts/resume_dit_training.py",
+    "launcher_sha256": "cda716c0af4afdeb0330046250425ff78958b1bae334b6b5f1f7442a2deb529d",
+    "provenance": "docs/provenance/dit_training_pause_20261101.json",
+    "prior_reference_search": "outputs/reactflow_dit/pause_resume_reference_search_20261101.txt",
+    "checkpoint_copy_helper": "reactoccflow/provenance.py:copy_resource",
+    "reference_audit_helpers": "reactoccflow/provenance.py:snapshot_tree,compare_snapshot"
+  },
+  "checkpoint": {
+    "path": "/home/lthpc/wxh/Paper/outputs/reactflow_dit/seed_2026/paused_step_054000_20261105.pt",
+    "sha256": "ce5f6b30882336007ff9b8e0191da30b757b181e78c11514f284807ff72df880",
+    "global_step": 54000,
+    "epoch": 24,
+    "next_batch": 3216,
+    "complete_optimizer_ema_scheduler_rng": true,
+    "runtime_identities_verified": 19722
+  },
+  "reference_protection": {
+    "heads": {
+      "OccFM": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "IR-WM": "94dbbf44d6c22e50db4080e986b3675eadbb4497"
+    },
+    "before": "outputs/reactflow_dit/pause_20261105/reference_before.json",
+    "after": "outputs/reactflow_dit/pause_20261105/reference_after.json",
+    "unchanged": true
+  },
+  "frozen_source_files_verified": 81,
+  "source_manifest_sha256": "615ccc51adef993a58c8863c87716f62b20daa0726be380c46cb3d397ca3f871",
+  "processes_stopped": 19,
+  "training_gpu_memory_released": true,
+  "training_restarted": false,
+  "auto_restart": false,
+  "dry_run": {
+    "status": "dry_run_passed",
+    "training_started": false,
+    "checkpoint": "/home/lthpc/wxh/Paper/outputs/reactflow_dit/seed_2026/paused_step_054000_20261105.pt",
+    "global_step": 54000,
+    "cwd": "/home/lthpc/wxh/Paper/outputs/reactflow_dit/source_seed_2026",
+    "verified_files": 82
+  },
+  "acceptance": "docs/implementation/standard_dit_pause_20261105_acceptance.json",
+  "limitation": "Running trainer has no signal-triggered save handler. Complete durable step 54000 is retained. The 600 logged later optimizer steps and any unlogged later updates must be replayed on resume."
+}

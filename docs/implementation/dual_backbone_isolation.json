@@ -1,0 +1,124 @@
+{
+  "passed": true,
+  "backbones": {
+    "occfm_unet": {
+      "sample_shapes": {
+        "future_latents": [
+          1,
+          1,
+          6,
+          16,
+          50,
+          50
+        ],
+        "actor_future": [
+          1,
+          1,
+          8,
+          6,
+          6
+        ],
+        "actor_existence": [
+          1,
+          1,
+          8,
+          6
+        ]
+      },
+      "strict_checkpoint_round_trip": true,
+      "decoded_logits_shape": [
+        1,
+        200,
+        200,
+        16,
+        18
+      ]
+    },
+    "dit": {
+      "sample_shapes": {
+        "future_latents": [
+          1,
+          1,
+          6,
+          16,
+          50,
+          50
+        ],
+        "actor_future": [
+          1,
+          1,
+          8,
+          6,
+          6
+        ],
+        "actor_existence": [
+          1,
+          1,
+          8,
+          6
+        ]
+      },
+      "strict_checkpoint_round_trip": true,
+      "decoded_logits_shape": [
+        1,
+        200,
+        200,
+        16,
+        18
+      ]
+    }
+  },
+  "observations": "real cached history",
+  "vae_encoded_shape": [
+    1,
+    16,
+    50,
+    50
+  ],
+  "stale_baseline_modules_absent": true,
+  "loaded_modules": {
+    "reactoccflow": "/tmp/reactoccflow-restore-installed-po8pze7v/env/lib/python3.10/site-packages/reactoccflow/__init__.py",
+    "reactoccflow.models.modules": "/tmp/reactoccflow-restore-installed-po8pze7v/env/lib/python3.10/site-packages/reactoccflow/models/modules/__init__.py",
+    "reactoccflow.models.modules.embedding.voxel_height_sem_embed": "/tmp/reactoccflow-restore-installed-po8pze7v/env/lib/python3.10/site-packages/reactoccflow/models/modules/embedding/voxel_height_sem_embed.py",
+    "reactoccflow.models.modules.embedding": "/tmp/reactoccflow-restore-installed-po8pze7v/env/lib/python3.10/site-packages/reactoccflow/models/modules/embedding/__init__.py",
+    "reactoccflow.models.modules.base": "/tmp/reactoccflow-restore-installed-po8pze7v/env/lib/python3.10/site-packages/reactoccflow/models/modules/base/__init__.py",
+    "reactoccflow.models.modules.base.swin_transformerbase": "/tmp/reactoccflow-restore-installed-po8pze7v/env/lib/python3.10/site-packages/reactoccflow/models/modules/base/swin_transformerbase.py",
+    "reactoccflow.models._utils": "/tmp/reactoccflow-restore-installed-po8pze7v/env/lib/python3.10/site-packages/reactoccflow/models/_utils.py",
+    "reactoccflow.models.modules.base.others": "/tmp/reactoccflow-restore-installed-po8pze7v/env/lib/python3.10/site-packages/reactoccflow/models/modules/base/others.py",
+    "reactoccflow.models.modules.base.res_layersbase": "/tmp/reactoccflow-restore-installed-po8pze7v/env/lib/python3.10/site-packages/reactoccflow/models/modules/base/res_layersbase.py",
+    "reactoccflow.models.ops": "/tmp/reactoccflow-restore-installed-po8pze7v/env/lib/python3.10/site-packages/reactoccflow/models/ops/__init__.py",
+    "reactoccflow.models.ops.flash_attention": "/tmp/reactoccflow-restore-installed-po8pze7v/env/lib/python3.10/site-packages/reactoccflow/models/ops/flash_attention/__init__.py",
+    "reactoccflow.models.ops.flash_attention.flash_attention": "/tmp/reactoccflow-restore-installed-po8pze7v/env/lib/python3.10/site-packages/reactoccflow/models/ops/flash_attention/flash_attention.py",
+    "reactoccflow.models.modules.base.attn_base": "/tmp/reactoccflow-restore-installed-po8pze7v/env/lib/python3.10/site-packages/reactoccflow/models/modules/base/attn_base.py",
+    "reactoccflow.models.modules.base.temporal_base": "/tmp/reactoccflow-restore-installed-po8pze7v/env/lib/python3.10/site-packages/reactoccflow/models/modules/base/temporal_base.py",
+    "reactoccflow.models.modules.encoders.SwinSingleFrameDownV2": "/tmp/reactoccflow-restore-installed-po8pze7v/env/lib/python3.10/site-packages/reactoccflow/models/modules/encoders/SwinSingleFrameDownV2.py",
+    "reactoccflow.models.modules.encoders": "/tmp/reactoccflow-restore-installed-po8pze7v/env/lib/python3.10/site-packages/reactoccflow/models/modules/encoders/__init__.py",
+    "reactoccflow.models.modules.decoders.SwinSingleFrameUpV2": "/tmp/reactoccflow-restore-installed-po8pze7v/env/lib/python3.10/site-packages/reactoccflow/models/modules/decoders/SwinSingleFrameUpV2.py",
+    "reactoccflow.models.modules.decoders": "/tmp/reactoccflow-restore-installed-po8pze7v/env/lib/python3.10/site-packages/reactoccflow/models/modules/decoders/__init__.py",
+    "reactoccflow.models.modules.quantization.vae_quant": "/tmp/reactoccflow-restore-installed-po8pze7v/env/lib/python3.10/site-packages/reactoccflow/models/modules/quantization/vae_quant.py",
+    "reactoccflow.models.modules.quantization": "/tmp/reactoccflow-restore-installed-po8pze7v/env/lib/python3.10/site-packages/reactoccflow/models/modules/quantization/__init__.py",
+    "reactoccflow.models.codec": "/tmp/reactoccflow-restore-installed-po8pze7v/env/lib/python3.10/site-packages/reactoccflow/models/codec.py",
+    "reactoccflow.models.flow": "/tmp/reactoccflow-restore-installed-po8pze7v/env/lib/python3.10/site-packages/reactoccflow/models/flow.py",
+    "reactoccflow.models.modules.base.postion_embed": "/tmp/reactoccflow-restore-installed-po8pze7v/env/lib/python3.10/site-packages/reactoccflow/models/modules/base/postion_embed.py",
+    "reactoccflow.models.modules.base.dit": "/tmp/reactoccflow-restore-installed-po8pze7v/env/lib/python3.10/site-packages/reactoccflow/models/modules/base/dit.py",
+    "reactoccflow.models.standard_dit": "/tmp/reactoccflow-restore-installed-po8pze7v/env/lib/python3.10/site-packages/reactoccflow/models/standard_dit.py",
+    "reactoccflow.models.modules.transition_models.FlowMatchingV2": "/tmp/reactoccflow-restore-installed-po8pze7v/env/lib/python3.10/site-packages/reactoccflow/models/modules/transition_models/FlowMatchingV2.py",
+    "reactoccflow.models.modules.transition_models": "/tmp/reactoccflow-restore-installed-po8pze7v/env/lib/python3.10/site-packages/reactoccflow/models/modules/transition_models/__init__.py",
+    "reactoccflow.models.joint_transition": "/tmp/reactoccflow-restore-installed-po8pze7v/env/lib/python3.10/site-packages/reactoccflow/models/joint_transition.py",
+    "reactoccflow.models.react_flow": "/tmp/reactoccflow-restore-installed-po8pze7v/env/lib/python3.10/site-packages/reactoccflow/models/react_flow.py",
+    "reactoccflow.models": "/tmp/reactoccflow-restore-installed-po8pze7v/env/lib/python3.10/site-packages/reactoccflow/models/__init__.py",
+    "reactoccflow.geometry": "/tmp/reactoccflow-restore-installed-po8pze7v/env/lib/python3.10/site-packages/reactoccflow/geometry/__init__.py",
+    "reactoccflow.losses.consistency": "/tmp/reactoccflow-restore-installed-po8pze7v/env/lib/python3.10/site-packages/reactoccflow/losses/consistency.py",
+    "reactoccflow.losses": "/tmp/reactoccflow-restore-installed-po8pze7v/env/lib/python3.10/site-packages/reactoccflow/losses/__init__.py",
+    "reactoccflow.training.joint": "/tmp/reactoccflow-restore-installed-po8pze7v/env/lib/python3.10/site-packages/reactoccflow/training/joint.py",
+    "reactoccflow.training": "/tmp/reactoccflow-restore-installed-po8pze7v/env/lib/python3.10/site-packages/reactoccflow/training/__init__.py",
+    "reactoccflow.training.diagnostics": "/tmp/reactoccflow-restore-installed-po8pze7v/env/lib/python3.10/site-packages/reactoccflow/training/diagnostics.py",
+    "reactoccflow.evaluation": "/tmp/reactoccflow-restore-installed-po8pze7v/env/lib/python3.10/site-packages/reactoccflow/evaluation/__init__.py"
+  },
+  "training_started": false,
+  "wheel": "/home/lthpc/wxh/Paper/outputs/architecture_migration/2026-11-02-restore-unet/dist/reactoccflow-0.1.0-py3-none-any.whl",
+  "wheel_sha256": "c20c43f1c3e2f7eae1cda95d52dbd4c51b315c243ee7c0d6f836d849f769b115",
+  "wheel_entries": 115,
+  "resource_sha256": "85c5a2566b3fa8a1ebb785af3113c6674fe9811e5eda2402b1959ce6cd66ef10",
+  "device": "cpu"
+}

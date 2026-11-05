@@ -398,8 +398,9 @@ def test_each_mode_default_and_yaml_has_active_trainable_gradient_path(mode, ori
         kwargs = yaml.safe_load(Path(f'configs/react_flow_{mode}.yaml').read_text())['model']
         kwargs.pop('kind')
     if origin == 'yaml':
-        kwargs['dit_config'] = {'patch_size': 2, 'hidden_size': 32, 'depth': 2,
-                                'num_heads': 4, 'activation_checkpointing': False}
+        kwargs['unet_config'] = {'model_channels': 32, 'channel_multi': [1, 2],
+                                 'init_kernel_size': 3, 'init_3d_conv_channels': 32,
+                                 'attn_dim': 8, 'temporal_attn_head': 4, 'spatial_attn_head': 4}
     else:
         kwargs['trunk'] = trunk
     kwargs.update(latent_shape=(2, 4, 4), max_actors=3)

@@ -1,0 +1,7 @@
+Materialized GT 1000/6019
+Materialized GT 2000/6019
+Materialized GT 3000/6019
+Materialized GT 4000/6019
+Materialized GT 5000/6019
+Materialized GT 6000/6019
+{"vae2d_frames": 6019, "vae3d_windows": 5269, "flow_windows": 4219, "unique_latent_frames": 5869}

@@ -1,0 +1,284 @@
+{
+  "date": "2026-11-02",
+  "task": "Restore OccFM-style U-shaped DiT alongside isotropic DiT",
+  "history": {
+    "before": "3169d59",
+    "dit_migration": "ee95563",
+    "archive": "outputs/architecture_migration/2026-10-31-standard-dit/legacy_unet_sources.tar.gz",
+    "archive_sha256": "698407927760ca842b37b11b93e5f4d60dfcd52da031a7d16ef4393a94666608"
+  },
+  "sources": [
+    {
+      "archive_member": "reactoccflow/models/modules/transition_models/FlowMatchingV2.py",
+      "sha256": "e6d21e220cd9302916f773d7b2e6e6d3f5c338a5f66ef2ebd2696821c737810e",
+      "destination": "reactoccflow/models/modules/transition_models/FlowMatchingV2.py"
+    },
+    {
+      "archive_member": "reactoccflow/models/modules/transition_models/__init__.py",
+      "sha256": "b5ee3192dcc1a030cab861554ea7b153a9ba69e3e47bd9bda221abe36c8be62d",
+      "destination": "reactoccflow/models/modules/transition_models/__init__.py"
+    },
+    {
+      "archive_member": "reactoccflow/models/modules/base/others.py",
+      "sha256": "85e431e651bc456e3b8b09a7c111161a4a93c18214fa42b57989e489cce93191",
+      "restored_classes": [
+        "EinopsToAndFrom",
+        "PreNorm"
+      ],
+      "destination": "reactoccflow/models/modules/base/others.py"
+    },
+    {
+      "archive_member": "reactoccflow/models/modules/base/postion_embed.py",
+      "sha256": "ac9140d712616df71d5a0851150f68273d44e2a44ad113901c00814c565efdda",
+      "restored_classes": [
+        "RelativePositionBias"
+      ],
+      "destination": "reactoccflow/models/modules/base/postion_embed.py"
+    },
+    {
+      "archive_member": "reactoccflow/models/modules/base/attn_base.py",
+      "sha256": "4fac2f147c9e80c7dc26d3e48be24a68dd5485ef52ae6ca985a19795e1bcd761",
+      "restored_classes": [
+        "Attention"
+      ],
+      "destination": "reactoccflow/models/modules/base/attn_base.py"
+    },
+    {
+      "source": "OccFM/forecast/models/modules/transition_models/FlowMatchingV2.py",
+      "source_commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "source_sha256": "89b73962947be5abcda56e13f2d305452bebfebf6ac0441d30ba21d2ad64dd1b",
+      "dependency_provenance": [
+        "docs/provenance/model_sources.json",
+        "docs/provenance/react_flow_sources.json"
+      ],
+      "runtime_reference_import": false
+    },
+    {
+      "source": "OccFM/forecast/models/modules/base/others.py",
+      "source_commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "source_sha256": "07473ba923b4a86fd89d69bbb0eb4e1e0ccf905acce958cd8a7240c619013592",
+      "dependency_provenance": [
+        "docs/provenance/model_sources.json",
+        "docs/provenance/react_flow_sources.json"
+      ],
+      "runtime_reference_import": false
+    },
+    {
+      "source": "OccFM/forecast/models/modules/base/postion_embed.py",
+      "source_commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "source_sha256": "ac9140d712616df71d5a0851150f68273d44e2a44ad113901c00814c565efdda",
+      "dependency_provenance": [
+        "docs/provenance/model_sources.json",
+        "docs/provenance/react_flow_sources.json"
+      ],
+      "runtime_reference_import": false
+    },
+    {
+      "source": "OccFM/forecast/models/modules/base/attn_base.py",
+      "source_commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "source_sha256": "64289056ad8ad2b07cc2a18df7f5771bbd8f8411e21a1d41f829f794115d8fb8",
+      "dependency_provenance": [
+        "docs/provenance/model_sources.json",
+        "docs/provenance/react_flow_sources.json"
+      ],
+      "runtime_reference_import": false
+    },
+    {
+      "source": "IR-WM/projects/mmdet3d_plugin/bevformer/modules/group_attention.py",
+      "source_commit": "94dbbf44d6c22e50db4080e986b3675eadbb4497",
+      "source_sha256": "ef01ab4328432cfd5178ba5900fb602811fd47d365102da3c41138e63c7c2172",
+      "dependency_provenance": [
+        "docs/provenance/model_sources.json",
+        "docs/provenance/react_flow_sources.json"
+      ],
+      "runtime_reference_import": false
+    },
+    {
+      "source": "OccFM/forecast/models/modules/base/res_layersbase.py",
+      "source_commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "source_sha256": "f9836412f36499eb3784c831c3caf6e569871ae7f360a3c35b5839f02d025fe6",
+      "archive_member": "reactoccflow/models/modules/base/res_layersbase.py",
+      "sha256": "f9836412f36499eb3784c831c3caf6e569871ae7f360a3c35b5839f02d025fe6",
+      "restored_classes": [
+        "Residual",
+        "Block",
+        "ResnetBlock"
+      ],
+      "destination": "reactoccflow/models/modules/base/res_layersbase.py"
+    },
+    {
+      "archive_member": "reactoccflow/models/flow.py",
+      "sha256": "f1e63d7b8786ca271a186153dee9d7fb87b5670ba5f338f0ec716b39492ddde0",
+      "snapshot": "reactoccflow/models/source_snapshots/restored_unet/legacy_flow.txt",
+      "reuse": "Strict OccFM checkpoint partition selection; flow objective/sampler remain current shared implementation."
+    }
+  ],
+  "searches": [
+    {
+      "repository": "OccFM",
+      "queries": [
+        "FLOW_MATCHING_DOWN_X4_DiT",
+        "RelativePositionBias",
+        "PreNorm",
+        "EinopsToAndFrom",
+        "load_pretrained",
+        "JointTransition"
+      ],
+      "matches": [
+        "OccFM/forecast/models/modules/transition_models/FlowMatchingV2.py",
+        "OccFM/forecast/models/modules/transition_models/__init__.py",
+        "OccFM/forecast/models/modules/base/others.py",
+        "OccFM/forecast/models/modules/base/postion_embed.py"
+      ],
+      "result": "Reuse the previously copied OccFM closure; actor exchange and dual-backbone dispatch remain project-owned."
+    },
+    {
+      "repository": "IR-WM",
+      "queries": [
+        "FLOW_MATCHING_DOWN_X4_DiT",
+        "RelativePositionBias",
+        "PreNorm",
+        "EinopsToAndFrom",
+        "load_pretrained",
+        "JointTransition"
+      ],
+      "matches": [],
+      "result": "No compatible OccFM latent U-shaped actor-flow backbone; preserve reference unchanged."
+    }
+  ],
+  "reused_dependency_closure": [
+    {
+      "owned_file": "reactoccflow/models/__init__.py",
+      "sha256": "a3d1c3aa0913fe5ce2e170ec8b09ea484ad35477828638f2a36f0646c48a5300"
+    },
+    {
+      "owned_file": "reactoccflow/models/_utils.py",
+      "sha256": "0c7cc6212e84d95c8c9c13a25d1c7add2e7db0d4475101621de973606ec32630"
+    },
+    {
+      "owned_file": "reactoccflow/models/codec.py",
+      "sha256": "cc3b760e8dba4a435b4c5cf2e517561263d6b005074361d9299039fd375cc441"
+    },
+    {
+      "owned_file": "reactoccflow/models/flow.py",
+      "sha256": "be854e8b33704ada75e1e281e7ec66b31a9115ce782cc1ff6fa2190efeb75311"
+    },
+    {
+      "owned_file": "reactoccflow/models/joint_transition.py",
+      "sha256": "d1390e518f773df4afbd624cf8f92a5a61631b3d096b21f96dafa7340ebc9555"
+    },
+    {
+      "owned_file": "reactoccflow/models/modules/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "owned_file": "reactoccflow/models/modules/base/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "owned_file": "reactoccflow/models/modules/base/attn_base.py",
+      "sha256": "009697a45788db9a3833f0f446211f302d6e7e03e739cc337501f45133cbab8d"
+    },
+    {
+      "owned_file": "reactoccflow/models/modules/base/dit.py",
+      "sha256": "4d8f7e7f70601afc7f0149e2a1d38b40ab6bec3e59c9eed9193d6333925f419b"
+    },
+    {
+      "owned_file": "reactoccflow/models/modules/base/others.py",
+      "sha256": "2eeccf7c162e71454d13ad75a2260efa5acd30b9ac944c88eeb35e54c2e81375"
+    },
+    {
+      "owned_file": "reactoccflow/models/modules/base/postion_embed.py",
+      "sha256": "722b76a5fe635c49267b6c374a26bebe7f5f6ad43503421cc66f75d2595ab2c3"
+    },
+    {
+      "owned_file": "reactoccflow/models/modules/base/res_layersbase.py",
+      "sha256": "8c7ab763696f13504f911301131272c786e7ba2a915d1a0c0a26fb8fc27b9687"
+    },
+    {
+      "owned_file": "reactoccflow/models/modules/base/swin_transformerbase.py",
+      "sha256": "0f1a099bbe2569060fd234ab4b4b382663568a406f1b3a5457211d5c2aaa8a9c"
+    },
+    {
+      "owned_file": "reactoccflow/models/modules/base/temporal_base.py",
+      "sha256": "f32f9f0942e719824750c2f2a85641b9d0dd2c326e56620e581b841791b653fb"
+    },
+    {
+      "owned_file": "reactoccflow/models/modules/decoders/SwinSingleFrameUpV2.py",
+      "sha256": "5bd3729defe6310d703d082aebd87d394a49ca950baf829030e922bafbdd076c"
+    },
+    {
+      "owned_file": "reactoccflow/models/modules/decoders/__init__.py",
+      "sha256": "c3c426692c9e4bc0b2cf746673cb012e7ceea15da9e2586e13ce358db04970ef"
+    },
+    {
+      "owned_file": "reactoccflow/models/modules/embedding/__init__.py",
+      "sha256": "5fa0083225473fd1b62214837197ed0a852f212328e296eb2d9614636acc4047"
+    },
+    {
+      "owned_file": "reactoccflow/models/modules/embedding/voxel_height_sem_embed.py",
+      "sha256": "7b430041a5b9fd563e70a2d3318fe6c4df787b46871cefdf4ecd2bc1b04016b5"
+    },
+    {
+      "owned_file": "reactoccflow/models/modules/encoders/SwinSingleFrameDownV2.py",
+      "sha256": "f8c02831de05a7971160542e78ee57076c8986d398964e2cfbfa1c43c76fdaaa"
+    },
+    {
+      "owned_file": "reactoccflow/models/modules/encoders/__init__.py",
+      "sha256": "db80a943c5b7070f2b3b7eb6d421e4b4b51ce08faf557485990e777331f74e77"
+    },
+    {
+      "owned_file": "reactoccflow/models/modules/quantization/__init__.py",
+      "sha256": "c360ed4e468543009a7237543c99db8f090b7d7a0f8686e49fcd489aedafa9a7"
+    },
+    {
+      "owned_file": "reactoccflow/models/modules/quantization/vae_quant.py",
+      "sha256": "0090eb15aa248696d46fe0c6c95517d31aa048888a4b0de3ef55bf5c839b7148"
+    },
+    {
+      "owned_file": "reactoccflow/models/modules/transition_models/FlowMatchingV2.py",
+      "sha256": "a585fa43cf99e3d73349720940b7c49cd369cb733d0df07be2b443122d9b3caf"
+    },
+    {
+      "owned_file": "reactoccflow/models/modules/transition_models/__init__.py",
+      "sha256": "b5ee3192dcc1a030cab861554ea7b153a9ba69e3e47bd9bda221abe36c8be62d"
+    },
+    {
+      "owned_file": "reactoccflow/models/ops/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "owned_file": "reactoccflow/models/ops/flash_attention/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "owned_file": "reactoccflow/models/ops/flash_attention/flash_attention.py",
+      "sha256": "a4f4ae15a6195baa1b7225c58b29d27b2612bdf16d8ed7ab2dcb7d0c5006944c"
+    },
+    {
+      "owned_file": "reactoccflow/models/react_flow.py",
+      "sha256": "78f5866e95363c6388f86cec24cab5a790e246d3d2106bf38fd4797c4d9d34c1"
+    },
+    {
+      "owned_file": "reactoccflow/models/standard_dit.py",
+      "sha256": "bfd7c74b4e1c7b8d6ba0f51bdc85e78f0e78717089a5eb37a478c87246ef02b7"
+    }
+  ],
+  "validation": {
+    "reference_differences": {
+      "OccFM": [],
+      "IR-WM": []
+    },
+    "source_protection_passed": true,
+    "cpu_tests": "347 passed in 15.22s",
+    "checkpoint_report": "docs/implementation/dual_backbone_checkpoint_acceptance.json",
+    "isolated_wheel_report": "docs/implementation/dual_backbone_isolation.json",
+    "frozen_dit_resume": "dry_run_passed; 82 original files checked; training_started=false",
+    "runtime_reference_imports": false
+  },
+  "new_implementation_after_search": [
+    "Dual-backbone selection and option validation",
+    "Architecture-specific CLI, output directories and config identity",
+    "Tests and build/isolation orchestration based on existing owned tooling"
+  ]
+}
