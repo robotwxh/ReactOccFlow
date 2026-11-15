@@ -1,0 +1,57 @@
+{
+  "created_at": "2026-11-11T15:42:14.246964+08:00",
+  "task": "Diagnose remaining hidden512 vs U-shaped CFM+actor quality gap using fixed train/tune samples",
+  "reference_search": {
+    "patterns": "teacher|denois|diagnos|svd|flow_matching|consistency",
+    "log": "outputs/diagnostics/2026-11-11-dit512-cfm-gap/reference_search.txt",
+    "heads": {
+      "OccFM": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "IR-WM": "94dbbf44d6c22e50db4080e986b3675eadbb4497"
+    },
+    "finding": "References provide original flow/architecture/metric primitives already migrated, but no cross-checkpoint loss/teacher-path/NFE/input-removal diagnostic. Adapt prior owned frozen-model diagnostic and reuse owned loss, sampling and metric APIs; no new reference imports or code copies.",
+    "source_sha256": {
+      "OccFM/forecast/models/worldmodels/occfm.py": "32acddf3f166f341b5be69eb753fee3265e06974f1f2b6cbcbe7660e091ba301",
+      "OccFM/forecast/models/modules/transition_models/FlowMatchingV2.py": "89b73962947be5abcda56e13f2d305452bebfebf6ac0441d30ba21d2ad64dd1b",
+      "OccFM/forecast/utils/eval_utils.py": "11b60285639e569cb6555ba5ce63d999bdbbe19307c74f1c9afdbbf2518c3f68",
+      "IR-WM/projects/mmdet3d_plugin/bevformer/detectors/drive_occworld.py": "8696e8a5be4b2d24d963ab5de7c034758aece715c48c3ada1817112787b5dc6b"
+    }
+  },
+  "owned_reuse_sha256": {
+    "outputs/diagnostics/2026-11-07-dit-cfm-gap/diagnose_model.py": "29ecb887fa3973783cf486dc1f71c737ae92ab1d22d9ea12a74dbe3c561c32a3",
+    "reactoccflow/training/joint.py": "aba45fe3f3e426464e58e30d2603dc887c6a5a4250a04b7f5959b3022facdcba",
+    "reactoccflow/models/react_flow.py": "78f5866e95363c6388f86cec24cab5a790e246d3d2106bf38fd4797c4d9d34c1",
+    "reactoccflow/evaluation/occupancy.py": "7a4af0d8b5443bcaef8d8c755eb2fe4bf8a3328204894422205927a530a608c5",
+    "reactoccflow/evaluation/reactflow_generation.py": "12eb30ad57adb0d15eab3be28fc4be7a221c9e1a537aaf3c481bd9b9f1d87572"
+  },
+  "plan": "outputs/diagnostics/2026-11-11-dit512-cfm-gap/diagnostic_plan.json",
+  "no_training_or_checkpoint_changes": true,
+  "gradient_reference_search": {
+    "patterns": [
+      "autograd.grad",
+      "cosine_similarity"
+    ],
+    "repositories": [
+      "OccFM",
+      "IR-WM"
+    ],
+    "matches": [],
+    "finding": "No suitable cross-task gradient diagnostic; use owned objectives and torch.autograd.grad without optimizer."
+  },
+  "diagnostic_sources_sha256": {
+    "outputs/diagnostics/2026-11-11-dit512-cfm-gap/diagnose_gradients.py": "cabe6224dff41afb7f456c3add7cf3cf9958982dafe2b589e8b96ef913e559d2",
+    "outputs/diagnostics/2026-11-11-dit512-cfm-gap/diagnose_interaction.py": "90bf91008657f6e288b23abec72cba3253575141315f3e11d0bcdcadd18ead46",
+    "outputs/diagnostics/2026-11-11-dit512-cfm-gap/diagnose_model.py": "3a536e551f395745b29ad2b1d44d8ca9a0cb5826ca39cebca2098e3708814936",
+    "outputs/diagnostics/2026-11-11-dit512-cfm-gap/make_figure.py": "c3748506707ed3c6f8c6648ca24d0455b79b56f30bc1855279db8b93c5da6a26",
+    "outputs/diagnostics/2026-11-11-dit512-cfm-gap/diagnose_gradients.filtered_parameters_attempt.py": "506c845b83e627f4eb747eae68d445f8d9b45c42ad2bacb954ebbf99e10ca2e7"
+  },
+  "report_sha256": "41c870f5585404d5354cfce2be91a46c062cd247b9b45db6582a10d129d40bed",
+  "acceptance": "outputs/diagnostics/2026-11-11-dit512-cfm-gap/acceptance.json",
+  "summary": "outputs/diagnostics/2026-11-11-dit512-cfm-gap/summary.json",
+  "failures_and_corrections": {
+    "initial_gradient": "gradient_first_attempt_exit_codes.json",
+    "filtered_parameters": "gradient_filtered_parameter_exit.json",
+    "successful_final": "gradient_training_setup_exit_codes.json"
+  },
+  "all_original_weights_and_official_results_unchanged": true,
+  "final_summary_sha256": "96ed88cbe54eb70f4f31c46fa94742271b7a1606810bc6918d856e65c5cf966e"
+}

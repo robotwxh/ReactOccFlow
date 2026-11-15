@@ -62,6 +62,11 @@ def test_validation_combines_global_valid_element_statistics():
     separated = _evaluate(MaskedObjective(), split, torch.device("cpu"), torch.Generator())
 
     assert together == separated == (1.5, 2)
+    loss, count, components = _evaluate(
+        MaskedObjective(), split, torch.device('cpu'), torch.Generator(), return_components=True)
+    assert (loss, count) == together
+    assert components == {'masked': {'mean': 3., 'weight': .5,
+                                    'weighted_mean': 1.5, 'count': 4}}
 
 
 def test_resuming_early_stopped_state_does_not_optimize_again(tmp_path, monkeypatch):

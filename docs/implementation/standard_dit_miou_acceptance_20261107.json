@@ -1,0 +1,115 @@
+{
+  "status": "passed_complete_evaluation_with_poor_model_quality",
+  "checked_at": "2026-11-07T12:37:03.892381+08:00",
+  "scope": "Completed held-out occupancy generation mIoU; acceptance checks describe execution/integrity, not model quality",
+  "checkpoint_step": 100000,
+  "windows": 4219,
+  "scenes": 150,
+  "rank_exit_codes": [
+    0,
+    0
+  ],
+  "aggregation_exit_code": 0,
+  "elapsed_seconds": 2332.09434007699,
+  "miou_1_2_3s_percent": [
+    2.836126976845035,
+    2.523971496806618,
+    2.3662531231022106
+  ],
+  "miou_average_percent": 2.575450532251288,
+  "delta_vs_previous_actor_U_CFM_percentage_points": -26.098481225455455,
+  "delta_vs_OccFM_paper_future_percentage_points": -25.91454946774871,
+  "native_e0_known_average_percent": 2.785631729419416,
+  "audit": {
+    "current_result_sha256": "c178b01cb6703423323d370c7fc5e6d73798f7029f56c4fed8bbddea9b564d23",
+    "prior_cfm_result_sha256": "274a3697b71eb37b18dfb55dba4832a7dfc43e3ae8afe49ab886fb1f49cbfba5",
+    "original_OccFM_result_sha256": "8ad643898fe5eb388e81e960ed4d41e44ee03c7a3eb750ee0c0aae488597ac3a",
+    "standard_dit_checkpoint_sha256": "b2edceb33bab6989d9a761e3fb5ad4619c98e280dd6813bcec242b2c58296af9",
+    "current_model_options": {
+      "backbone": "dit",
+      "dit_config": {
+        "patch_size": 5,
+        "hidden_size": 256,
+        "depth": 8,
+        "num_heads": 8,
+        "mlp_ratio": 4.0,
+        "activation_checkpointing": true
+      }
+    },
+    "both_rank_coverage_verified": true,
+    "matched_settings": [
+      "nfe",
+      "seed",
+      "precision",
+      "encode_chunk",
+      "decode_chunk",
+      "batch_size",
+      "world_size",
+      "numerical_settings",
+      "limit",
+      "windows",
+      "condition",
+      "predictor_frame",
+      "paper_score_frame",
+      "native_score_mask",
+      "paper_score_mask",
+      "heading",
+      "torch_version",
+      "cuda_version"
+    ],
+    "shared_data_artifacts": 5723,
+    "unchanged_generation_and_score_functions": [
+      "window_seed",
+      "partition_indices",
+      "paper_horizon_summary",
+      "project_prediction_to_future",
+      "make_windows",
+      "make_initial_noise",
+      "predict_batch",
+      "OnlineEvaluationData._labels",
+      "OnlineEvaluationData._grid",
+      "OnlineEvaluationData.__getitem__"
+    ],
+    "identity_protocol_versions": [
+      1,
+      2
+    ],
+    "architecture_and_checkpoint_identity_changes_allowed": true,
+    "per_time_per_class_GT_matches_U_CFM": true,
+    "full_grid_GT_matches_original_OccFM": true,
+    "coverage_matches_U_CFM": true
+  },
+  "reference_before_after_equal": true,
+  "reference_entry_counts": {
+    "OccFM": 370,
+    "IR-WM": 389
+  },
+  "frozen_sources_unchanged": {
+    "outputs/reactflow_dit/source_seed_2026": 81,
+    "outputs/reactflow_joint/source_seed_2026": 114,
+    "outputs/evaluation/2026-11-04-reactflow-best52000/evaluation_source": 115,
+    "outputs/evaluation/2026-11-07-standard-dit-best100000/evaluation_source": 82
+  },
+  "preserved_checkpoints_and_baseline_files_unchanged": 7,
+  "generation_evaluator_cpu_tests_passed": 11,
+  "report_cpu_tests_passed": 17,
+  "pilot_windows_completed": 16,
+  "engineering_tune_bitwise_source_comparison_passed": true,
+  "independent_review_found_no_clear_assembly_or_scale_error": true,
+  "low_score_root_cause_established": false,
+  "training_restarted": false,
+  "optimizer_steps_this_task": 0,
+  "evaluation_tuning_performed": false,
+  "all_benchmark_artifacts_preserved": true,
+  "report_artifact_sha256": {
+    "full/result.json": "c178b01cb6703423323d370c7fc5e6d73798f7029f56c4fed8bbddea9b564d23",
+    "comparison.json": "d3505646806b8c4992df4fa5a854588a3524353bb0d88be8d503430fb0d81311",
+    "comparison.csv": "8351fe0645c199f4f5739fcbb3cbba3d06c63fe6fa3b53b0745969cbaaeb2036",
+    "per_class_comparison.csv": "bbe012aca123fbaeae3d34aa9d6902fc259e9f7940e8f7e376a7053acea2cdd7",
+    "\u6807\u51c6DiT\u4e0eCFM\u53caOccFM_mIoU\u5bf9\u7167.md": "ce1c228c23d301db618085220037927619b13f6ad43da288b4e807fb0a6f6eb3",
+    "protocol.json": "d735ce1703d58fa2be7f03c2635f4dcae009761650f77a9722c0628f3e058b15",
+    "engineering_probe_comparison.json": "137829b6f569b50fef8485bb99417e39730b42a7f38745b2ef82af3402742942",
+    "independent_low_score_review.json": "5a27ff36cf41c84d236dda934c9cb94719c42d70ebe6e514521cff92174113f7",
+    "prediction_distribution_diagnostic.json": "bf4831e20fda8a3c12e4b3ed4e619d7fbd8852c6f90a2f2a9c927c0902875566"
+  }
+}

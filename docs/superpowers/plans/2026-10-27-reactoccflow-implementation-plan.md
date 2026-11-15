@@ -1,4 +1,18 @@
+> 2026-11-15：已按用户要求撤回原始 LiDAR 输入及其后续改造，恢复 **语义 occupancy → 冻结原 VAE → latent／actor 状态缓存 → U形 CFM 或标准 DiT512**。新增点云感知/actor 检测/从头分阶段训练路线已移出活动代码，历史产物保留。**全部训练继续暂停，不自动恢复。**详见 [回退记录](../../implementation/2026-11-15-rollback-raw-input.md)。下文运行状态按日期保留为历史。
+
 # ReactOccFlow 独立工程详细实施计划
+
+> 2026-11-11 差距诊断：hidden512输出秩已满400；8个固定tune场景的actor→occupancy注入移除干预得到17.3353%→20.5856%，U形没有对应退化；NFE40仍保留两模型约11.07个百分点原生E0差距。语义敏感误差、目标覆盖不足与注入设计是当前排查重点，预训练和表示细节的贡献仍需受控重训。本轮只诊断，未更改权重或官方成绩。证据与后续优先级见 [差距分析](../../implementation/2026-11-11-dit512-cfm-gap-analysis.md)。
+
+> 2026-11-11 全量评测完成：修复后的标准DiT hidden512＋actor采用best84,000 EMA，官方validation150场景/4,219窗口全网格mIoU1/2/3秒=21.1581 / 17.7828 / 15.6813%，Avg **18.2074%**。比hidden256的2.5755%提高15.6320个百分点，仍低于U形CFM＋actor的28.6739%和OccFM论文未来轨迹条件28.49%。统计计数、共享评测协议、旧产物及参考仓库保护核验通过；本轮是诊断性复用，没有建立纯架构因果或显著性结论。见 [评测记录](../../implementation/2026-11-11-dit512-miou-evaluation.md)。
+
+> 2026-11-11 最新核查：修正后的标准DiT512＋actor已于11月10日22:32跑满100,000步；best EMA为84,000步，完整tune loss=0.19324544，最终100,000步固定8场景tune Avg mIoU=17.7525%（非官方全量成绩）。完整权重与状态已保存，结束后残留进程及CUDA占用已清理，无训练继续运行。见 [完成记录](../../implementation/2026-11-11-dit512-training-completed.md)。
+
+> 2026-11-07 修复进展：标准DiT配置已改为patch5/hidden512，并在构造时拒绝低于400维的直接线性速度头；1,200个token、8层、actor交互与冻结VAE保持原设计。新增分项tune损失及固定tune场景自由生成监控。512维独立全量实验已完成50步保存并恢复双卡训练，最终mIoU待测；旧256维模型的2.5755%为历史结果。验收与实验状态见 [修复记录](../../implementation/2026-11-07-dit-rank-repair.md)。
+
+> 2026-11-07 后续分析：用户要求解释两主干差异。已验证当前标准DiT的400→256输入、256→400直接速度头产生固定144维不可控初噪；SVD与投影守恒、8个预选tune场景的噪声/损失对照支持该结构缺陷。修复候选是patch5/hidden512或更小patch，但尚未实施，不将更多训练/NFE当成解除固定秩限制的方法。其它误差仍需诊断，未修改官方评测或启动新训练。见 [结构诊断](../../implementation/2026-11-07-dit-cfm-gap-analysis.md)。
+
+> 2026-11-07 最新实测：标准DiT joint完成100,000步及官方validation150场景/4,219窗口评测；best100,000 EMA的全网格mIoU1/2/3秒=2.8361 / 2.5240 / 2.3663%，Avg=2.5755%，较原actor+U形CFM的28.6739%下降26.0985个百分点。原生E0 Avg仅2.7856%。计数、源码、EMA与固定tune样本推理一致性核验通过，但生成质量很差，具体原因未确定；不据此声称标准DiT普遍不适用。模型/采样设置未依据官方验证集挑选，所有基线和检查点保留，没有自动重训。详见 [评测与低结果核查](../../implementation/2026-11-07-standard-dit-miou-evaluation.md)。
 
 > 2026-11-05 17:18 最新执行：用户已明确要求继续训练，标准DiT joint从保存的54,000步完整状态恢复双卡训练，原训练器严格恢复检查通过并记录本轮`started`。沿用原配置、冻结源码、100,000步上限与patience=10，模型/EMA/优化器/scheduler/双rank RNG及游标均继续；暂停前未落盘区间重跑。详见 [续训记录](../../implementation/2026-11-05-standard-dit-training-resumed.md)。下方暂停约束已由本次明确恢复指示解除；原U形CFM结束状态及评测结果保留。
 
@@ -102,7 +116,7 @@ Paper/
 | occupancy 语义与高度编码 | OccFM `forecast/models/modules/embedding/voxel_height_sem_embed.py`                      | 保留网格和类别兼容接口                                                  | 统一空间规范与可见性 mask                                                                        |
 | VAE 编解码               | OccFM `compressors/occfm_vae.py`、`encoders/`、`decoders/`、`quantization/` 及对应基础层 | 保留可加载权重的网络结构，拆分编码和解码 API                            | 支持项目自有数据、确定性均值编码                                                                 |
 | 原 OccFM/U-Net 复现（历史阶段） | 原始复制来源保留在 provenance | 历史复现已完成；按用户后续要求，运行代码、配置和加载入口已删除 | 仅保留来源档案、日志、权重和已产生的指标，不重新加入包 |
-| 标准 DiT 研究主干        | OccFM 已复制的 `base/dit.py`、注意力及条件/位置编码；完整标准 DiT 经两仓库检索后新增     | 固定 1,200 个时空 token、8 层、256 维、8 头，使用正确的 math 注意力分支 | patch 投影、adaLN 输出与 unpatchify；第 4 层后的 actor self-attention 和同步双向 cross-attention |
+| 标准 DiT 研究主干        | OccFM 已复制的 `base/dit.py`、注意力及条件/位置编码；完整标准 DiT 经两仓库检索后新增     | 固定 1,200 个时空 token、8 层、512 维、8 头，使用正确的 math 注意力分支 | patch 投影、adaLN 输出与 unpatchify；第 4 层后的 actor self-attention 和同步双向 cross-attention |
 | FM 训练和 ODE 采样       | OccFM `worldmodels/occfm.py`                                                             | 提取路径采样、速度目标、CFG 和积分器                                    | actor 分支、可复现随机数、分块采样                                                               |
 | nuScenes 缓存读取        | OccFM `datasets/nuscenes_dataset.py`、`tools/cache_vae.py`                               | 用 token 索引替代固定字符串路径切分                                     | 独立缓存格式、身份和有效性 mask                                                                  |
 | actor 与 ego 标签        | IR-WM `datasets/trajectory_api.py` 及坐标转换代码                                        | 复制标签构造和变换逻辑，移除不必要的 OpenMMLab 包装                     | 当前帧选取、稳定身份关联、防未来泄漏                                                             |
@@ -188,9 +202,9 @@ Controller.step(selected_plan, ego_state, dt) -> VehicleControl
 ### 3.4 ReactFlow 联合生成
 
 - 先保持 occupancy-only CFM 可运行，再增加 actor motion 分支。
-- occupancy 主干采用标准 DiT：latent patch=5、hidden=256、depth=8、heads=8；12 槽共形成 1,200 个固定分辨率 token，各层进行全局时空 self-attention，没有 U-Net 编解码与跨尺度跳连。
+- occupancy 主干采用标准 DiT：latent patch=5、hidden=512、depth=8、heads=8；12 槽共形成 1,200 个固定分辨率 token，各层进行全局时空 self-attention，没有 U-Net 编解码与跨尺度跳连。
 - actor 分支复用复制后的时间编码、Fourier 编码及注意力基础层；8 个 actor×6 个未来槽共形成 48 个 token，hidden=128，在两层、4 头交互模块中分别进行 masked actor self-attention 和 FFN。
-- 第 4 个 DiT Block 后接入双向 cross-attention：actor 更新时 `Q=actor, K/V=occupancy`；occupancy 更新时 `Q=occupancy, K/V=actor`。两路从同一轮状态计算，再经门控残差更新。occupancy 先投影至 128 维，交互增量回投至 256 维后继续后 4 层 DiT；两组 token 不拼接做共同 self-attention。
+- 第 4 个 DiT Block 后接入双向 cross-attention：actor 更新时 `Q=actor, K/V=occupancy`；occupancy 更新时 `Q=occupancy, K/V=actor`。两路从同一轮状态计算，再经门控残差更新。occupancy 先投影至 128 维，交互增量回投至 512 维后继续后 4 层 DiT；两组 token 不拼接做共同 self-attention。
 - 单套 VAE 在离线阶段分别编码历史观测与未来监督标签。训练读取 latent 缓存，仅对预测端点运行冻结 decoder；patch 线性投影和 unpatchify 不属于第二次 VAE 编解码。actor 不经过 occupancy VAE。
 - occupancy 与 actor 使用独立高斯初始噪声、共享生成流时间；物理未来时间与生成时间分开命名。
 - 采用线性 source–target 插值及速度回归；每种模态分别做有效元素均值，再加权求和。

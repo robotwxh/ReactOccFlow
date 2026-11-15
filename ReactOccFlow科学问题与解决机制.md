@@ -1,4 +1,8 @@
+> 2026-11-15：已按用户要求撤回原始 LiDAR 输入及其后续改造，恢复 **语义 occupancy → 冻结原 VAE → latent／actor 状态缓存 → U形 CFM 或标准 DiT512**。新增点云感知/actor 检测/从头分阶段训练路线已移出活动代码，历史产物保留。**全部训练继续暂停，不自动恢复。**详见 [回退记录](docs/implementation/2026-11-15-rollback-raw-input.md)。下文运行状态按日期保留为历史。
+
 # ReactOccFlow：科学问题、解决机制与验证方案
+
+> 2026-11-07 修复进展：标准DiT配置已改为patch5/hidden512，并在构造时拒绝低于400维的直接线性速度头；1,200个token、8层、actor交互与冻结VAE保持原设计。新增分项tune损失及固定tune场景自由生成监控。512维独立全量实验已完成50步保存并恢复双卡训练，最终mIoU待测；旧256维模型的2.5755%为历史结果。验收与实验状态见 [修复记录](docs/implementation/2026-11-07-dit-rank-repair.md)。
 
 > 2026-11-02 最新架构决定：恢复原 OccFM 式 U 形 DiT 为默认主干，同时保留 `backbone=dit` 的标准 DiT。两个分支均支持三种研究模式；原删除限制已被本次决定替代。训练继续暂停，既有 DiT 冻结源码和恢复入口保持不变。详见 [双架构恢复说明](docs/implementation/2026-11-02-restore-unet-and-keep-dit.md)。
 
@@ -215,7 +219,7 @@ $$
 
 存在性采用单独的概率输出，训练时监督可见/有效状态；不能通过删除困难目标来规避预测误差。航向在解码时归一化正余弦并恢复角度，静止目标需要稳定的方向处理。
 
-默认 occupancy 网络恢复原 U 形时空 DiT，保留瓶颈后的两层 actor 双向交互；标准 DiT 分支为：`16×50×50` latent 按 `5×5` 空间 patch 投影到 256 维，12 个历史/带噪未来槽共形成 1,200 个 token，经 8 层、8 头 DiT 的全局时空 self-attention 建模。所有层保持固定 token 数与宽度；没有 U-Net 的多尺度编码/解码及跨尺度跳连。生成时间与候选自车轨迹用于条件调制。
+默认 occupancy 网络恢复原 U 形时空 DiT，保留瓶颈后的两层 actor 双向交互；标准 DiT 分支为：`16×50×50` latent 按 `5×5` 空间 patch 投影到 512 维，12 个历史/带噪未来槽共形成 1,200 个 token，经 8 层、8 头 DiT 的全局时空 self-attention 建模。所有层保持固定 token 数与宽度；没有 U-Net 的多尺度编码/解码及跨尺度跳连。生成时间与候选自车轨迹用于条件调制。
 
 actor 历史、当前观测 mask、类别、尺寸、带噪未来运动状态、物理未来槽位、生成时间和候选轨迹共同组成 48 个 128 维 token。标准 DiT 在第 4 个 Block 后、U 形 DiT 在 mid_block2 后插入两层、4 头交互模块，分别执行 actor self-attention、同步双向 cross-attention 和 actor FFN：
 
@@ -226,7 +230,7 @@ actor 历史、当前观测 mask、类别、尺寸、带噪未来运动状态、
 | occupancy → actor cross-attention | actor | occupancy | 用场景上下文更新 actor |
 | actor → occupancy cross-attention | occupancy | actor | 用主体运动更新场景 |
 
-两路 cross-attention 从同一轮归一化状态计算，再分别通过可学习门控残差更新。occupancy 先由 256 维投影到 128 维，经过两层交互后只将增量回投至 256 维并继续后 4 层 DiT。两组模态 token 没有拼接成一条共同做 self-attention 的序列；候选轨迹通过条件编码注入，也不是第三组 cross-attention token。配置数值属于工程起点，不是理论最优值。
+两路 cross-attention 从同一轮归一化状态计算，再分别通过可学习门控残差更新。occupancy 先由 512 维投影到 128 维，经过两层交互后只将增量回投至 512 维并继续后 4 层 DiT。两组模态 token 没有拼接成一条共同做 self-attention 的序列；候选轨迹通过条件编码注入，也不是第三组 cross-attention token。配置数值属于工程起点，不是理论最优值。
 
 VAE 仍只有一套：历史观测和未来训练标签分别经同一 encoder 生成缓存，训练 step 读取 latent；DiT patch 投影和输出 unpatchify 只在 latent/token 之间转换。预测 occupancy 端点经原 VAE decoder 得到连续 logits 后计算一致性，actor 则使用状态 MLP 和独立输出头。采样仅编码已有观测，不使用未来 occupancy 标签。
 

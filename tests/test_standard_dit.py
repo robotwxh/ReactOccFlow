@@ -46,6 +46,9 @@ def test_default_flow_is_isotropic_dit_and_trainable_from_scratch():
     trunk = flow.transition_model.trunk
     assert isinstance(trunk, StandardDiT) and flow.backbone == 'dit'
     assert trunk.token_count == 1200 and len(trunk.blocks) == 8
+    assert trunk.hidden_size == 512
+    assert trunk.patch_embed.in_features == 400
+    assert trunk.final_layer.linear.out_features == 400
     assert not any(isinstance(m, (nn.Conv2d, nn.Conv3d, nn.ConvTranspose2d, nn.ConvTranspose3d))
                    for m in flow.modules())
     assert not hasattr(trunk, 'downs') and not hasattr(trunk, 'ups')
@@ -175,6 +178,31 @@ def test_invalid_architecture_options_are_rejected(options):
     config = dict(in_channels=2, input_size=4, patch_size=2, hidden_size=32, depth=2, num_heads=4)
     with pytest.raises(ValueError, match='DiT'):
         StandardDiT(**{**config, **options})
+
+
+def test_direct_velocity_backbone_rejects_forced_noise_nullspace_before_training():
+    with pytest.raises(ValueError, match='Gaussian noise directions'):
+        StandardDiT(in_channels=16, input_size=50, patch_size=5,
+                    hidden_size=256, depth=8, num_heads=8)
+
+
+def test_safe_width_has_capacity_to_observe_and_control_every_patch_direction():
+    # Nonzero weights emulate a learned head; zero-init is retained for real training.
+    trunk = StandardDiT(in_channels=4, input_size=4, frames=2,
+                        trajectory_length=1, patch_size=2, hidden_size=32,
+                        depth=1, num_heads=4, activation_checkpointing=False)
+    generator = torch.Generator().manual_seed(61)
+    with torch.no_grad():
+        trunk.final_layer.linear.weight.copy_(torch.randn(
+            trunk.final_layer.linear.weight.shape, generator=generator))
+    assert torch.linalg.matrix_rank(trunk.patch_embed.weight.double()) == 16
+    assert torch.linalg.matrix_rank(trunk.final_layer.linear.weight.double()) == 16
+    # A full-row-rank velocity head admits a correction for arbitrary patch noise.
+    noise = torch.randn(7, 16, generator=generator, dtype=torch.float64)
+    weight = trunk.final_layer.linear.weight.double()
+    features = -noise @ torch.linalg.pinv(weight).T
+    torch.testing.assert_close(noise + features @ weight.T,
+                               torch.zeros_like(noise), rtol=0, atol=1e-12)
 
 
 def test_standard_dit_supports_explicit_nonlegacy_temporal_slots():

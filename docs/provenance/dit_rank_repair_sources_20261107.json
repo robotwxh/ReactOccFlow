@@ -1,0 +1,65 @@
+{
+  "created_at": "2026-11-07T10:54:28.585109+00:00",
+  "reference_commits": {
+    "OccFM": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+    "IR-WM": "94dbbf44d6c22e50db4080e986b3675eadbb4497"
+  },
+  "reference_search_artifact": "outputs/architecture_migration/2026-11-07-dit-full-rank/reference_search.txt",
+  "reference_read_only": true,
+  "source_sha256": {
+    "OccFM/forecast/utils/eval_utils.py": "11b60285639e569cb6555ba5ce63d999bdbbe19307c74f1c9afdbbf2518c3f68",
+    "OccFM/tools/test.py": "fd5ad8a3e9564cb661f143470f82b6cd8afbdf339f2e53618358634da764f880",
+    "IR-WM/projects/mmdet3d_plugin/bevformer/utils/metric_stp3.py": "a4095e4fca0bedd6800cdb974a5e06d0cedfd289e3c8d4acafb8972b213aa82e",
+    "OccFM/forecast/models/modules/base/dit.py": "4d8f7e7f70601afc7f0149e2a1d38b40ab6bec3e59c9eed9193d6333925f419b",
+    "OccFM/forecast/models/modules/base/attn_base.py": "64289056ad8ad2b07cc2a18df7f5771bbd8f8411e21a1d41f829f794115d8fb8",
+    "OccFM/forecast/models/modules/base/postion_embed.py": "ac9140d712616df71d5a0851150f68273d44e2a44ad113901c00814c565efdda"
+  },
+  "finding": "Both read-only references were searched. Existing owned migrated attention/conditioning and count metric dependencies are reused. Neither supplies a dimension guard for this project direct patch velocity head or a project-specific deterministic fixed-tune generation probe; no new reference runtime dependency or source copy is needed.",
+  "task": "Repair standard DiT rank bottleneck and prevent total-loss-only training acceptance",
+  "implementation_sha256": {
+    "reactoccflow/models/standard_dit.py": "573e09d894abc32517fd361ebef527577a26d0e89d1d9f0879b5f23c4e1f9839",
+    "configs/dit.yaml": "c679ba85f07ef3bf13de9a258103945c46e63cc2d5a5a902ed899df18dc8be25",
+    "configs/react_flow_joint_dit.yaml": "a8954f792262b410d0fe4a69597799e069420a3e5c482d6d6436ee2366d0d6bf",
+    "configs/react_flow_parallel_dit.yaml": "f4f5660a11b9ec2e5246e38eb2e51308897795372d467cd580ec58465d811bbb",
+    "configs/react_flow_occupancy_only_dit.yaml": "7ee62956e91f2445306f345126a4ce9820cbcbe3f75249ff5dab5bc5d8fd1441",
+    "scripts/train_react_flow.py": "f45ac196414328753e96ed2910b3c023f2457c4abb05071386ec66c2662948cb",
+    "tests/test_standard_dit.py": "136cf4c737c9124475ed7f31bacc4f74c855532408e284ecc03e2fc2c5459071",
+    "tests/test_train_react_flow.py": "3a7b602e9268aff184c25ba8b4a5978849392e4d34b3008731a33bfe1b5cf536",
+    "tests/test_reactflow_generation.py": "267379e19ac75e5a8e4431921c90d53d6df1e580b62e56d1e90d44b8eeac1216"
+  },
+  "preserved_initialization": "adaLN and final output head zero initialization retained; rank0 at initialization is not mistaken for dimensional hard cap",
+  "new_experiment_boundary": "No256 checkpoint is resumed or rewritten. Independent512 random initialization; preserve old weights/sources/results.",
+  "full_suite": {
+    "passed": 387,
+    "seconds": 16.0
+  },
+  "synthetic_artifacts": [
+    "legacy256_capacity.json",
+    "fixed512_capacity.json"
+  ],
+  "semantic_quality": "No512 semantic quality claim before real-data generation/training evaluation.",
+  "additional_reference_search_artifact": "outputs/architecture_migration/2026-11-07-dit-full-rank/generation_probe_reference_search.txt",
+  "owned_dependency_closure": "Existing independent copies tracked in standard_dit_sources.json, evaluation_sources.json and training provenance. No additional reference file is imported or executed.",
+  "experiment_scripts_sha256": {
+    "outputs/architecture_migration/2026-11-07-dit-full-rank/synthetic_noise_capacity.py": "2fd2d1b91eec880e015c5fe0bdacf2c148a2ebb6b14e820e95be85860336aea3",
+    "outputs/architecture_migration/2026-11-07-dit-full-rank/run_acceptance.py": "cbc6f64706b3c5e81d83a9ff66d8215d06c78c9b9c85757f38114401e9d84dac",
+    "outputs/architecture_migration/2026-11-07-dit-full-rank/probe_real32.py": "b4f046edc7c4416ca219b22be1f7375afd844643f17ebb6b3c840e6551d43e6b",
+    "outputs/architecture_migration/2026-11-07-dit-full-rank/launch_full_training.py": "2eb8d51f2a4dd9c2984e3b1311e445f41b02b1965fefab907d7aa22ec32a902e"
+  },
+  "new_source_manifest": "outputs/reactflow_dit512/source_seed_2026.manifest.json",
+  "new_source_files": 153,
+  "validation_artifacts": {
+    "ddp": "outputs/architecture_migration/2026-11-07-dit-full-rank/ddp_resume_acceptance.json",
+    "isolation": "outputs/architecture_migration/2026-11-07-dit-full-rank/isolation_acceptance.json",
+    "protection": "outputs/architecture_migration/2026-11-07-dit-full-rank/protection_acceptance.json",
+    "combined": "outputs/architecture_migration/2026-11-07-dit-full-rank/acceptance.json",
+    "real200": "outputs/architecture_migration/2026-11-07-dit-full-rank/real32_training/results.json",
+    "real_generation": "outputs/architecture_migration/2026-11-07-dit-full-rank/real_generation_comparison.json",
+    "new_training_health": "outputs/architecture_migration/2026-11-07-dit-full-rank/new_training_health.json"
+  },
+  "owned_launch_workflow_sha256": {
+    "scripts/resume_dit_training.py": "cda716c0af4afdeb0330046250425ff78958b1bae334b6b5f1f7442a2deb529d"
+  },
+  "real_generation_quality_status": "Fixed8tune Avg0.20058%\u21920.34660% after200nonEMA pilotsteps remains poor. Newfull512 mIoU is pending, not claimed.",
+  "training_state": "New512 fulljoint two-GPU training started, saved50 and resumed after19783 strictidentity checks. Independent random initialization; old256 notloaded."
+}

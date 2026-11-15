@@ -1,0 +1,138 @@
+{
+  "status": "running_verified",
+  "checked_at": "2026-11-05T17:25:58.854769+08:00",
+  "backbone": "dit",
+  "trunk": "StandardDiT",
+  "seed": 2026,
+  "resume_from_complete_step": 54000,
+  "latest_verified_training_step": 54050,
+  "latest_complete_checkpoint_step": 54000,
+  "max_steps": 100000,
+  "patience_evaluations": 10,
+  "started_event": {
+    "event": "started",
+    "global_step": 54000,
+    "config": {
+      "mode": "joint",
+      "max_steps": 100000,
+      "warmup_steps": 1000,
+      "eval_interval": 2000,
+      "patience": 10,
+      "batch_size_per_rank": 2,
+      "gradient_accumulation": 2,
+      "effective_batch_size": 8,
+      "workers": 4,
+      "decode_chunk": 4,
+      "trunk_lr": 0.0001,
+      "new_branch_lr": 0.0001,
+      "weight_decay": 0.01,
+      "max_grad_norm": 1.0,
+      "ema_decay": 0.9999,
+      "precision": "float32",
+      "minimum_lr_ratio": 0.01,
+      "seed": 2026,
+      "world_size": 2,
+      "device_type": "cuda",
+      "condition": "logged_ego_action_supervision",
+      "observation_representation": "oracle_E0",
+      "run_scope": "full_training",
+      "diagnostic_train_windows": null,
+      "diagnostic_tune_windows": null,
+      "validation_reduction": "global_per_component_valid_element_means",
+      "epoch_tail_policy": "drop_incomplete_accumulation_group",
+      "train_batches_per_rank": 4366,
+      "dropped_tail_microbatches_per_rank": 1,
+      "numerical_settings": {
+        "deterministic_algorithms": true,
+        "cudnn_deterministic": true,
+        "cudnn_benchmark": false,
+        "cublas_workspace_config": ":4096:8",
+        "matmul_allow_tf32": false,
+        "cudnn_allow_tf32": true
+      },
+      "backbone": "dit",
+      "dit": {
+        "in_channels": 16,
+        "input_size": 50,
+        "frames": 12,
+        "trajectory_length": 6,
+        "patch_size": 5,
+        "hidden_size": 256,
+        "depth": 8,
+        "num_heads": 8,
+        "mlp_ratio": 4.0,
+        "activation_checkpointing": true
+      }
+    },
+    "train_windows": 17468,
+    "tune_windows": 2176,
+    "trainable_parameter_tensors": 168,
+    "stop_after_steps": null,
+    "utc": "2026-11-05T09:20:02.890335+00:00",
+    "elapsed_seconds": 0.0007817570001407148
+  },
+  "latest_train_event": {
+    "event": "train",
+    "global_step": 54050,
+    "loss": 0.5349867269396782,
+    "lr_trunk": 4.493546015329789e-05,
+    "lr_new_branches": 4.493546015329789e-05,
+    "rank0_peak_cuda_bytes": 7872659456,
+    "utc": "2026-11-05T09:24:33.802022+00:00",
+    "elapsed_seconds": 270.9124684330002
+  },
+  "processes": [
+    {
+      "pid": 25182,
+      "state": "S",
+      "cwd": "/home/lthpc/wxh/Paper/outputs/reactflow_dit/source_seed_2026"
+    },
+    {
+      "pid": 25202,
+      "state": "S",
+      "cwd": "/home/lthpc/wxh/Paper/outputs/reactflow_dit/source_seed_2026"
+    },
+    {
+      "pid": 25203,
+      "state": "S",
+      "cwd": "/home/lthpc/wxh/Paper/outputs/reactflow_dit/source_seed_2026"
+    }
+  ],
+  "gpu_activity_summary": {
+    "0": {
+      "samples": 25,
+      "average_utilization_percent": 90.88,
+      "max_utilization_percent": 99.0,
+      "memory_used_mib_range": [
+        9742.0,
+        9744.0
+      ],
+      "last_utilization_percent": 99.0
+    },
+    "1": {
+      "samples": 25,
+      "average_utilization_percent": 84.56,
+      "max_utilization_percent": 100.0,
+      "memory_used_mib_range": [
+        9700.0,
+        9702.0
+      ],
+      "last_utilization_percent": 90.0
+    }
+  },
+  "gpu_activity_sample_count": 25,
+  "run_identity_entries_verified": 19722,
+  "frozen_source_checkpoint_files_verified": 82,
+  "frozen_source_files_unchanged": 81,
+  "strict_trainer_resume_passed": true,
+  "complete_optimizer_ema_scheduler_and_rank_rng_restored": true,
+  "reference_before_after_equal": true,
+  "pause_and_cfm_checkpoints_unchanged": true,
+  "cfm_restarted": false,
+  "auto_restart": false,
+  "console_log": "/home/lthpc/wxh/Paper/outputs/reactflow_dit/seed_2026.resume_20261105T171843194848.log",
+  "training_log": "/home/lthpc/wxh/Paper/outputs/reactflow_dit/seed_2026/training.jsonl",
+  "source": "/home/lthpc/wxh/Paper/outputs/reactflow_dit/source_seed_2026",
+  "replaying_unpersisted_pause_interval": true,
+  "replay_loss_at_logged_step_matches_previous_run": true
+}

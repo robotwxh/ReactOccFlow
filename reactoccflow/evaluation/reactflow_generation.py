@@ -2,6 +2,8 @@
 
 Reuse of the copied OccFM count metric and IR-WM-derived SE(3)/voxel geometry
 is recorded in docs/provenance/reactflow_generation_sources_20261104.json.
+Checkpoint-bound dual-backbone construction is recorded in
+docs/provenance/standard_dit_generation_sources_20261107.json.
 The official reference repositories are never imported or executed.
 
 The predictor receives four observed grids/actor states and an explicitly
@@ -27,7 +29,7 @@ from reactoccflow.evaluation.occupancy import OccupancyAccumulator
 from reactoccflow.geometry import GridSpec, inverse_transform, warp_occupancy_nearest
 
 
-PROTOCOL_VERSION = 1
+PROTOCOL_VERSION = 2
 HORIZON_INDICES = (1, 3, 5)
 SCORE_NAMES = ('native_e0_known', 'paper_frame_full', 'paper_frame_covered')
 
@@ -49,6 +51,28 @@ def partition_indices(length, rank, world_size):
     if world_size < 1 or not 0 <= rank < world_size or length < 0:
         raise ValueError('Invalid evaluation partition')
     return list(range(rank, length, world_size))
+
+
+def checkpoint_model_options(checkpoint):
+    """Select the trained architecture; retain the original legacy U default."""
+    config = checkpoint['config']
+    if config.get('mode') != 'joint':
+        raise ValueError('This benchmark requires a joint occupancy-actor checkpoint')
+    backbone = config.get('backbone', 'occfm_unet')
+    if backbone == 'occfm_unet':
+        return {}
+    if backbone != 'dit':
+        raise ValueError(f'Unsupported checkpoint backbone: {backbone}')
+    options = dict(config['dit'])
+    for name, expected in {'in_channels': 16, 'input_size': 50, 'frames': 12,
+                           'trajectory_length': 6}.items():
+        if options.pop(name, None) != expected:
+            raise ValueError(f'Checkpoint DiT {name} differs from the benchmark grid/slots')
+    required = {'patch_size', 'hidden_size', 'depth', 'num_heads', 'mlp_ratio',
+                'activation_checkpointing'}
+    if set(options) != required:
+        raise ValueError('Incomplete or unsupported checkpoint DiT configuration')
+    return {'backbone': 'dit', 'dit_config': options}
 
 
 def paper_horizon_summary(accumulator):
@@ -254,7 +278,9 @@ def prepare_identity(args, resource, labels, windows):
               for x in [*w['history_metadata'], *w['future_metadata']]}
     paths += [args.occupancy_root / scene / token / 'labels.npz' for scene, token in sorted(frames)]
     hashes = {str(path.resolve()): payload_sha256(path) for path in paths}
+    checkpoint = torch.load(args.checkpoint, map_location='cpu', weights_only=True)
     identity = {'protocol_version': PROTOCOL_VERSION, 'input_sha256': hashes,
+                'model_options': checkpoint_model_options(checkpoint),
                 'nfe': args.nfe, 'seed': args.seed, 'precision': 'float32',
                 'encode_chunk': args.encode_chunk, 'decode_chunk': args.decode_chunk,
                 'batch_size': args.batch_size, 'world_size': args.world_size,
@@ -384,9 +410,12 @@ def main(argv=None):
         if normalization.get('fit_group') != 'train':
             raise ValueError('Normalization must be train-only')
         checkpoint = torch.load(args.checkpoint, map_location='cpu', weights_only=True)
-        flow = ReactFlow(normalization=normalization).to(device).eval().requires_grad_(False)
-        if type(flow.transition_model.trunk).__name__ != 'FLOW_MATCHING_DOWN_X4_DiT':
-            raise ValueError('This evaluation requires the original U-shaped DiT backbone')
+        model_options = checkpoint_model_options(checkpoint)
+        flow = ReactFlow(normalization=normalization, **model_options).to(device).eval().requires_grad_(False)
+        expected_trunk = ('StandardDiT' if model_options.get('backbone') == 'dit'
+                          else 'FLOW_MATCHING_DOWN_X4_DiT')
+        if type(flow.transition_model.trunk).__name__ != expected_trunk:
+            raise ValueError('The loaded model does not match the checkpoint backbone')
         for name in ('actor_mean', 'actor_std'):
             if not torch.equal(getattr(flow, name).detach().cpu(), checkpoint['ema_state_dict'][name]):
                 raise ValueError('Checkpoint normalization buffers differ from the supplied train statistics')

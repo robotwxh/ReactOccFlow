@@ -210,7 +210,7 @@ def _runtime_fingerprint(train_cache, tune_cache, codec_checkpoint):
     return fingerprint
 
 
-def _evaluate(objective, loader, device, generator):
+def _evaluate(objective, loader, device, generator, *, return_components=False):
     objective.eval()
     totals, names, weights = None, None, None
     samples = torch.zeros((), dtype=torch.float64, device=device)
@@ -242,6 +242,15 @@ def _evaluate(objective, loader, device, generator):
     loss = (weights * totals[:, 0] / totals[:, 1].clamp_min(1)).sum()
     if not torch.isfinite(loss):
         raise RuntimeError("Validation loss must be finite")
+    if return_components:
+        components = {
+            name: {'mean': float((totals[i, 0] / totals[i, 1].clamp_min(1)).item()),
+                   'weight': float(weights[i].item()),
+                   'weighted_mean': float((weights[i] * totals[i, 0] / totals[i, 1].clamp_min(1)).item()),
+                   'count': int(totals[i, 1].item())}
+            for i, name in enumerate(names)
+        }
+        return float(loss.item()), int(count), components
     return float(loss.item()), int(count)
 
 
@@ -367,6 +376,10 @@ def main(argv=None):
     parser.add_argument("--grad-accum", type=int, default=2)
     parser.add_argument("--workers", type=int, default=2)
     parser.add_argument("--decode-chunk", type=int, default=1)
+    parser.add_argument("--probe-tune-windows", type=int, default=8,
+                        help="Fixed engineering-tune generation probe; 0 explicitly disables it")
+    parser.add_argument("--probe-nfe", type=int, default=10)
+    parser.add_argument("--probe-seed", type=int, default=20261107)
     parser.add_argument("--diagnostic-train-windows", type=int, default=None,
                         help="Explicit engineering subset of a complete cache; both diagnostic counts are required")
     parser.add_argument("--diagnostic-tune-windows", type=int, default=None,
@@ -403,12 +416,17 @@ def main(argv=None):
         parser.error("warmup must be in [0, max_steps) and workers nonnegative")
     if args.stop_after_steps is not None and not 1 <= args.stop_after_steps <= args.max_steps:
         parser.error("stop-after-steps must be in [1, max-steps]")
+    if args.probe_tune_windows < 0 or args.probe_nfe < 1:
+        parser.error("probe window count must be nonnegative and probe NFE positive")
 
     train_cache, tune_cache = Path(args.train_cache).resolve(), Path(args.tune_cache).resolve()
     train_dataset, tune_dataset = validate_cache_pair(train_cache, tune_cache)
     normalization = train_dataset.normalization
     train_dataset, tune_dataset = _diagnostic_datasets(
         train_dataset, tune_dataset, args.diagnostic_train_windows, args.diagnostic_tune_windows)
+    from reactoccflow.training.generation_probe import select_probe_indices, evaluate_generation_probe
+    probe_indices = (select_probe_indices(tune_dataset, count=args.probe_tune_windows)
+                     if args.probe_tune_windows else [])
     output = Path(args.output).resolve()
     numerical_settings = _configure_determinism()
 
@@ -495,6 +513,10 @@ def main(argv=None):
                   "train_batches_per_rank": training_batch_count,
                   "dropped_tail_microbatches_per_rank": len(train_loader) - training_batch_count}
         config["numerical_settings"] = numerical_settings
+        config['tune_generation_probe'] = {
+            'indices': probe_indices, 'nfe': args.probe_nfe, 'seed': args.probe_seed,
+            'scope': 'fixed_engineering_tune_subset_native_E0_not_official_validation',
+        }
         config['backbone'] = args.backbone
         config['dit'] = ((getattr(getattr(flow.transition_model, 'trunk', None), 'config', None)
                          if hasattr(flow, 'transition_model') else dit_options)
@@ -533,10 +555,10 @@ def main(argv=None):
 
         def evaluate_and_checkpoint(next_epoch, next_batch, best, bad, evaluations):
             eval_generator = torch.Generator(device=device).manual_seed(args.seed + 9_000_001 + rank)
-            tune_loss, sample_count = _evaluate(
+            tune_loss, sample_count, components = _evaluate(
                 JointTrainingAdapter(ema.module, codec, decode_chunk=args.decode_chunk,
                                      require_frozen_trunk=False, record_components=False).to(device),
-                tune_loader, device, eval_generator)
+                tune_loader, device, eval_generator, return_components=True)
             evaluations += 1
             improved = tune_loss < best
             if improved:
@@ -553,8 +575,30 @@ def main(argv=None):
             save_latest(next_epoch, next_batch, best, bad, evaluations)
             log({"event": "validation", "global_step": progress["global_step"],
                  "tune_loss_logged_action_conditioned": tune_loss, "tune_sample_count": sample_count,
+                 "tune_components": components,
                  "improved": improved, "bad_evaluations": bad, "best_tune_loss": best})
+            log_generation_probe()
             return best, bad, evaluations
+
+        def log_generation_probe():
+            if not probe_indices:
+                return
+            # Match the existing rank-zero output/error broadcast pattern. No
+            # DDP forward occurs in the probe and all ranks continue together.
+            result = [None]
+            if rank == 0:
+                try:
+                    result[0] = {'ok': True, 'probe': evaluate_generation_probe(
+                        ema.module, codec, tune_dataset, probe_indices, device=device,
+                        nfe=args.probe_nfe, seed=args.probe_seed, decode_chunk=args.decode_chunk)}
+                except Exception as error:
+                    result[0] = {'ok': False, 'error': f'{type(error).__name__}: {error}'}
+            if world_size > 1:
+                dist.broadcast_object_list(result, src=0, device=device)
+            if not result[0]['ok']:
+                raise RuntimeError('Tune generation probe failed: ' + result[0]['error'])
+            log({'event': 'generation_probe', 'global_step': progress['global_step'],
+                 'probe': result[0]['probe']})
 
         log({"event": "started", "global_step": progress["global_step"], "config": config,
              "train_windows": len(train_dataset), "tune_windows": len(tune_dataset),
@@ -620,6 +664,7 @@ def main(argv=None):
         if paused and progress["global_step"] > initial_step and progress["global_step"] % args.eval_interval != 0:
             save_latest(progress["epoch"], progress["next_batch"], progress["best_tune_loss"],
                         progress["bad_evaluations"], progress["evaluations"])
+            log_generation_probe()
         elif not paused and progress["global_step"] > initial_step and progress["global_step"] % args.eval_interval != 0:
             next_epoch, next_batch = progress["epoch"], progress["next_batch"]
             if next_batch >= training_batch_count:

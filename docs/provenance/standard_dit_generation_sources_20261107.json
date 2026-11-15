@@ -1,0 +1,92 @@
+{
+  "date": "2026-11-07",
+  "task": "Evaluate completed standard DiT joint world model and compare against OccFM and prior actor+U-CFM",
+  "reference_search": {
+    "repositories": [
+      "OccFM",
+      "IR-WM"
+    ],
+    "commits": {
+      "OccFM": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "IR-WM": "94dbbf44d6c22e50db4080e986b3675eadbb4497"
+    },
+    "patterns": [
+      "def .*eval",
+      "def .*predict",
+      "multi_step_MeanIou",
+      "StandardDiT",
+      "Popen|timeout|poll|checkpoint.*config|config.*checkpoint"
+    ],
+    "record": "outputs/evaluation/2026-11-07-standard-dit-best100000/reference_search.txt",
+    "searched_source_sha256": {
+      "OccFM/forecast/utils/eval_utils.py": "11b60285639e569cb6555ba5ce63d999bdbbe19307c74f1c9afdbbf2518c3f68",
+      "OccFM/forecast/models/worldmodels/occfm.py": "32acddf3f166f341b5be69eb753fee3265e06974f1f2b6cbcbe7660e091ba301",
+      "OccFM/forecast/models/modules/transition_models/FlowMatchingV2.py": "89b73962947be5abcda56e13f2d305452bebfebf6ac0441d30ba21d2ad64dd1b",
+      "IR-WM/projects/mmdet3d_plugin/bevformer/detectors/drive_occworld.py": "8696e8a5be4b2d24d963ab5de7c034758aece715c48c3ada1817112787b5dc6b",
+      "IR-WM/projects/mmdet3d_plugin/datasets/nuscenes_world_dataset_template.py": "5e18951f2c3b4572bfe66cf0736a699a744521cbfcab7a77a7a1220c30434ce9"
+    },
+    "finding": "Both references supply their own model evaluation/counts but no joint ReactFlow dual-backbone checkpoint constructor or launcher. Reuse the independent generation evaluator and strict owned model constructors; do not copy or execute new reference dependencies."
+  },
+  "owned_reuse": {
+    "prior_generation_provenance": "docs/provenance/reactflow_generation_sources_20261104.json",
+    "original_evaluator": {
+      "path": "outputs/evaluation/2026-11-04-reactflow-best52000/evaluation_source/reactoccflow/evaluation/reactflow_generation.py",
+      "sha256": "37a31fa85e0f74fb4c56e3281fce15abe0d4759b9a28d72dd0610de8c3b7d63b"
+    },
+    "training_source_manifest": "outputs/reactflow_dit/source_seed_2026.manifest.json",
+    "training_source_sha256": "615ccc51adef993a58c8863c87716f62b20daa0726be380c46cb3d397ca3f871"
+  },
+  "adaptation": {
+    "path": "reactoccflow/evaluation/reactflow_generation.py",
+    "sha256": "12eb30ad57adb0d15eab3be28fc4be7a221c9e1a537aaf3c481bd9b9f1d87572",
+    "new_function": "checkpoint_model_options",
+    "changed_existing_functions": [
+      "prepare_identity",
+      "main"
+    ],
+    "core_predict_data_noise_and_score_functions_changed": false,
+    "protocol_version": 2,
+    "reason": "Bind architecture to checkpoint configuration, explicitly choose StandardDiT, reject unsupported shapes/modes, retain the legacy original U constructor."
+  },
+  "tests": {
+    "path": "tests/test_reactflow_generation.py",
+    "sha256": "b798f825ba484f41da7ae789900598889d0a6d6612b148625b4d4962faf28a2b",
+    "command": "/home/lthpc/wxh/envs/ReactOccFlow/bin/python -B -m pytest -q -p no:cacheprovider tests/test_reactflow_generation.py",
+    "result": "11 passed in1.58s"
+  },
+  "independent_export": {
+    "path": "outputs/evaluation/2026-11-07-standard-dit-best100000/evaluation_source",
+    "files": 82,
+    "original_training_files_unchanged": 81,
+    "strict_ema_load_passed": true,
+    "checkpoint_step": 100000,
+    "requires_grad_parameters": 0,
+    "reference_imports": false
+  },
+  "launcher": {
+    "path": "outputs/evaluation/2026-11-07-standard-dit-best100000/launch_evaluation.py",
+    "sha256": "4a512dd9ee0eed81830c5056bb9ea473196218884e93d637d6519e82cc08980c",
+    "reuse": "Recorded owned full4219 launch commands from2026-11-04; standard-library two-process exit and21600-second timeout monitor; no autoretry."
+  },
+  "runtime": "/home/lthpc/wxh/envs/ReactOccFlow",
+  "new_dependencies_installed": false,
+  "completed_evaluation": {
+    "windows": 4219,
+    "scenes": 150,
+    "miou_average_percent": 2.575450532251288,
+    "rank_exit_codes": [
+      0,
+      0
+    ],
+    "reference_directories_unchanged": true,
+    "source_manifests_unchanged": {
+      "outputs/reactflow_dit/source_seed_2026": 81,
+      "outputs/reactflow_joint/source_seed_2026": 114,
+      "outputs/evaluation/2026-11-04-reactflow-best52000/evaluation_source": 115,
+      "outputs/evaluation/2026-11-07-standard-dit-best100000/evaluation_source": 82
+    },
+    "engineering_tune_probe": "outputs/evaluation/2026-11-07-standard-dit-best100000/engineering_probe_comparison.json",
+    "independent_low_score_review": "outputs/evaluation/2026-11-07-standard-dit-best100000/independent_low_score_review.json",
+    "acceptance": "docs/implementation/standard_dit_miou_acceptance_20261107.json"
+  }
+}

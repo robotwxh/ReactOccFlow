@@ -1,7 +1,8 @@
 # Standard isotropic DiT; consumed by train_react_flow --dit-config.
 # 12 temporal slots * (50 / 5)^2 spatial patches = 1,200 global tokens.
+# Each patch contains 5*5*16=400 values; hidden512 avoids forced input/output rank loss.
 patch_size: 5
-hidden_size: 256
+hidden_size: 512
 depth: 8
 num_heads: 8
 mlp_ratio: 4.0

@@ -1,4 +1,8 @@
+> 2026-11-15：已按用户要求撤回原始 LiDAR 输入及其后续改造，恢复 **语义 occupancy → 冻结原 VAE → latent／actor 状态缓存 → U形 CFM 或标准 DiT512**。新增点云感知/actor 检测/从头分阶段训练路线已移出活动代码，历史产物保留。**全部训练继续暂停，不自动恢复。**详见 [回退记录](docs/implementation/2026-11-15-rollback-raw-input.md)。下文运行状态按日期保留为历史。
+
 # ReactOccFlow：面向闭环驾驶的反应式占据流世界模型
+
+> 2026-11-07 修复进展：标准DiT配置已改为patch5/hidden512，并在构造时拒绝低于400维的直接线性速度头；1,200个token、8层、actor交互与冻结VAE保持原设计。新增分项tune损失及固定tune场景自由生成监控。512维独立全量实验已完成50步保存并恢复双卡训练，最终mIoU待测；旧256维模型的2.5755%为历史结果。验收与实验状态见 [修复记录](docs/implementation/2026-11-07-dit-rank-repair.md)。
 
 > 2026-11-02 最新架构决定：恢复原 OccFM 式 U 形 DiT 为默认主干，同时保留 `backbone=dit` 的标准 DiT。两个分支均支持三种研究模式；原删除限制已被本次决定替代。训练继续暂停，既有 DiT 冻结源码和恢复入口保持不变。详见 [双架构恢复说明](docs/implementation/2026-11-02-restore-unet-and-keep-dit.md)。
 
@@ -87,10 +91,10 @@ $$
 
 occupancy 速度网络现支持两种主干：默认恢复原 U 形时空 DiT，在瓶颈后交换 actor；标准 DiT 分支保留如下设计：
 
-- 将 6 个历史槽与 6 个带噪未来槽组成的 latent 序列切成空间 patch；单帧 latent 为 `16×50×50`，patch 为 `5×5`，每块 `400→256` 线性投影，共得到 1,200 个 token。
-- 在固定 token 分辨率上堆叠 8 层、256 维、8 头的 DiT Block。occupancy token 之间做全局时空 self-attention；生成时间和候选轨迹通过条件编码调制 adaLN。
+- 将 6 个历史槽与 6 个带噪未来槽组成的 latent 序列切成空间 patch；单帧 latent 为 `16×50×50`，patch 为 `5×5`，每块 `400→512` 线性投影，共得到 1,200 个 token。
+- 在固定 token 分辨率上堆叠 8 层、512 维、8 头的 DiT Block。occupancy token 之间做全局时空 self-attention；生成时间和候选轨迹通过条件编码调制 adaLN。
 - 8 个当前观测选中 actor、6 个未来槽构成 48 个 128 维 token。第 4 个 DiT Block 后接两层、4 头交互模块，每层先做 masked actor self-attention，再同步计算两路 cross-attention，最后更新 actor FFN。
-- actor 更新使用 `Q=actor, K/V=occupancy`；occupancy 更新使用 `Q=occupancy, K/V=actor`。occupancy 在交互前投影为 128 维，交互增量回投到 256 维后进入后 4 层 DiT。
+- actor 更新使用 `Q=actor, K/V=occupancy`；occupancy 更新使用 `Q=occupancy, K/V=actor`。occupancy 在交互前投影为 128 维，交互增量回投到 512 维后进入后 4 层 DiT。
 - occupancy 和 actor 保持两条 token 序列；分别输出 occupancy/actor 的生成流速度，actor 存在性由独立 head 输出。occupancy 输出投影与 unpatchify 恢复 latent 张量形状，随后通过 FM 采样得到未来 latent，再交给原 VAE decoder。
 
 ```mermaid

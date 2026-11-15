@@ -1,0 +1,272 @@
+{
+  "task": "User-directed rollback to the pre-raw-LiDAR route",
+  "method": "Restore verified ordinary files from owned pre-request 2026-11-11 10:57 source snapshot; archive later source additions and metadata; no new model functions implemented or upstream scripts executed",
+  "before_archive": "outputs/rollback/2026-11-15-before-raw-input",
+  "changed_at": "2026-11-15T11:36:17.552494+08:00",
+  "baseline_snapshot": "outputs/evaluation/2026-11-11-dit512-best84000/evaluation_source",
+  "restored_exact_files": {
+    "THIRD_PARTY_NOTICES.md": "af8115d1771077c3fe5657a444e7fc62d5b3f0321fd6f6d64980f3ad5ae56f90",
+    "reactoccflow/models/README.md": "70804979ac0ead58cf5caf98600b7d3a6f75efb8493f9e91e8cb641c5dff72f2",
+    "reactoccflow/models/joint_transition.py": "d1390e518f773df4afbd624cf8f92a5a61631b3d096b21f96dafa7340ebc9555",
+    "reactoccflow/perception/__init__.py": "84e732015b698b83369213c5732169743d00e2ad464a86b56a366ce1cb11b461",
+    "scripts/build_e0_examples.py": "ad9e368bc35231ef7c09754b171679ef0b38a70089a9550e852a8762768a51e6",
+    "scripts/cache_research.py": "9193d841dfe695b8da002b002f7b7da21928d5308cc2dbc97e1f438ef1dfd845",
+    "scripts/check_consistency.py": "901c08f51639c8ae030382427c08d2b413e64ce0912fce582148115651ec1289",
+    "scripts/resume_cfm_training.py": "a971fd5017aa01e03a3b03aaa88e8ad9d276c827ba047f4c25e2be986e1f32e1",
+    "scripts/resume_dit_training.py": "cda716c0af4afdeb0330046250425ff78958b1bae334b6b5f1f7442a2deb529d",
+    "scripts/train_joint_smoke.py": "5a5df2e36cdd88cdd94fb39085bdbad2bd27c739fcb6c4489714ae264c32a7d8",
+    "scripts/train_react_flow.py": "f45ac196414328753e96ed2910b3c023f2457c4abb05071386ec66c2662948cb"
+  },
+  "archived_removed_paths": [
+    {
+      "original": "configs/lidar_perception.yaml",
+      "archived": "outputs/rollback/2026-11-15-before-raw-input/removed/configs/lidar_perception.yaml"
+    },
+    {
+      "original": "configs/raw_full_training.yaml",
+      "archived": "outputs/rollback/2026-11-15-before-raw-input/removed/configs/raw_full_training.yaml"
+    },
+    {
+      "original": "reactoccflow/models/lidar_vae.py",
+      "archived": "outputs/rollback/2026-11-15-before-raw-input/removed/reactoccflow/models/lidar_vae.py"
+    },
+    {
+      "original": "reactoccflow/models/native_attention.py",
+      "archived": "outputs/rollback/2026-11-15-before-raw-input/removed/reactoccflow/models/native_attention.py"
+    },
+    {
+      "original": "reactoccflow/perception/box_coding.py",
+      "archived": "outputs/rollback/2026-11-15-before-raw-input/removed/reactoccflow/perception/box_coding.py"
+    },
+    {
+      "original": "reactoccflow/perception/learned.py",
+      "archived": "outputs/rollback/2026-11-15-before-raw-input/removed/reactoccflow/perception/learned.py"
+    },
+    {
+      "original": "reactoccflow/perception/nuscenes.py",
+      "archived": "outputs/rollback/2026-11-15-before-raw-input/removed/reactoccflow/perception/nuscenes.py"
+    },
+    {
+      "original": "reactoccflow/perception/pipeline.py",
+      "archived": "outputs/rollback/2026-11-15-before-raw-input/removed/reactoccflow/perception/pipeline.py"
+    },
+    {
+      "original": "reactoccflow/perception/point_filter.py",
+      "archived": "outputs/rollback/2026-11-15-before-raw-input/removed/reactoccflow/perception/point_filter.py"
+    },
+    {
+      "original": "reactoccflow/perception/source_snapshots",
+      "archived": "outputs/rollback/2026-11-15-before-raw-input/removed/reactoccflow/perception/source_snapshots"
+    },
+    {
+      "original": "reactoccflow/training/data_policy.py",
+      "archived": "outputs/rollback/2026-11-15-before-raw-input/removed/reactoccflow/training/data_policy.py"
+    },
+    {
+      "original": "reactoccflow/training/perception.py",
+      "archived": "outputs/rollback/2026-11-15-before-raw-input/removed/reactoccflow/training/perception.py"
+    },
+    {
+      "original": "reactoccflow/training/raw_full_data.py",
+      "archived": "outputs/rollback/2026-11-15-before-raw-input/removed/reactoccflow/training/raw_full_data.py"
+    },
+    {
+      "original": "reactoccflow/training/raw_supervision.py",
+      "archived": "outputs/rollback/2026-11-15-before-raw-input/removed/reactoccflow/training/raw_supervision.py"
+    },
+    {
+      "original": "reactoccflow/training/raw_world.py",
+      "archived": "outputs/rollback/2026-11-15-before-raw-input/removed/reactoccflow/training/raw_world.py"
+    },
+    {
+      "original": "reactoccflow/training/raw_world_data.py",
+      "archived": "outputs/rollback/2026-11-15-before-raw-input/removed/reactoccflow/training/raw_world_data.py"
+    },
+    {
+      "original": "reactoccflow/training/scratch.py",
+      "archived": "outputs/rollback/2026-11-15-before-raw-input/removed/reactoccflow/training/scratch.py"
+    },
+    {
+      "original": "reactoccflow/training/source_snapshots/occfm_vae_quant_original.py.txt",
+      "archived": "outputs/rollback/2026-11-15-before-raw-input/removed/reactoccflow/training/source_snapshots/occfm_vae_quant_original.py.txt"
+    },
+    {
+      "original": "scripts/predict_from_lidar.py",
+      "archived": "outputs/rollback/2026-11-15-before-raw-input/removed/scripts/predict_from_lidar.py"
+    },
+    {
+      "original": "scripts/train_lidar_perception.py",
+      "archived": "outputs/rollback/2026-11-15-before-raw-input/removed/scripts/train_lidar_perception.py"
+    },
+    {
+      "original": "scripts/prepare_raw_full.py",
+      "archived": "outputs/rollback/2026-11-15-before-raw-input/removed/scripts/prepare_raw_full.py"
+    },
+    {
+      "original": "scripts/cache_raw_world.py",
+      "archived": "outputs/rollback/2026-11-15-before-raw-input/removed/scripts/cache_raw_world.py"
+    },
+    {
+      "original": "scripts/train_raw_stage.py",
+      "archived": "outputs/rollback/2026-11-15-before-raw-input/removed/scripts/train_raw_stage.py"
+    },
+    {
+      "original": "scripts/train_raw_world.py",
+      "archived": "outputs/rollback/2026-11-15-before-raw-input/removed/scripts/train_raw_world.py"
+    },
+    {
+      "original": "scripts/run_raw_pipeline.py",
+      "archived": "outputs/rollback/2026-11-15-before-raw-input/removed/scripts/run_raw_pipeline.py"
+    },
+    {
+      "original": "tests/test_lidar_pipeline.py",
+      "archived": "outputs/rollback/2026-11-15-before-raw-input/removed/tests/test_lidar_pipeline.py"
+    },
+    {
+      "original": "tests/test_raw_full_training.py",
+      "archived": "outputs/rollback/2026-11-15-before-raw-input/removed/tests/test_raw_full_training.py"
+    },
+    {
+      "original": "tests/test_scratch_training.py",
+      "archived": "outputs/rollback/2026-11-15-before-raw-input/removed/tests/test_scratch_training.py"
+    },
+    {
+      "original": "docs/implementation/2026-11-11-raw-lidar-perception.md",
+      "archived": "outputs/rollback/2026-11-15-before-raw-input/removed/docs/implementation/2026-11-11-raw-lidar-perception.md"
+    },
+    {
+      "original": "docs/implementation/2026-11-11-raw-full-training-paused.md",
+      "archived": "outputs/rollback/2026-11-15-before-raw-input/removed/docs/implementation/2026-11-11-raw-full-training-paused.md"
+    },
+    {
+      "original": "docs/implementation/2026-11-14-raw-scratch-training.md",
+      "archived": "outputs/rollback/2026-11-15-before-raw-input/removed/docs/implementation/2026-11-14-raw-scratch-training.md"
+    },
+    {
+      "original": "docs/provenance/lidar_synchronized_perception_20261111.json",
+      "archived": "outputs/rollback/2026-11-15-before-raw-input/removed/docs/provenance/lidar_synchronized_perception_20261111.json"
+    },
+    {
+      "original": "docs/provenance/raw_full_training_20261111.json",
+      "archived": "outputs/rollback/2026-11-15-before-raw-input/removed/docs/provenance/raw_full_training_20261111.json"
+    },
+    {
+      "original": "docs/provenance/raw_scratch_training_20261114.json",
+      "archived": "outputs/rollback/2026-11-15-before-raw-input/removed/docs/provenance/raw_scratch_training_20261114.json"
+    },
+    {
+      "original": "docs/provenance/raw_vae_results_inspection_20261115.json",
+      "archived": "outputs/rollback/2026-11-15-before-raw-input/removed/docs/provenance/raw_vae_results_inspection_20261115.json"
+    },
+    {
+      "original": "data/sensor_perception",
+      "archived": "outputs/rollback/2026-11-15-before-raw-input/removed/data/sensor_perception"
+    },
+    {
+      "original": "data/raw_full_training",
+      "archived": "outputs/rollback/2026-11-15-before-raw-input/removed/data/raw_full_training"
+    },
+    {
+      "original": "build",
+      "archived": "outputs/rollback/2026-11-15-before-raw-input/generated_before/build",
+      "generated_artifact": true
+    },
+    {
+      "original": "reactoccflow.egg-info",
+      "archived": "outputs/rollback/2026-11-15-before-raw-input/generated_before/reactoccflow.egg-info",
+      "generated_artifact": true
+    }
+  ],
+  "already_absent_raw_paths": [
+    "docs/implementation/2026-11-15-raw-scratch-training-paused.md"
+  ],
+  "removed_dataset_link": "data/nuscenes",
+  "dataset_target_preserved": true,
+  "gitignore_restored_from": "86d6ef1",
+  "tests_updated_to_original_public_main": 4,
+  "training_started": false,
+  "rollback_in_progress": false,
+  "status": "complete",
+  "acceptance": "outputs/rollback/2026-11-15-before-raw-input/acceptance.json",
+  "read_only_reference_guard_search": {
+    "repositories": [
+      "OccFM",
+      "IR-WM"
+    ],
+    "pattern": "def .*source|addaudithook|audit.*hook",
+    "matches": 0,
+    "decision": "Verification-only standard-library read audit, no runtime feature added or reference scripts executed"
+  },
+  "verification": {
+    "status": "rollback_complete",
+    "verified_at": "2026-11-15T11:42:08.581787+08:00",
+    "scope": "pre-raw-LiDAR-request occupancy/latent + actor-state route",
+    "restored_snapshot_files": {
+      "THIRD_PARTY_NOTICES.md": {
+        "sha256": "af8115d1771077c3fe5657a444e7fc62d5b3f0321fd6f6d64980f3ad5ae56f90",
+        "exact_match": true
+      },
+      "reactoccflow/models/README.md": {
+        "baseline_sha256": "70804979ac0ead58cf5caf98600b7d3a6f75efb8493f9e91e8cb641c5dff72f2",
+        "only_added_current_rollback_notice": true
+      },
+      "reactoccflow/models/joint_transition.py": {
+        "sha256": "d1390e518f773df4afbd624cf8f92a5a61631b3d096b21f96dafa7340ebc9555",
+        "exact_match": true
+      },
+      "reactoccflow/perception/__init__.py": {
+        "sha256": "84e732015b698b83369213c5732169743d00e2ad464a86b56a366ce1cb11b461",
+        "exact_match": true
+      },
+      "scripts/build_e0_examples.py": {
+        "sha256": "ad9e368bc35231ef7c09754b171679ef0b38a70089a9550e852a8762768a51e6",
+        "exact_match": true
+      },
+      "scripts/cache_research.py": {
+        "sha256": "9193d841dfe695b8da002b002f7b7da21928d5308cc2dbc97e1f438ef1dfd845",
+        "exact_match": true
+      },
+      "scripts/check_consistency.py": {
+        "sha256": "901c08f51639c8ae030382427c08d2b413e64ce0912fce582148115651ec1289",
+        "exact_match": true
+      },
+      "scripts/resume_cfm_training.py": {
+        "sha256": "a971fd5017aa01e03a3b03aaa88e8ad9d276c827ba047f4c25e2be986e1f32e1",
+        "exact_match": true
+      },
+      "scripts/resume_dit_training.py": {
+        "sha256": "cda716c0af4afdeb0330046250425ff78958b1bae334b6b5f1f7442a2deb529d",
+        "exact_match": true
+      },
+      "scripts/train_joint_smoke.py": {
+        "sha256": "5a5df2e36cdd88cdd94fb39085bdbad2bd27c739fcb6c4489714ae264c32a7d8",
+        "exact_match": true
+      },
+      "scripts/train_react_flow.py": {
+        "sha256": "f45ac196414328753e96ed2910b3c023f2457c4abb05071386ec66c2662948cb",
+        "exact_match": true
+      }
+    },
+    "archived_paths": 39,
+    "removed_dataset_symlink": true,
+    "external_dataset_preserved": true,
+    "historical_artifacts_sha256_verified": 19,
+    "historical_source_export_files_sha256_verified": 698,
+    "archived_raw_source_files_sha256_verified": 149,
+    "reference_differences": {
+      "OccFM": [],
+      "IR-WM": []
+    },
+    "cpu_tests_passed": 387,
+    "isolated_installed_cache_route_passed": true,
+    "raw_dataset_reads_during_isolated_verification": 0,
+    "reference_reads_during_isolated_verification": 0,
+    "both_historical_backbone_ema_load_and_inference_passed": true,
+    "training_started": false,
+    "active_training_processes": [],
+    "all_training_paused": true,
+    "raw_scratch_checkpoint_preserved_step": 9422,
+    "backup": "/home/lthpc/wxh/Paper/outputs/rollback/2026-11-15-before-raw-input",
+    "trained_weights_or_results_deleted": false
+  }
+}

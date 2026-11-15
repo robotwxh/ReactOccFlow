@@ -1,0 +1,64 @@
+{
+  "created_at": "2026-11-07T12:58:58.799303+08:00",
+  "request": "Detailed explanation of U-CFM+actor versus standardDiT+actor performance gap",
+  "skill": "academic-research-suite/experiment-agent validate with bounded frozen-model diagnostics",
+  "reference_search": {
+    "repositories": [
+      "OccFM",
+      "IR-WM"
+    ],
+    "heads": {
+      "OccFM": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "IR-WM": "94dbbf44d6c22e50db4080e986b3675eadbb4497"
+    },
+    "patterns": [
+      "patch_size",
+      "FinalLayer",
+      "unpatchify",
+      "svd"
+    ],
+    "log": "outputs/diagnostics/2026-11-07-dit-cfm-gap/reference_search.txt",
+    "source_sha256": {
+      "OccFM/forecast/models/modules/transition_models/FlowMatchingV2.py": "89b73962947be5abcda56e13f2d305452bebfebf6ac0441d30ba21d2ad64dd1b",
+      "OccFM/forecast/models/modules/base/swin_transformerbase.py": "0f1a099bbe2569060fd234ab4b4b382663568a406f1b3a5457211d5c2aaa8a9c",
+      "IR-WM/projects/mmdet3d_plugin/bevformer/detectors/drive_occworld.py": "8696e8a5be4b2d24d963ab5de7c034758aece715c48c3ada1817112787b5dc6b"
+    },
+    "finding": "References contain their own architecture/patch embedding but no checkpoint-specific output-subspace diagnostic. Reuse owned codec, flow, loss/statistics/noise/metric helpers; use standard torch linear algebra and matplotlib, without new reference imports or copies."
+  },
+  "owned_reuse": {
+    "reactoccflow/models/standard_dit.py": "bfd7c74b4e1c7b8d6ba0f51bdc85e78f0e78717089a5eb37a478c87246ef02b7",
+    "reactoccflow/models/react_flow.py": "78f5866e95363c6388f86cec24cab5a790e246d3d2106bf38fd4797c4d9d34c1",
+    "reactoccflow/training/joint.py": "aba45fe3f3e426464e58e30d2603dc887c6a5a4250a04b7f5959b3022facdcba",
+    "reactoccflow/evaluation/reactflow_generation.py": "12eb30ad57adb0d15eab3be28fc4be7a221c9e1a537aaf3c481bd9b9f1d87572",
+    "reactoccflow/evaluation/occupancy.py": "7a4af0d8b5443bcaef8d8c755eb2fe4bf8a3328204894422205927a530a608c5"
+  },
+  "diagnostic_script": {
+    "path": "outputs/diagnostics/2026-11-07-dit-cfm-gap/diagnose_model.py",
+    "sha256": "29ecb887fa3973783cf486dc1f71c737ae92ab1d22d9ea12a74dbe3c561c32a3",
+    "imports": "Each exact frozen source via ordinary working directory; no sys.path/PYTHONPATH injection"
+  },
+  "diagnostic_plan": "outputs/diagnostics/2026-11-07-dit-cfm-gap/diagnostic_plan.json",
+  "oracle_control_first_attempt": "outputs/diagnostics/2026-11-07-dit-cfm-gap/oracle_control_first_attempt_error.json",
+  "results": "outputs/diagnostics/2026-11-07-dit-cfm-gap/causal_evidence_summary.json",
+  "independent_review": "outputs/diagnostics/2026-11-07-dit-cfm-gap/independent_review.json",
+  "acceptance": "outputs/diagnostics/2026-11-07-dit-cfm-gap/acceptance.json",
+  "public_primary_sources": [
+    {
+      "url": "https://github.com/facebookresearch/DiT/blob/main/models.py",
+      "verified_on": "2026-11-07",
+      "scope": "Original default latent channels, patch size, hidden width and linear final layer; no runtime code copied"
+    },
+    {
+      "url": "https://arxiv.org/abs/2212.09748",
+      "scope": "Original DiT replaces U-Net and studies depth/width/token scaling; not a guarantee for this occupancy task"
+    }
+  ],
+  "interpretation_limits": [
+    "Exact causal fraction of the full4219 official-validation mIoU drop.",
+    "That posthoc noise removal repairs this trained model; its observed improvement is small.",
+    "That input/output dimension repair alone will recover the prior U-CFM mIoU without retraining.",
+    "General superiority of U architectures over properly configured standard DiT."
+  ],
+  "training_started": false,
+  "all_official_metrics_and_weights_unchanged": true
+}

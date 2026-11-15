@@ -1,0 +1,57 @@
+{
+  "created_at": "2026-11-11T10:57:19.338835+08:00",
+  "task": "Evaluate hidden512 best84000 against OccFM paper/reproduction, actor U-CFM and previous hidden256 DiT",
+  "reference_search": {
+    "patterns": [
+      "aggregate.only",
+      "class_confusion_counts",
+      "paper_horizon_summary",
+      "validate_completed",
+      "launch_evaluation"
+    ],
+    "matches": {
+      "OccFM": [],
+      "IR-WM": []
+    },
+    "commits": {
+      "OccFM": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "IR-WM": "94dbbf44d6c22e50db4080e986b3675eadbb4497"
+    },
+    "finding": "No project-specific complete comparison or launcher in references. Reuse owned scoring, audit and launcher; no reference execution or new reference imports."
+  },
+  "owned_reuse_sha256": {
+    "outputs/evaluation/2026-11-07-standard-dit-best100000/launch_evaluation.py": "4a512dd9ee0eed81830c5056bb9ea473196218884e93d637d6519e82cc08980c",
+    "reactoccflow/evaluation/architecture_report.py": "b31b02382ac34df5d463ba058e72b90720d6ebbe9e7c15ecc35e0becb47f0bda",
+    "reactoccflow/evaluation/reactflow_generation.py": "12eb30ad57adb0d15eab3be28fc4be7a221c9e1a537aaf3c481bd9b9f1d87572"
+  },
+  "reference_source_sha256": {
+    "OccFM/tools/test.py": "fd5ad8a3e9564cb661f143470f82b6cd8afbdf339f2e53618358634da764f880",
+    "OccFM/forecast/utils/eval_utils.py": "11b60285639e569cb6555ba5ce63d999bdbbe19307c74f1c9afdbbf2518c3f68",
+    "IR-WM/projects/mmdet3d_plugin/datasets/pipelines/loading_occupancy.py": "de2bad112c0c93f9409a7c7bf1632601d03c2650d0e73cef3fa2c8d7cff9ec37",
+    "IR-WM/projects/mmdet3d_plugin/bevformer/utils/metric_stp3.py": "a4095e4fca0bedd6800cdb974a5e06d0cedfd289e3c8d4acafb8972b213aa82e"
+  },
+  "export_manifest": "outputs/evaluation/2026-11-11-dit512-best84000/evaluation_source.manifest.json",
+  "scope": "New ordinary-file evaluation export, owned launch orchestration and comparison only; model/scoring/reference bytes unchanged.",
+  "report_implementation": {
+    "path": "scripts/compare_dit512_evaluation.py",
+    "role": "Five-row count-validated comparison; reuse existing auditor tests17passed0.32s; complete evaluation is final integration validation",
+    "no_training_or_scoring_changes": true,
+    "sha256": "cc7c86c1aa7d87d2cd31183dd5c12b4cf85933155494130dd08a4db5ad7b327b"
+  },
+  "outcome": {
+    "acceptance": "outputs/evaluation/2026-11-11-dit512-best84000/acceptance.json",
+    "primary_avg_miou_percent": 18.20740875409678,
+    "reference_protection": "passed",
+    "source_exports_verified": 698,
+    "protected_artifacts": 9,
+    "monitor_interruption_and_recovery": "Original rank exit codes unavailable; both complete identity-bound rank states aggregated without regeneration, aggregation exit0.",
+    "comparison_result_sha256": "df78a2606af69643369f0d87ede5e34a03a8afa1c6bc850dc1367100c50aab70",
+    "final_report_sha256": "638f303cd32dd8499bf0273c97e713f55e76f583de3d853bcc298ebc8262a202",
+    "csv_rows": {
+      "overall": 5,
+      "per_class_horizon": 51
+    },
+    "statistical_fallacy_checks": 11,
+    "independent_full_generation_reproduction": "not_performed"
+  }
+}

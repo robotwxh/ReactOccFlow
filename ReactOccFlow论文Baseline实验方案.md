@@ -1,4 +1,8 @@
+> 2026-11-15：已按用户要求撤回原始 LiDAR 输入及其后续改造，恢复 **语义 occupancy → 冻结原 VAE → latent／actor 状态缓存 → U形 CFM 或标准 DiT512**。新增点云感知/actor 检测/从头分阶段训练路线已移出活动代码，历史产物保留。**全部训练继续暂停，不自动恢复。**详见 [回退记录](docs/implementation/2026-11-15-rollback-raw-input.md)。下文运行状态按日期保留为历史。
+
 # ReactOccFlow 论文 Baseline 与实验对照方案
+
+> 2026-11-11 已完成的occupancy实测：官方150场景/4,219窗口，OccFM论文未来轨迹条件Avg mIoU=28.49%，其本机复现28.2669%，U形CFM＋actor 28.6739%，旧hidden256＋actor 2.5755%，修复后hidden512＋actor（best84,000 EMA）18.2074%。详见 [五组完整对照与协议限制](docs/implementation/2026-11-11-dit512-miou-evaluation.md)。这组结果不替代下文待执行的actor、反事实、风险或闭环实验，也不能单独量化actor收益或主干因果差异；下方“暂停/仅创建”按原始文档日期保留。
 
 > 2026-11-02 最新架构决定：恢复原 OccFM 式 U 形 DiT 为默认主干，同时保留 `backbone=dit` 的标准 DiT。两个分支均支持三种研究模式；原删除限制已被本次决定替代。训练继续暂停，既有 DiT 冻结源码和恢复入口保持不变。详见 [双架构恢复说明](docs/implementation/2026-11-02-restore-unet-and-keep-dit.md)。
 

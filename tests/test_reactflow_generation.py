@@ -7,11 +7,43 @@ import torch
 
 from reactoccflow.evaluation.occupancy import OccupancyAccumulator
 from reactoccflow.evaluation.reactflow_generation import (
-    SCORE_NAMES, aggregate, atomic_json, make_initial_noise, make_windows,
+    SCORE_NAMES, aggregate, atomic_json, checkpoint_model_options, make_initial_noise, make_windows,
     paper_horizon_summary, partition_indices, project_prediction_to_future,
     window_seed,
 )
 from reactoccflow.geometry import GridSpec, transform_matrix
+
+
+def test_checkpoint_architecture_overrides_default_and_loads_trained_weights():
+    from reactoccflow.models.react_flow import ReactFlow
+    from reactoccflow.models.standard_dit import StandardDiT
+    config = {'mode': 'joint', 'backbone': 'dit', 'dit': {
+        'in_channels': 16, 'input_size': 50, 'frames': 12, 'trajectory_length': 6,
+        'patch_size': 1, 'hidden_size': 32, 'depth': 2, 'num_heads': 4,
+        'mlp_ratio': 2., 'activation_checkpointing': False}}
+    options = checkpoint_model_options({'config': config})
+    source = ReactFlow(backbone='dit', dit_config=options['dit_config'])
+    restored = ReactFlow(**options)
+    restored.load_state_dict(source.state_dict(), strict=True)
+    assert isinstance(restored.transition_model.trunk, StandardDiT)
+    assert restored.transition_model.trunk.depth == 2
+    assert restored.transition_model.trunk.hidden_size == 32
+    assert config['dit']['frames'] == 12  # Saved metadata is not mutated.
+
+
+def test_checkpoint_selection_retains_legacy_u_shape_and_rejects_other_modes():
+    assert checkpoint_model_options({'config': {'mode': 'joint'}}) == {}
+    assert checkpoint_model_options({'config': {'mode': 'joint', 'backbone': 'occfm_unet'}}) == {}
+    with pytest.raises(ValueError, match='Unsupported checkpoint backbone'):
+        checkpoint_model_options({'config': {'mode': 'joint', 'backbone': 'unknown'}})
+    with pytest.raises(ValueError, match='joint'):
+        checkpoint_model_options({'config': {'mode': 'occupancy_only', 'backbone': 'dit'}})
+
+
+def test_checkpoint_with_different_grid_is_rejected_before_weight_loading():
+    with pytest.raises(ValueError, match='input_size'):
+        checkpoint_model_options({'config': {'mode': 'joint', 'backbone': 'dit',
+                                            'dit': {'in_channels': 16, 'input_size': 40}}})
 
 
 def test_paper_average_uses_one_two_three_seconds_and_not_six_frame_average():

@@ -1,0 +1,39 @@
+{
+  "status": "finished_max_steps",
+  "checked_at": "2026-11-07T11:54:23.598898+08:00",
+  "backbone": "dit",
+  "seed": 2026,
+  "final_step": 100000,
+  "best_step": 100000,
+  "best_tune_loss": 0.5522293311513242,
+  "bad_evaluations": 0,
+  "finished_event": {
+    "event": "finished",
+    "global_step": 100000,
+    "best_tune_loss_logged_action_conditioned": 0.5522293311513242,
+    "training_seconds": 124498.164328278,
+    "formal_planning_evaluation": false,
+    "utc": "2026-11-06T19:55:01.053901+00:00",
+    "elapsed_seconds": 124498.164334958
+  },
+  "validation_event": {
+    "event": "validation",
+    "global_step": 100000,
+    "tune_loss_logged_action_conditioned": 0.5522293311513242,
+    "tune_sample_count": 2176,
+    "improved": true,
+    "bad_evaluations": 0,
+    "best_tune_loss": 0.5522293311513242,
+    "utc": "2026-11-06T19:55:01.053682+00:00",
+    "elapsed_seconds": 124498.16412945799
+  },
+  "latest_full_checkpoint": "outputs/reactflow_dit/seed_2026/latest.pt",
+  "latest_sha256": "688c6ec59b068b1e2344d276b7fde2ba19f2cbfc68122a6236ed66022a9de4f5",
+  "best_ema_checkpoint": "outputs/reactflow_dit/seed_2026/best.pt",
+  "best_sha256": "b2edceb33bab6989d9a761e3fb5ad4619c98e280dd6813bcec242b2c58296af9",
+  "training_restarted": false,
+  "evaluation_root": "outputs/evaluation/2026-11-07-standard-dit-best100000",
+  "evaluation_status": "completed",
+  "evaluation_miou_average_percent": 2.575450532251288,
+  "evaluation_report": "outputs/evaluation/2026-11-07-standard-dit-best100000/\u6807\u51c6DiT\u4e0eCFM\u53caOccFM_mIoU\u5bf9\u7167.md"
+}

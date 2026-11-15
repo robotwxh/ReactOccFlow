@@ -1,3 +1,5 @@
+> 2026-11-15：已按用户要求撤回原始 LiDAR 输入及其后续改造，恢复 **语义 occupancy → 冻结原 VAE → latent／actor 状态缓存 → U形 CFM 或标准 DiT512**。新增点云感知/actor 检测/从头分阶段训练路线已移出活动代码，历史产物保留。**全部训练继续暂停，不自动恢复。**详见 [回退记录](../../docs/implementation/2026-11-15-rollback-raw-input.md)。下文运行状态按日期保留为历史。
+
 # U-shaped / standard DiT and the occupancy VAE
 
 `ReactFlow` supports `backbone='occfm_unet'` (restored default) and `backbone='dit'` (isotropic). The restored trunk is the independently migrated `FLOW_MATCHING_DOWN_X4_DiT`: convolutional residual blocks, spatial/temporal attention, down/up stages and skip connections, with actor exchange immediately after `mid_block2`. Both architectures retain the same observation/target boundary and three model modes. One frozen `OccupancyCodec` is shared. See [restoration](../../docs/implementation/2026-11-02-restore-unet-and-keep-dit.md) for configuration, legacy weights and numerical compatibility.
@@ -7,9 +9,21 @@
 `ReactFlow(backbone="dit")` constructs a standard isotropic DiT: patch projection → eight
 fixed-width DiT blocks → conditioned output projection → unpatchify. Default
 inputs are 12 temporal slots of 16×50×50 latents. Spatial patch size 5 gives
-1,200 tokens, width 256, eight heads and MLP ratio 4. All occupancy tokens
+1,200 tokens, width 512, eight heads and MLP ratio 4. All occupancy tokens
 participate in global space-time self-attention. There are no down/up stages
 or encoder-to-decoder skips in the world model.
+
+The direct linear patch-velocity head requires `hidden_size >= 16*patch_size**2`.
+The constructor rejects narrower tokens: for patch5 the patch dimension is400,
+so historical width256 permanently trapped144 independent Gaussian directions.
+Width512 removes that forced rank bound; it does not guarantee semantic quality.
+Standard adaLN/output zero initialization is retained. Initial rank0 is expected
+and differs from the dimension bound of a trained output head.
+
+The trainer logs globally reduced per-component tune losses and a fixed,
+identity-seeded eight-scene tune generation probe (native E0 mIoU at1/2/3s,
+latent moments and learned output rank). This diagnostic is not the official
+held-out benchmark and preserves training RNG, module modes and gradient flags.
 
 Actor history/state/condition embeddings form 48 tokens (8 actors×6 future
 slots), width 128. Two `TokenInteraction` modules follow DiT block 4:
@@ -23,7 +37,7 @@ slots), width 128. Two `TokenInteraction` modules follow DiT block 4:
 
 Each interaction runs actor self-attention, simultaneous bidirectional
 cross-attention with gated residuals, and an actor FFN. Occupancy is projected
-256→128; only the exchanged delta is projected 128→256 into the original DiT
+512→128; only the exchanged delta is projected 128→512 into the original DiT
 sequence, followed by blocks 5–8. Modalities are separate token sequences.
 `joint` enables exchange, `parallel` disables exchange, and `occupancy_only`
 skips actors. Valid actor keys come from current observations, never future
@@ -34,8 +48,7 @@ DiT uses the copied block's correctly merged math attention path. Its adaLN
 and output layers are zero-initialized, so initial occupancy velocity is zero.
 Use `dit_config` or the training CLI's `--dit-config configs/dit.yaml` to set
 architecture options. `freeze_backbone=False` is the default; the optional
-`freeze_trunk()` method supports explicit inference/ablation setups. The removed
-pretrained world-backbone loader is not part of the API.
+`freeze_trunk()` method supports explicit inference/ablation setups. Only the restored U-shaped branch supports explicit pretrained trunk loading.
 
 ## One independent occupancy VAE
 
@@ -52,7 +65,7 @@ these shared codec components are not the removed world-model U-Net.
 
 Offline caching encodes history observations and future training labels using
 the same VAE. Training reads cached latents and decodes predicted endpoints
-for consistency losses. Patch projection maps 400 latent values to a 256-dim
+for consistency losses. Patch projection maps 400 latent values to a 512-dim
 token; unpatchify restores latent shape. Neither operation is a second VAE.
 Actor tokens use state MLPs. The frozen VAE decoder still permits gradients
 to its input latent; its parameters are not optimized.
@@ -68,8 +81,9 @@ sampling interface; predicted future existence comes from its own head.
 
 The formal trainer saves complete DiT/actor model, EMA, optimizer, scheduler,
 RNG and identity metadata. Resume requires identical configuration, data and
-source identity. Removed U-Net weights cannot be loaded by this package.
-Historical source archives retain the old code solely for provenance.
+source identity. U-shaped weights require the matching U-shaped branch. Historical 256-wide DiT
+checkpoints must be replayed with their original frozen source, while the
+512-wide branch starts a separate experiment and cannot resume those weights.
 
 See [removal and validation](../../docs/implementation/2026-10-31-remove-unet.md),
 [standard DiT architecture](../../docs/implementation/2026-10-31-standard-dit.md),

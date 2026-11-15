@@ -48,7 +48,7 @@ class StandardDiT(nn.Module):
     architecture = 'standard_dit'
 
     def __init__(self, *, in_channels=16, input_size=50, frames=12,
-                 trajectory_length=6, patch_size=5, hidden_size=256, depth=8,
+                 trajectory_length=6, patch_size=5, hidden_size=512, depth=8,
                  num_heads=8, mlp_ratio=4., activation_checkpointing=True):
         super().__init__()
         integer_options = {'in_channels': in_channels, 'input_size': input_size,
@@ -59,6 +59,15 @@ class StandardDiT(nn.Module):
             raise ValueError('DiT dimensions, depth and heads must be positive integers')
         if input_size % patch_size or hidden_size % 4 or hidden_size % num_heads:
             raise ValueError('DiT requires divisible image/patch size and hidden size divisible by 4 and heads')
+        patch_values = patch_size ** 2 * in_channels
+        if hidden_size < patch_values:
+            raise ValueError(
+                f'DiT hidden_size={hidden_size} must be at least patch_size**2 * '
+                f'in_channels={patch_values}. With linear patch input/output and '
+                'a direct velocity field, a narrower token forces independent '
+                'Gaussian noise directions to remain uncontrollable. Increase '
+                'hidden_size or use a smaller divisible patch_size. Historical '
+                'checkpoints must be replayed with their original frozen source.')
         if not math.isfinite(mlp_ratio) or mlp_ratio <= 0 or int(hidden_size * mlp_ratio) < 1:
             raise ValueError('DiT mlp_ratio must be finite and positive')
         if not isinstance(activation_checkpointing, bool):
@@ -70,7 +79,6 @@ class StandardDiT(nn.Module):
         self.activation_checkpointing = activation_checkpointing
         self.config = {**integer_options, 'mlp_ratio': float(mlp_ratio),
                        'activation_checkpointing': activation_checkpointing}
-        patch_values = patch_size ** 2 * in_channels
         self.patch_embed = nn.Linear(patch_values, hidden_size)
         self.t_embedder = nn.Sequential(nn.Linear(hidden_size, hidden_size), nn.SiLU(),
                                        nn.Linear(hidden_size, hidden_size))

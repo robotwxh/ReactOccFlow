@@ -1,0 +1,52 @@
+{
+  "date": "2026-11-05",
+  "request": "Continue training after the user-requested pause.",
+  "status": "running_verified",
+  "existing_implementation_reused": {
+    "launcher": "scripts/resume_dit_training.py",
+    "launcher_sha256": "cda716c0af4afdeb0330046250425ff78958b1bae334b6b5f1f7442a2deb529d",
+    "original_provenance": "docs/provenance/dit_training_pause_20261101.json",
+    "new_training_function_implemented": false,
+    "frozen_source_manifest": "outputs/reactflow_dit/source_seed_2026.manifest.json",
+    "source_manifest_sha256": "615ccc51adef993a58c8863c87716f62b20daa0726be380c46cb3d397ca3f871"
+  },
+  "resume_checkpoint": {
+    "path": "outputs/reactflow_dit/seed_2026/paused_step_054000_20261105.pt",
+    "sha256": "ce5f6b30882336007ff9b8e0191da30b757b181e78c11514f284807ff72df880",
+    "global_step": 54000,
+    "epoch": 24,
+    "next_batch": 3216
+  },
+  "verification": {
+    "source_checkpoint_files": 82,
+    "runtime_identities": 19722,
+    "trainer_strict_resume_passed": true,
+    "first_verified_step": 54050,
+    "finite_loss": 0.5349867269396782,
+    "source_files_unchanged": 81,
+    "cfm_and_pause_checkpoints_unchanged": true,
+    "replay_loss_matches_previous_logged_step": true
+  },
+  "reference_protection": {
+    "heads": {
+      "OccFM": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+      "IR-WM": "94dbbf44d6c22e50db4080e986b3675eadbb4497"
+    },
+    "before": "outputs/reactflow_dit/resume_20261105/reference_before.json",
+    "after": "outputs/reactflow_dit/resume_20261105/reference_after.json",
+    "unchanged": true
+  },
+  "actual_run": {
+    "torchrun_pid": 25182,
+    "rank_pids": [
+      25202,
+      25203
+    ],
+    "started_event_utc": "2026-11-05T09:20:02.890335+00:00",
+    "health_record": "docs/implementation/standard_dit_resume_20261105_health.json",
+    "console": "/home/lthpc/wxh/Paper/outputs/reactflow_dit/seed_2026.resume_20261105T171843194848.log",
+    "auto_restart": false,
+    "cfm_restarted": false
+  },
+  "scope": "Resume only the original standard DiT joint seed-2026 experiment using full saved state and unchanged schedule; keep all benchmark artifacts."
+}
