@@ -1,0 +1,26 @@
+{
+  "date": "2026-11-16",
+  "source_commits": {
+    "OccFM": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+    "IR-WM": "94dbbf44d6c22e50db4080e986b3675eadbb4497"
+  },
+  "inspected_sources": {
+    "OccFM/tools/train.py": "b74cfb6113d2f8fee5e1383f8959e3e51cdb07a0f2a0e60b3c825bdc9be1d5c2",
+    "OccFM/tools/train_utils/train_utils.py": "16e7ea88467b3db368a8836a9fad9f910d2e164ca620bec7b9e53f2c1766c7ee",
+    "IR-WM/tools/train.py": "3d3bf5e8cbf9c4c7b2f23c37144f35e58fff08f60c0dbc288cc8ada32603041f"
+  },
+  "searches": [
+    "argparse learning-rate options",
+    "checkpoint save and resume",
+    "signal SIGTERM STOP and process supervision"
+  ],
+  "decisions": [
+    "Reuse owned optimizer and checkpoint implementation copied earlier; expose trunk_lr without changing its default.",
+    "No equivalent dense-cache sequential supervisor or synchronized stop-marker protocol in references; implement owned standard-library supervisor and use existing PyTorch collectives.",
+    "New run explicitly authorized; preserve all earlier paused runs and raw STOP marker."
+  ],
+  "frozen_source_manifest": "outputs/reactflow_occfm_unet_dense_history/2026-11-16-seed2026/source.manifest.json",
+  "source_sha256": "dbf24c7d982ce7b188997afb269a7883822cc1077fdd785decceccce73bf5e60",
+  "source_file_count": 190,
+  "tests": "34 targeted tests passed, including stop/save at validation boundary and no advance after pipeline failures"
+}

@@ -1,6 +1,30 @@
+> 2026-11-19 最新恢复：已按用户要求将默认历史输入恢复第一版`mask_lidar`，采用原始可见性mask、不做地面补全；默认缓存/训练均回到`e0_full`。三轮历史权重与结果保留，未启动新训练。见[恢复说明](docs/implementation/2026-11-19-mask-v1-restored.md)。下方为历史状态。
+
+> 2026-11-19 完成：新mask已完成10,000步训练与完整评测，三组Avg mIoU为密集27.8944%、原mask27.9574%、新mask27.7821%；新mask未达到other_flat改进目标。固定最终EMA、计数和协议已复核，原始产物保留。见[完整三组对比](docs/implementation/2026-11-19-ground-mask-three-way-evaluation.md)。下方状态按日期保留。
+
+> 2026-11-18 最新恢复：已按用户“训练继续进行”指令恢复新mask流程。11,027条缓存完整核验通过，沿用原冻结源码和10,000步总预算，随后自动正式评测并与前两轮比较；raw STOP保持原位。见[恢复记录](docs/implementation/2026-11-18-ground-mask-training-resumed.md)。下方为历史状态。
+
+> 2026-11-18 最新暂停：新mask流程已按用户要求停止于缓存阶段，保留11,027/17,468条训练缓存；正式训练尚未开始（0/10,000步）。控制器及双rank已退出，后续训练和评测不自动启动。见[暂停记录](docs/implementation/2026-11-18-ground-mask-training-paused.md)。下方为历史状态。
+
+> 2026-11-18 新训练：已按用户授权启动新mask `mask_lidar_temporal_ground` 的独立缓存→双卡10,000步训练→全量评测→与前两轮对比流程。当前阶段以运行目录 `pipeline.json` 为准，既有权重和结果保留。详见[启动记录与核验](docs/implementation/2026-11-18-ground-mask-training-started.md)。
+
+> 2026-11-18：两轮10,000步完整评测已完成，密集/mask平均mIoU为27.8944%/27.9574%，见[完整逐类结果](docs/implementation/2026-11-18-history-input-10000-evaluation.md)。针对地面类新增可选`mask_lidar_temporal_ground`，仅用过去/当前可见语义保守补全；训练子集重建收益很小，尚未训练新CFM或验证未来预测提升。原输入模式、缓存和权重保留，见[诊断、改动与使用方法](docs/implementation/2026-11-18-mask-lidar-ground-completion.md)。下方状态按日期保留。
+
 > 2026-11-15：已按用户要求撤回原始 LiDAR 输入及其后续改造，恢复 **语义 occupancy → 冻结原 VAE → latent／actor 状态缓存 → U形 CFM 或标准 DiT512**。新增点云感知/actor 检测/从头分阶段训练路线已移出活动代码，历史产物保留。**全部训练继续暂停，不自动恢复。**详见 [回退记录](docs/implementation/2026-11-15-rollback-raw-input.md)。下文运行状态按日期保留为历史。
 
+> 2026-11-16：新实验默认采用**密集语义历史**（`in_bounds & semantics!=255`），取消额外的历史`mask_lidar`过滤；冻结原OccFM VAE、actor选择、E0表示、损失和双主干保持不变。新缓存目录为`data/research/e0_dense_history/{train,tune}`，**尚未生成**。旧缓存与检查点保留原输入协议。此次仅完成代码与验证，缓存生成和训练继续暂停，见[修复说明与待执行命令](docs/implementation/2026-11-16-dense-semantic-history.md)。
+
 # ReactOccFlow
+
+> 2026-11-17 后续恢复：按用户“继续训练”指令，mask/dense对照流程已从完整6,842步状态恢复，继续至总预算10,000步，再接续两轮正式评测和对比。暂停点权重及日志另存保留，见[恢复记录](docs/implementation/2026-11-17-history-input-comparison-resumed.md)。
+
+> 2026-11-17 最新暂停：按用户要求，mask/dense对照流程已在mask训练**6,842 / 10,000步**安全暂停，完整恢复状态保存；正式评测及自动对比尚未开始，等待明确恢复指令。见[暂停记录](docs/implementation/2026-11-17-history-input-comparison-paused.md)。
+
+> 2026-11-17 最新实验：密集历史10,000步模型已完成；按用户新要求启动相同配置的`mask_lidar`模型训练10,000步，随后自动执行两者的官方全量评测与逐类对比。独立运行位于`outputs/history_input_comparison/2026-11-17-seed2026/`，详见[对照实验记录](docs/implementation/2026-11-17-history-input-comparison-started.md)。
+
+> 2026-11-16 预算更新：密集历史新实验已按用户要求将训练上限改为**10,000步**，保留缓存进度；此前100,000步及4–5天的估计撤销。训练阶段约10–11小时，详见[运行记录](docs/implementation/2026-11-16-dense-history-training-started.md)。
+
+> 2026-11-16 后续训练授权：用户已要求按密集语义历史训练。独立运行位于`outputs/reactflow_occfm_unet_dense_history/2026-11-16-seed2026/`，顺序生成新train/tune缓存，再以原OccFM主干初始化训练U形CFM＋actor。旧实验和raw训练不恢复，见[启动记录](docs/implementation/2026-11-16-dense-history-training-started.md)。此前“尚未生成/暂停”的说明保留为代码验收时的状态。
 
 > 2026-11-11 差距诊断：当前hidden512已无旧秩瓶颈。固定8个tune场景中，actor→occupancy注入倍率1/0.5/0对应DiT mIoU=17.3353/19.2051/20.5856%，U形为29.1259/29.0881/28.9461%；发现当前DiT注入退化、速度场与语义误差及latent loss失配。预训练与粗patch结构的独立贡献尚未分摊。所有数值为诊断小集原生E0口径，不替代下方官方成绩；没有改权重或重训。见 [完整诊断与修复优先级](docs/implementation/2026-11-11-dit512-cfm-gap-analysis.md)。
 
@@ -111,23 +135,24 @@ python -m scripts.build_e0_examples --device cuda:0
 
 ## ReactFlow、缓存与计划边界
 
-研究分支接口位于 `reactoccflow/models/react_flow.py`，连续 endpoint 一致性约束位于 `reactoccflow/losses/consistency.py`。真实 E0 标签的全量缓存由下面的命令生成；双 rank 任务完成并写入 `complete: true` 前，读取器默认拒绝缓存：
+研究分支接口位于 `reactoccflow/models/react_flow.py`，连续 endpoint 一致性约束位于 `reactoccflow/losses/consistency.py`。当前默认恢复第一版`mask_lidar`历史输入，不做地面补全，使用已有`e0_full`缓存。以下仅提供缓存命令；已有完整缓存绑定原生成源码，如需重新生成应显式指定新输出目录。双rank完成并写入`complete: true`前，读取器拒绝缓存：
 
 ```bash
-python -m scripts.cache_research --device cuda:0 --rank 0 --world-size 2 --output data/research/e0_full/train
-python -m scripts.cache_research --device cuda:1 --rank 1 --world-size 2 --output data/research/e0_full/train
+python -m scripts.cache_research --history-visibility mask_lidar --output data/research/e0_mask_v1_rebuild/train --device cuda:0 --rank 0 --world-size 2
+python -m scripts.cache_research --history-visibility mask_lidar --output data/research/e0_mask_v1_rebuild/train --device cuda:1 --rank 1 --world-size 2
 ```
 
-train 的 17,468 个窗口与 tune 的 2,176 个窗口已全部生成并通过全量载荷与 rank 清单审计。历史 U-Net 的 200 步、32 窗口、恢复和 330 项测试证据见 [原训练验收](docs/implementation/2026-10-29-training-acceptance.md)，此次已从其 50,000 步完整状态续训；标准 DiT 的验收单独记录。T8 的分支协议、T9/T11 的指标接口和 T10 的候选规划器不会替代 CARLA 反事实采集、独立校准集或闭环评测。
+原`e0_full`的train 17,468个窗口与tune 2,176个窗口已生成并审计，采用第一版`mask_lidar`协议。密集历史与新mask的独立实验也已完成，结果保留，见[三轮对比](docs/implementation/2026-11-19-ground-mask-three-way-evaluation.md)。历史U-Net训练验收见[原记录](docs/implementation/2026-10-29-training-acceptance.md)。T8/T9/T10/T11接口不会替代CARLA反事实采集、独立校准或闭环评测。
 
-原 U 形主干的新实验使用 `--backbone occfm_unet --unet-config configs/unet.yaml`，默认输出 `outputs/reactflow_occfm_unet/seed_<seed>`。修正后的512维标准 DiT 使用以下配置，从随机初始化训练，继续使用独立的冻结 VAE 和完整 E0 缓存。新输出目录与旧256维DiT、U形实验分开；目录已有实验时应使用对应冻结源码及记录的恢复命令：
+原U形主干使用`--backbone occfm_unet --unet-config configs/unet.yaml`。以下是512维标准DiT使用第一版mask缓存的命令示例，当前没有启动新训练。模型结构和独立冻结VAE保持原设计，使用独立输出目录；历史实验恢复使用对应冻结源码及原命令：
 
 ```bash
 torchrun --standalone --nproc_per_node=2 --module scripts.train_react_flow \
   --backbone dit --dit-config configs/dit.yaml \
+  --history-visibility mask_lidar \
   --train-cache data/research/e0_full/train \
   --tune-cache data/research/e0_full/tune \
-  --output outputs/reactflow_dit512/seed_2026 --seed 2026 \
+  --output outputs/reactflow_dit512_mask_v1/seed_2026 --seed 2026 --max-steps 10000 \
   --batch-size 2 --grad-accum 2 --workers 4 --decode-chunk 4 \
   --probe-tune-windows 8 --probe-nfe 10
 ```

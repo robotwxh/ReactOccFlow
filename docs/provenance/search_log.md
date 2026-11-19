@@ -2,6 +2,63 @@
 
 Date: 2026-10-27. Both references remain read-only.
 
+## 2026-11-19 restore first-version mask defaults
+
+Read-only searches of OccFM's dataset/cache and IR-WM's occupancy loader for
+mask_lidar, history_visibility, visibility_key and semantics found no equivalent
+project-specific default/mode binding. Reuse the original owned visibility
+intersection from the completed mask experiment; restore default API and CLI
+selection independently. Future targets and checkpoint identities remain
+unchanged. No reference code copied or executed. Sources and SHA-256:
+`mask_v1_restore_sources_20261119.json`.
+
+## 2026-11-18 new-mask training and three-way comparison
+
+Read-only searches inspected both references' cache, EMA, occupancy metric and
+dataset/loader code. Neither supplies identity-bound recoding of history while
+reusing unchanged E0 targets or this three-way fixed-step pipeline. Reuse the
+owned encoder/EMA exporter and rank/count/GT/protocol validators; implement only
+independent target-reuse and report glue. The evaluator audit admits exactly the
+declared observed-history block and verifies unchanged scoring/generation ASTs.
+No model/loss/optimizer changes. Sources, frozen identities and GPU smoke exits:
+`ground_mask_training_sources_20261118.json`.
+
+## 2026-11-18 observed-only masked ground history
+
+Read-only searches in both references for `mask_lidar`, `temporal_ground`,
+`ground_completion`, `inpaint`, `hole.fill` and `binary_closing`, including
+OccFM's dataset/cache and IR-WM's occupancy-loading pipeline, found no causal
+visible-only E0 ground completion. Reuse the already-owned warp/VAE closure;
+implement the shared cache/online completion and training-split diagnostic in
+the independent project. Only previously observed ground labels may fill
+currently hidden cells; hidden semantic labels and future frames cannot supply
+completion values. Source commits, SHA-256 and protection snapshots:
+`masked_ground_sources_20261118.json`.
+
+## 2026-11-17 matched history-input experiment
+
+Read-only searches inspected OccFM training/EMA checkpoint logic and count-based
+evaluation, plus IR-WM's EMA hook and persistent-worker dataset builder. Neither
+reference supplies the independent persistent-loader shutdown or matched-history
+fixed-step export/controller protocol. Reuse owned EMA and architecture-report
+auditors; implement only project-specific lifecycle/orchestration glue. No new
+reference runtime dependencies. Commits, source hashes, reuse decisions and GPU
+smoke results: `history_input_comparison_sources_20261117.json`.
+
+## 2026-11-16 dense semantic history
+
+Read-only searches inspected OccFM's `forecast/datasets/nuscenes_dataset.py`
+and `tools/cache_vae.py`, plus IR-WM's occupancy-loading pipeline and both
+repositories for `history_visibility`, `input_visibility_policy`,
+`settings_sha256`, and `dense_semantic`. OccFM directly loads semantic labels
+without LiDAR visibility filtering. The necessary semantic/VAE/3-D warp closure
+is already copied into the owned package; its dense-known path was previously
+used for future targets. Reuse that path for observed history. Neither reference
+provides the project's mode-bound cache/checkpoint protocol, so implement its
+small shared resolver/mask helpers independently. No new reference imports or
+source dependencies are introduced. Source commits/checksums and decisions:
+`dense_history_sources_20261116.json`.
+
 | Function | Searches and inspected sources | Reuse decision |
 |---|---|---|
 | VAE and semantic embedding | OccFM compressors/occfm_vae.py, modules embedding/encoders/decoders/quantization; IR-WM model tree | Copy OccFM dependency closure before adaptation; exact files in model_sources.json |

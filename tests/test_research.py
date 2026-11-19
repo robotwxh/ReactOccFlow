@@ -159,6 +159,13 @@ def test_streamed_records_and_on_demand_occupancy_warp(tmp_path):
     np.testing.assert_array_equal(result['semantics'], semantic)
     np.testing.assert_array_equal(result['visibility']['mask_camera'], semantic == 4)
     assert result['oracle'] is True
+    # Dense mode must not even load unrelated sensor masks from the NPZ.
+    np.savez(path / 'labels.npz', semantics=semantic, mask_lidar=np.zeros((1,), bool),
+             mask_camera=np.zeros((1,), bool))
+    dense = index.load_occupancy_e0('s2', 's2', source_frame='ego', source_grid=grid,
+                                   target_grid=grid, visibility_keys=())
+    np.testing.assert_array_equal(dense['semantics'], semantic)
+    assert dense['visibility'] == {}
 
 
 def test_selection_distance_is_planar_e0_even_when_ego_is_tilted(tmp_path):

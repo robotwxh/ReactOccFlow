@@ -25,11 +25,15 @@ import torch
 from torch.utils.data import DataLoader, Dataset
 
 from reactoccflow.data.e0_dataset import payload_sha256
+from reactoccflow.data.loader import shutdown_data_loaders
+from reactoccflow.data.history_visibility import (
+    HISTORY_VISIBILITIES, complete_masked_ground_history, history_visibility_mask, visibility_key_from_mode,
+)
 from reactoccflow.evaluation.occupancy import OccupancyAccumulator
 from reactoccflow.geometry import GridSpec, inverse_transform, warp_occupancy_nearest
 
 
-PROTOCOL_VERSION = 2
+PROTOCOL_VERSION = 3
 HORIZON_INDICES = (1, 3, 5)
 SCORE_NAMES = ('native_e0_known', 'paper_frame_full', 'paper_frame_covered')
 
@@ -73,6 +77,14 @@ def checkpoint_model_options(checkpoint):
     if set(options) != required:
         raise ValueError('Incomplete or unsupported checkpoint DiT configuration')
     return {'backbone': 'dit', 'dit_config': options}
+
+
+def checkpoint_history_visibility(checkpoint):
+    """Legacy joint weights retain their original LiDAR-masked observations."""
+    mode = checkpoint['config'].get('history_visibility', 'mask_lidar')
+    if mode not in HISTORY_VISIBILITIES:
+        raise ValueError(f'Unsupported checkpoint history visibility: {mode}')
+    return mode
 
 
 def paper_horizon_summary(accumulator):
@@ -130,7 +142,10 @@ def make_windows(resource_manifest, label_manifest, limit=None):
 class OnlineEvaluationData(Dataset):
     """CPU geometry/labels; no VAE or predictor is accessible to this dataset."""
 
-    def __init__(self, windows, label_manifest, label_root, occupancy_root):
+    def __init__(self, windows, label_manifest, label_root, occupancy_root, *, history_visibility='mask_lidar'):
+        if history_visibility not in HISTORY_VISIBILITIES:
+            raise ValueError(f'Unsupported evaluation history visibility: {history_visibility}')
+        self.history_visibility = history_visibility
         self.windows = windows
         self.label_manifest = label_manifest
         self.label_root = Path(label_root)
@@ -156,16 +171,16 @@ class OnlineEvaluationData(Dataset):
             raise ValueError('Incomplete future logged-action condition')
         return observation, candidate
 
-    def _grid(self, metadata):
+    def _grid(self, metadata, *, visibility_key=None):
         path = self.occupancy_root / metadata['scene'] / metadata['token'] / 'labels.npz'
         with np.load(path, allow_pickle=False) as data:
             semantics = data['semantics'].astype(np.uint8, copy=True)
-            lidar = data['mask_lidar'].astype(bool, copy=True)
-        if semantics.shape != GridSpec().shape or lidar.shape != semantics.shape:
+            sensor_mask = data[visibility_key].astype(bool, copy=True) if visibility_key is not None else None
+        if semantics.shape != GridSpec().shape or (sensor_mask is not None and sensor_mask.shape != semantics.shape):
             raise ValueError('Invalid original occupancy shape')
         if not np.isin(semantics, [*range(18), 255]).all():
             raise ValueError('Invalid original semantic labels')
-        return semantics, lidar
+        return semantics, sensor_mask
 
     def __getitem__(self, index):
         entry = self.windows[index]
@@ -173,14 +188,17 @@ class OnlineEvaluationData(Dataset):
         observation, candidate = self._labels(metadata)
         current_to_global = np.asarray(metadata['e0_to_global'], dtype=np.float64)
         global_to_current = inverse_transform(current_to_global)
-        history, visible = [], []
+        history, visible, bounds = [], [], []
         for frame in entry['history_metadata']:
-            semantics, lidar = self._grid(frame)
+            semantics, sensor_mask = self._grid(frame, visibility_key=visibility_key_from_mode(self.history_visibility))
             transformed = warp_occupancy_nearest(
-                semantics, global_to_current @ np.asarray(frame['e0_to_global']), visibility=lidar)
-            known = transformed['in_bounds'] & (transformed['semantics'] != 255)
+                semantics, global_to_current @ np.asarray(frame['e0_to_global']), visibility=sensor_mask)
             history.append(transformed['semantics'])
-            visible.append(known & transformed['visibility'])
+            bounds.append(transformed['in_bounds'])
+            visible.append(history_visibility_mask(transformed['semantics'], transformed['in_bounds'],
+                                                   transformed.get('visibility')))
+        if self.history_visibility == 'mask_lidar_temporal_ground':
+            history, visible = complete_masked_ground_history(history, bounds, visible)
         # Future grids/poses are deliberately separate scorer fields.
         original, native, native_known, future_poses = [], [], [], []
         for frame in entry['future_metadata']:
@@ -272,6 +290,7 @@ def prepare_identity(args, resource, labels, windows):
              args.resource_manifest, args.label_manifest,
              *sorted(root.joinpath('reactoccflow/models').rglob('*.py')),
              root/'reactoccflow/geometry/__init__.py', root/'reactoccflow/evaluation/occupancy.py', Path(__file__)]
+    paths += [root/'reactoccflow/data/history_visibility.py', root/'reactoccflow/data/loader.py']
     # Bind source bytes before any resumed counters are reused.
     paths += [args.label_manifest.parent / shard['file'] for shard in labels['shards']]
     frames = {(x['scene'], x['token']) for w in windows
@@ -281,6 +300,7 @@ def prepare_identity(args, resource, labels, windows):
     checkpoint = torch.load(args.checkpoint, map_location='cpu', weights_only=True)
     identity = {'protocol_version': PROTOCOL_VERSION, 'input_sha256': hashes,
                 'model_options': checkpoint_model_options(checkpoint),
+                'history_visibility': checkpoint_history_visibility(checkpoint),
                 'nfe': args.nfe, 'seed': args.seed, 'precision': 'float32',
                 'encode_chunk': args.encode_chunk, 'decode_chunk': args.decode_chunk,
                 'batch_size': args.batch_size, 'world_size': args.world_size,
@@ -422,7 +442,8 @@ def main(argv=None):
         flow.load_state_dict(checkpoint['ema_state_dict'], strict=True)
         codec = OccupancyCodec().to(device).eval().requires_grad_(False)
         codec.load_pretrained(args.codec_checkpoint)
-        dataset = OnlineEvaluationData(windows, labels, args.label_manifest.parent, args.occupancy_root)
+        dataset = OnlineEvaluationData(windows, labels, args.label_manifest.parent, args.occupancy_root,
+                                       history_visibility=identity['history_visibility'])
         remaining = torch.utils.data.Subset(dataset, assigned[len(completed):])
         loader = DataLoader(remaining, batch_size=args.batch_size, num_workers=args.workers,
                             shuffle=False, collate_fn=list_collate, persistent_workers=args.workers>0)
@@ -468,6 +489,7 @@ def main(argv=None):
         atomic_json(rank_output/'result.json', result)
         atomic_json(rank_output/'status.json', {'status': 'completed', 'rank': args.rank,
                                                'completed': len(completed), 'total': len(assigned)})
+        shutdown_data_loaders(loader)
         print(json.dumps({'status': 'completed', 'rank': args.rank, 'windows': len(completed)}), flush=True)
 
 

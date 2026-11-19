@@ -1,0 +1,50 @@
+{
+  "date": "2026-11-16",
+  "task": "Dense known semantic history; code and synthetic verification only",
+  "references": {
+    "OccFM": {
+      "commit": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853"
+    },
+    "IR-WM": {
+      "commit": "94dbbf44d6c22e50db4080e986b3675eadbb4497"
+    }
+  },
+  "source_files": {
+    "OccFM/forecast/datasets/nuscenes_dataset.py": "11133c58522f5c3b2ed1b2fbffb8ff230d93bf74e2984135183bd4ad723957f0",
+    "OccFM/tools/cache_vae.py": "c1a9272bbd66b4ea9a37740d86e2884ceceb0d037d5236a60fa1a56d87f0713b",
+    "IR-WM/projects/mmdet3d_plugin/datasets/pipelines/loading_occupancy.py": "de2bad112c0c93f9409a7c7bf1632601d03c2650d0e73cef3fa2c8d7cff9ec37"
+  },
+  "search_terms": [
+    "history_visibility",
+    "input_visibility_policy",
+    "settings_sha256",
+    "dense_semantic",
+    "mask_lidar",
+    "semantics"
+  ],
+  "decisions": [
+    "OccFM loads semantic grids without LiDAR masking; reuse already-copied semantic VAE and E0 geometry closure.",
+    "Existing owned _encode_grid already supported dense known semantics for future targets; use it for observed history.",
+    "No equivalent mode-bound E0 cache/checkpoint protocol in either reference; shared protocol helpers are independent project code.",
+    "No new reference code copied; preserve existing copyright/license/provenance and unresolved upstream license notice.",
+    "Legacy joint checkpoints without a policy use mask_lidar; fresh runs default dense_semantic."
+  ],
+  "owned_files_sha256": {
+    "reactoccflow/data/history_visibility.py": "6bcaa103cbc1cc21ee8dd76d28df48cea5a1e13fe699580d8f2c8baea5b64923",
+    "reactoccflow/data/e0_cache.py": "32efde374719dbdffc48857fbf5740ba0399cc2cd5da1a8df129d426a78ff532",
+    "reactoccflow/data/e0_dataset.py": "653f8d6e711472085b10d588577cfca2fbf2ca56ba15a852f6edd250249ab6c1",
+    "reactoccflow/data/research.py": "dfd5a447fbf43bdf42bee284f97a2110cdfa48a490c1bae8fa81e2f40a7ac06f",
+    "scripts/cache_research.py": "5b4995474e1fb4083e849dc354d06477c5627e299005543cd693d34eb28e8432",
+    "scripts/train_react_flow.py": "d465f5401ee5df9b47bc199b56c9c61c6f5fc5d724c4290039bc368a37b13c75",
+    "reactoccflow/evaluation/reactflow_generation.py": "89b44a481c14da34202271d50338cb83ed4b4d297fefee4aade02a5230549937"
+  },
+  "runtime_reference_dependencies": false,
+  "real_preprocessing_started": false,
+  "training_started": false,
+  "verification_directory": "outputs/verification/2026-11-16-dense-history",
+  "verification": {
+    "pytest_report": "outputs/verification/2026-11-16-dense-history/pytest-final.xml",
+    "isolation_report": "outputs/verification/2026-11-16-dense-history/isolated_execution.json",
+    "acceptance": "outputs/verification/2026-11-16-dense-history/acceptance.json"
+  }
+}

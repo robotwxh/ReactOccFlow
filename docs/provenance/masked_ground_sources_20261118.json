@@ -1,0 +1,47 @@
+{
+  "date": "2026-11-18",
+  "task": "Observed-only temporal ground completion for masked semantic history",
+  "references": {
+    "OccFM": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+    "IR-WM": "94dbbf44d6c22e50db4080e986b3675eadbb4497"
+  },
+  "search_terms": [
+    "mask_lidar",
+    "temporal_ground",
+    "ground_completion",
+    "inpaint",
+    "hole.fill",
+    "binary_closing"
+  ],
+  "source_sha256": {
+    "OccFM/forecast/datasets/nuscenes_dataset.py": "11133c58522f5c3b2ed1b2fbffb8ff230d93bf74e2984135183bd4ad723957f0",
+    "OccFM/tools/cache_vae.py": "c1a9272bbd66b4ea9a37740d86e2884ceceb0d037d5236a60fa1a56d87f0713b",
+    "IR-WM/projects/mmdet3d_plugin/datasets/pipelines/loading_occupancy.py": "de2bad112c0c93f9409a7c7bf1632601d03c2650d0e73cef3fa2c8d7cff9ec37"
+  },
+  "decisions": [
+    "Neither reference implements causal visible-only ground completion on E0 semantic history.",
+    "Reuse the existing owned 3-D nearest warp, VAE, masked encoding and source-protection closure; no new reference code copied.",
+    "New project-owned mode must preserve original modes and their artifacts, use only observed past/current ground classes, and use identical cache/online preprocessing.",
+    "Do not copy current hidden ground-truth labels or consume future targets."
+  ],
+  "verification_directory": "outputs/verification/2026-11-18-mask-ground",
+  "implemented_mode": "mask_lidar_temporal_ground",
+  "policy_version": "v3_four_neighbours",
+  "owned_files_sha256": {
+    "reactoccflow/data/history_visibility.py": "73c6242b0c753f371a9b96f27b616c72d25b6357ef2b8a44c2d9098623dbc812",
+    "reactoccflow/data/e0_cache.py": "206aa48546f9929c6723f38a52b57db595d0d2d8fc5236bcff627c57c02f1a20",
+    "reactoccflow/evaluation/reactflow_generation.py": "0afbdb0ba5ea5292d5f9c5183f909e5371fc247e3d2eabd095de775a0c66c257",
+    "scripts/cache_research.py": "b86790939404b20f6cfbdee9badf119886e02c7503d25f79790f2cf04a78a24f",
+    "scripts/diagnose_masked_ground.py": "2aa35df5377c0e308d81bf1ed25ed943af0863e7828ba3ad361b8cea989f2f13"
+  },
+  "diagnostic_reports": {
+    "rejected_v1": "train64_ground_reconstruction.json",
+    "partial_support_v2": "train64_ground_spatial_support.json",
+    "final_v3": "train128_ground_four_neighbours.json"
+  },
+  "training_started": false,
+  "formal_future_prediction_evaluation_started": false,
+  "reference_runtime_reads": false,
+  "tests_passed": 183,
+  "isolated_execution": "outputs/verification/2026-11-18-mask-ground/isolated_execution.json"
+}

@@ -1,0 +1,59 @@
+{
+  "date": "2026-11-19",
+  "request": "\u5c06mask\u8fd8\u539f\u5230\u7b2c\u4e00\u7248",
+  "search_terms": [
+    "mask_lidar",
+    "history_visibility",
+    "visibility_key",
+    "semantics",
+    "cache"
+  ],
+  "source_commits": {
+    "OccFM": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+    "IR-WM": "94dbbf44d6c22e50db4080e986b3675eadbb4497"
+  },
+  "reference_files_sha256": {
+    "OccFM/forecast/datasets/nuscenes_dataset.py": "11133c58522f5c3b2ed1b2fbffb8ff230d93bf74e2984135183bd4ad723957f0",
+    "OccFM/tools/cache_vae.py": "c1a9272bbd66b4ea9a37740d86e2884ceceb0d037d5236a60fa1a56d87f0713b",
+    "IR-WM/projects/mmdet3d_plugin/datasets/pipelines/loading_occupancy.py": "de2bad112c0c93f9409a7c7bf1632601d03c2650d0e73cef3fa2c8d7cff9ec37"
+  },
+  "original_owned_mask_source": "outputs/history_input_comparison/2026-11-17-seed2026/source/reactoccflow/data/history_visibility.py",
+  "original_owned_mask_source_sha256": "6bcaa103cbc1cc21ee8dd76d28df48cea5a1e13fe699580d8f2c8baea5b64923",
+  "decisions": [
+    "Reuse the existing owned first-version mask intersection without algorithm changes.",
+    "Neither reference supplies project-specific mode-aware CLI/API defaults; adapt the independent protocol glue.",
+    "Restore original mask defaults and e0_full caches; explicit dense and historical ground-mask checkpoint identities remain unchanged for reproduction.",
+    "Future targets remain fully known in-bounds, independent of history visibility; do not initialize or start training.",
+    "No reference source copied or executed; preserve all frozen experiments."
+  ],
+  "verification_directory": "outputs/verification/2026-11-19-mask-v1-restore",
+  "owned_files_sha256": {
+    "reactoccflow/data/history_visibility.py": "0ef98100785881c18846c2a7734e561dd13801ca24f46224bf2b46e5500b21fe",
+    "reactoccflow/data/e0_cache.py": "0eebcbf10e5935659c5a6365795ad5b54f7dddfe61ea28f273b5a1c784e2629a",
+    "scripts/cache_research.py": "ce7ebd4c34156a8f2b0cc4600fab1f6f7a28e730e54ac7d8d0d5ed4b2ac7f8bc",
+    "scripts/train_react_flow.py": "22f42c4a2b847f55867207dfc7d8df1c54c13c688c70e5d800ef9c20bde82cdc"
+  },
+  "tests_passed": 183,
+  "isolation_passed": true,
+  "actual_default_encoding_matches_original_cache_exactly": true,
+  "reference_differences": {
+    "OccFM": [],
+    "IR-WM": []
+  },
+  "protected_original_changes": [],
+  "frozen_archives": {
+    "outputs/reactflow_occfm_unet_dense_history/2026-11-16-seed2026": {
+      "files": 190,
+      "changes": []
+    },
+    "outputs/history_input_comparison/2026-11-17-seed2026": {
+      "files": 192,
+      "changes": []
+    },
+    "outputs/history_input_comparison/2026-11-18-ground-mask-seed2026": {
+      "files": 195,
+      "changes": []
+    }
+  },
+  "training_started": false
+}

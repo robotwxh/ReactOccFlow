@@ -58,7 +58,7 @@ class SmallIndex:
                 'target': {'ego_target_mask': np.array([bool(t) for t in self.future_tokens]),
                            'actor_future': np.zeros((8, future, 6), np.float32)}}
 
-    def load_occupancy_e0(self, source_token, current_token, *, source_frame):
+    def load_occupancy_e0(self, source_token, current_token, *, source_frame, visibility_keys=()):
         assert current_token == 'current' and source_frame in {'ego', 'lidar'}
         self.loads.append((source_token, current_token, source_frame))
         return deepcopy(self.grids[source_token])
@@ -74,7 +74,7 @@ def test_observation_is_future_independent_and_aligns_padded_latents():
     assert obs['history_latents'].shape == (6, 16, 50, 50)
     np.testing.assert_array_equal(obs['history_mask'], [False, False, False, True, True, True])
     assert not obs['history_latents'][:3].any()
-    assert obs['history_latents'][3, 0, 0, 0] == 52  # visible1 + 3 maskedempty17
+    assert obs['history_latents'][3, 0, 0, 0] == 52  # visible1, three maskedempty17
     assert obs['actor_history'].shape == (8, 4, 6)
     assert obs['ego_history'].shape == (4, 6)
     np.testing.assert_array_equal(obs['history_time_s'], [0, 0, 0, -1, -.5, 0])
@@ -88,7 +88,7 @@ def test_observation_is_future_independent_and_aligns_padded_latents():
 def test_history_encodes_warped_3d_semantics_and_intersection_of_validity_masks():
     from reactoccflow.data.e0_cache import encode_e0_observation
     index, codec = SmallIndex(), RecordingCodec()
-    encode_e0_observation(index, 'scene-1', 'current', codec, source_frame='lidar')
+    encode_e0_observation(index, 'scene-1', 'current', codec, source_frame='lidar', visibility_key='mask_lidar')
     semantics, visibility, *_ = codec.calls[0]
     assert semantics.shape == (1, 2, 2, 1)
     np.testing.assert_array_equal(semantics[0], index.grids['past']['semantics'])
@@ -147,7 +147,7 @@ def test_requested_input_visibility_must_exist_and_masks_match_grid():
     index = SmallIndex()
     del index.grids['past']['visibility']['mask_lidar']
     with pytest.raises(ValueError, match='mask_lidar'):
-        encode_e0_observation(index, 'scene-1', 'current', RecordingCodec())
+        encode_e0_observation(index, 'scene-1', 'current', RecordingCodec(), visibility_key='mask_lidar')
     index = SmallIndex()
     index.grids['past']['in_bounds'] = np.ones((2, 2), bool)
     with pytest.raises(ValueError, match='shape'):
@@ -169,7 +169,7 @@ def test_history_and_future_land_in_same_current_e0_xyz_before_encoding():
                 labels[cell] = 4
                 self.sources[token] = labels
 
-        def load_occupancy_e0(self, source_token, current_token, *, source_frame):
+        def load_occupancy_e0(self, source_token, current_token, *, source_frame, visibility_keys=()):
             self.loads.append((source_token, current_token, source_frame))
             transform = np.eye(4)
             offset = {'previous': -1, 'current': 0, 'next': 1}[source_token]
@@ -282,3 +282,72 @@ def test_future_semantics_option_requires_boolean_before_loading():
         encode_e0_training_sample(
             index, 'scene-1', 'current', RecordingCodec(), include_future_semantics='yes')
     assert not index.loads and not index.sample_calls
+
+
+def test_explicit_dense_preserves_known_invisible_voxels_and_needs_no_sensor_masks():
+    from reactoccflow.data.e0_cache import encode_e0_observation
+    codec = RecordingCodec()
+    original = encode_e0_observation(SmallIndex(), 'scene-1', 'current', codec, visibility_key=None)
+    np.testing.assert_array_equal(codec.calls[0][1][0], [[[True], [False]], [[False], [True]]])
+    assert original['metadata']['history_visibility'] == 'dense_semantic'
+    assert original['metadata']['input_visibility_key'] is None
+    assert original['metadata']['input_visibility_policy'] == 'in_bounds & semantics!=255'
+    for replacement in ('missing', 'false', 'malformed'):
+        index = SmallIndex()
+        for grid in index.grids.values():
+            if replacement == 'missing':
+                del grid['visibility']
+            else:
+                grid['visibility'] = {'mask_lidar': np.zeros((2, 2, 1) if replacement == 'false' else (1,), bool)}
+        result = encode_e0_observation(index, 'scene-1', 'current', RecordingCodec(), visibility_key=None)
+        np.testing.assert_array_equal(result['observation']['history_latents'], original['observation']['history_latents'])
+
+
+def test_switching_history_mode_keeps_actor_inputs_and_all_future_targets_identical():
+    from reactoccflow.data.e0_cache import encode_e0_training_sample
+    dense = encode_e0_training_sample(SmallIndex(), 'scene-1', 'current', RecordingCodec(),
+                                     visibility_key=None, include_future_semantics=True)
+    masked = encode_e0_training_sample(SmallIndex(), 'scene-1', 'current', RecordingCodec(),
+                                      visibility_key='mask_lidar', include_future_semantics=True)
+    assert dense['observation']['history_latents'][3, 0, 0, 0] == 37
+    assert masked['observation']['history_latents'][3, 0, 0, 0] == 52
+    for key in dense['observation']:
+        if key != 'history_latents':
+            np.testing.assert_array_equal(dense['observation'][key], masked['observation'][key])
+    for key in dense['target']:
+        np.testing.assert_array_equal(dense['target'][key], masked['target'][key])
+
+
+def test_restored_default_keeps_hidden_ground_masked_without_completion(monkeypatch):
+    import reactoccflow.data.e0_cache as encoder
+    index = SmallIndex()
+    for token in ('past', 'previous', 'current'):
+        index.grids[token] = {'semantics': np.full((3, 3, 1), 12, np.uint8),
+                             'in_bounds': np.ones((3, 3, 1), bool),
+                             'visibility': {'mask_lidar': np.ones((3, 3, 1), bool)}}
+    index.grids['current']['visibility']['mask_lidar'][1, 1, 0] = False
+    def unexpected_completion(*args):
+        raise AssertionError('First-version mask must not complete hidden ground')
+    monkeypatch.setattr(encoder, 'complete_masked_ground_history', unexpected_completion)
+    codec = RecordingCodec()
+    default = encoder.encode_e0_training_sample(index, 'scene-1', 'current', codec)
+    assert not codec.calls[2][1][0, 1, 1, 0]
+    assert default['metadata']['history_visibility'] == 'mask_lidar'
+    explicit = encoder.encode_e0_training_sample(index, 'scene-1', 'current', RecordingCodec(),
+                                               history_visibility='mask_lidar')
+    assert default['metadata'] == explicit['metadata']
+    for section in ('observation', 'target'):
+        for key in default[section]:
+            np.testing.assert_array_equal(default[section][key], explicit[section][key])
+
+
+@pytest.mark.parametrize('visibility_key', [None, 'mask_lidar'])
+def test_future_grid_changes_cannot_change_history_encoding(visibility_key):
+    from reactoccflow.data.e0_cache import encode_e0_training_sample
+    index = SmallIndex()
+    first = encode_e0_training_sample(index, 'scene-1', 'current', RecordingCodec(), visibility_key=visibility_key)
+    index.grids['next']['semantics'][:] = 10
+    changed = encode_e0_training_sample(index, 'scene-1', 'current', RecordingCodec(), visibility_key=visibility_key)
+    for key in first['observation']:
+        np.testing.assert_array_equal(first['observation'][key], changed['observation'][key])
+    assert not np.array_equal(first['target']['future_latents'], changed['target']['future_latents'])

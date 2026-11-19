@@ -49,6 +49,8 @@ def numeric_sample(scene='scene-a', token='s3'):
             'scene': scene, 'token': token, 'coordinate_frame': 'E0',
             'oracle': True, 'source_frame': 'ego', 'actor_instance_tokens': [''] * 8,
             'posterior': 'mean', 'latent_scaling': 'unscaled',
+            'input_visibility_key': 'mask_lidar',
+            'input_visibility_policy': 'selected_sensor_mask & in_bounds & semantics!=255',
             'history_slots': 6, 'hist_last': 4, 'future': 6,
             'grid': {'shape': [2, 2, 1]}, 'timestamp_us': 1000000,
             'history_sample_tokens': ['s0', 's1', 's2', token],
@@ -136,6 +138,18 @@ def test_checksum_detects_altered_valid_numpy_payload(tmp_path):
         E0ResearchDataset(tmp_path, verify_checksums=True)[0]
 
 
+@pytest.mark.parametrize('field,value', [('history_visibility', 'dense_semantic'),
+                                       ('input_visibility_policy', 'in_bounds & semantics!=255'),
+                                       ('input_visibility_key', None)])
+def test_loader_rejects_contradictory_history_metadata(tmp_path, field, value):
+    from reactoccflow.data.e0_dataset import E0ResearchDataset
+    sample = numeric_sample()
+    sample['metadata'][field] = value
+    write_fixture(tmp_path, sample=sample)
+    with pytest.raises(ValueError, match='disagrees'):
+        E0ResearchDataset(tmp_path)[0]
+
+
 def anchor_fixture(count=4):
     return [{'scene': 'scene-a', 'token': f'a{i}', 'global_index': i} for i in range(count)]
 
@@ -159,6 +173,80 @@ def test_two_rank_generation_resumes_and_only_publishes_complete_after_all_ranks
     assert [row['token'] for row in final['records']] == ['a0', 'a1', 'a2', 'a3']
     run_cache(tmp_path, settings, anchors, encode, rank=0, world_size=2)
     assert len(calls) == 4
+
+
+def test_cache_rejects_mixed_input_modes_and_cross_mode_resume(tmp_path):
+    from scripts.cache_research import run_cache
+    from reactoccflow.data.e0_dataset import E0ResearchDataset
+    from reactoccflow.data.history_visibility import visibility_metadata
+    settings = {'history_visibility': 'dense_semantic', 'visibility_key': None}
+    anchors = anchor_fixture(1)
+    def dense(anchor):
+        sample = numeric_sample(anchor['scene'], anchor['token'])
+        sample['metadata'].update(visibility_metadata(None))
+        return sample
+    def masked(anchor):
+        return numeric_sample(anchor['scene'], anchor['token'])
+    with pytest.raises(ValueError, match='history visibility'):
+        run_cache(tmp_path, settings, anchors, masked)
+    result = run_cache(tmp_path, settings, anchors, dense)
+    assert result['history_visibility'] == 'dense_semantic'
+    assert E0ResearchDataset(tmp_path)[0]['metadata']['input_visibility_key'] is None
+    with pytest.raises(ValueError, match='settings'):
+        run_cache(tmp_path, {'history_visibility': 'mask_lidar', 'visibility_key': 'mask_lidar'}, anchors, masked)
+    record_path = tmp_path / 'scene-a/a0.json'
+    record = json.loads(record_path.read_text())
+    record['metadata'].update(visibility_metadata('mask_lidar'))
+    record_path.write_text(json.dumps(record))
+    with pytest.raises(ValueError, match='history visibility'):
+        E0ResearchDataset(tmp_path)[0]
+    # A corrupted but otherwise schema-valid mode is not accepted as a valid resume.
+    calls = []
+    def reencode(anchor):
+        calls.append(anchor['token'])
+        return dense(anchor)
+    run_cache(tmp_path, settings, anchors, reencode)
+    assert calls == ['a0']
+
+
+@pytest.mark.parametrize('mode', [None, 'dense_semantic', 'mask_lidar', 'mask_lidar_temporal_ground'])
+def test_cache_cli_selects_mode_specific_group_directory_without_preprocessing(tmp_path, monkeypatch, mode):
+    import scripts.cache_research as cache
+    class StopPreflight(Exception):
+        pass
+    received = []
+    def inspect(args):
+        received.append(args)
+        raise StopPreflight
+    monkeypatch.setattr(cache, '_prepare', inspect)
+    with pytest.raises(StopPreflight):
+        cache.main(['--group', 'tune']+([] if mode is None else ['--history-visibility', mode]))
+    args = received[0]
+    mode = 'mask_lidar' if mode is None else mode
+    assert args.history_visibility == mode
+    name = {'dense_semantic': 'e0_dense_history', 'mask_lidar': 'e0_full',
+            'mask_lidar_temporal_ground': 'e0_mask_lidar_temporal_ground'}[mode]
+    assert args.output == Path('data/research') / name / 'tune'
+
+
+def test_completed_ground_cache_cannot_be_reused_as_plain_mask_history(tmp_path):
+    from scripts.cache_research import run_cache
+    from reactoccflow.data.e0_dataset import E0ResearchDataset
+    from reactoccflow.data.history_visibility import visibility_metadata
+    mode = 'mask_lidar_temporal_ground'
+    policy = visibility_metadata('mask_lidar', history_visibility=mode)
+    settings = {'history_visibility': mode, 'visibility_key': 'mask_lidar',
+                'input_visibility_policy': policy['input_visibility_policy']}
+    def encode(anchor):
+        sample = numeric_sample(anchor['scene'], anchor['token'])
+        sample['metadata'].update(policy)
+        return sample
+    result = run_cache(tmp_path, settings, anchor_fixture(1), encode)
+    assert result['history_visibility'] == mode
+    assert E0ResearchDataset(tmp_path)[0]['metadata']['history_visibility'] == mode
+    with pytest.raises(ValueError, match='settings|identity|different'):
+        run_cache(tmp_path, {'history_visibility': 'mask_lidar', 'visibility_key': 'mask_lidar'},
+                  anchor_fixture(1), encode)
 
 
 def test_resume_reencodes_only_missing_or_hash_corrupt_records_and_rejects_settings_changes(tmp_path):
@@ -314,7 +402,8 @@ def test_preflight_accepts_existing_canonical_normalization_split_identity(tmp_p
     checkpoint = tmp_path / 'checkpoint.ckpt'; checkpoint.write_bytes(b'fingerprint only, never loaded')
     args = argparse.Namespace(root=tmp_path / 'raw', version='v1.0-trainval', group='train',
                               split=split_path, label_manifest=label_path, normalization=stats_path,
-                              source_manifest=source_manifest, checkpoint=checkpoint, device='cpu')
+                              source_manifest=source_manifest, checkpoint=checkpoint, device='cpu',
+                              history_visibility='mask_lidar')
     anchors, settings = _prepare(args)
     assert len(anchors) == 1 and anchors[0]['token'] == 's3'
     assert settings['split_sha256'] == split_bytes_sha

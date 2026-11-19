@@ -1,0 +1,46 @@
+# ReactOccFlow 迁移环境：Linux x86_64，适用于四张 V100 32GB。
+# 在目标电脑的项目根目录执行（需要已安装 Conda 和兼容的 NVIDIA 驱动）：
+#   conda env create --prefix "$HOME/wxh/envs/ReactOccFlow" --file environment.yml
+#   conda activate "$HOME/wxh/envs/ReactOccFlow"
+#   python -m pip check
+#   python -I -m reactoccflow doctor
+#   python -I -c "import torch; assert 'sm_70' in torch.cuda.get_arch_list(); print(torch.__version__, torch.version.cuda)"
+#
+# 选择 cu126；原机器的 torch 2.7.1+cu128 构建不包含 V100 的 sm_70。
+# PyTorch 官方安装来源：https://pytorch.org/get-started/previous-versions/#v271
+# CUDA/cuDNN/NCCL 等运行库由 PyTorch 的 pip 依赖安装，无需另装系统 CUDA Toolkit。
+# 不要叠加安装旧 requirements-lock.txt，其中固定了 cu128 和原机器绝对路径。
+# 本文件锁定主要依赖；间接依赖由安装器解析，不是完整环境锁文件。
+# 最后一项“.”会正常安装项目本身，不使用 editable install 或参考仓库路径。
+# 权重、数据、缓存和配置路径需要另外迁移；创建环境不会启动训练或评测。
+name: ReactOccFlow
+
+channels:
+  - conda-forge
+  - nodefaults
+
+dependencies:
+  - python=3.10
+  - pip>=24
+  - setuptools>=68
+  - wheel
+  - pip:
+      - --index-url https://pypi.org/simple
+      - --extra-index-url https://download.pytorch.org/whl/cu126
+
+      # 核心运行依赖：与项目 pyproject.toml 的版本范围一致。
+      - torch==2.7.1+cu126
+      - numpy==1.26.4
+      - einops==0.8.2
+      - einops-exts==0.0.4
+      - PyYAML==6.0.3
+      - easydict==1.13
+      - scipy==1.15.3
+
+      # 测试、打包和可视化。
+      - pytest==8.4.2
+      - build==1.3.0
+      - matplotlib==3.10.7
+
+      # 随项目一起复制本文件，并从项目根目录创建环境。
+      - .

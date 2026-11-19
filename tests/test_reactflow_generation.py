@@ -7,7 +7,7 @@ import torch
 
 from reactoccflow.evaluation.occupancy import OccupancyAccumulator
 from reactoccflow.evaluation.reactflow_generation import (
-    SCORE_NAMES, aggregate, atomic_json, checkpoint_model_options, make_initial_noise, make_windows,
+    SCORE_NAMES, aggregate, atomic_json, checkpoint_history_visibility, checkpoint_model_options, make_initial_noise, make_windows,
     paper_horizon_summary, partition_indices, project_prediction_to_future,
     window_seed,
 )
@@ -44,6 +44,72 @@ def test_checkpoint_with_different_grid_is_rejected_before_weight_loading():
     with pytest.raises(ValueError, match='input_size'):
         checkpoint_model_options({'config': {'mode': 'joint', 'backbone': 'dit',
                                             'dit': {'in_channels': 16, 'input_size': 40}}})
+
+
+def test_checkpoint_input_policy_preserves_legacy_and_rejects_unknown_modes():
+    assert checkpoint_history_visibility({'config': {'mode': 'joint'}}) == 'mask_lidar'
+    for mode in ('dense_semantic', 'mask_lidar', 'mask_lidar_temporal_ground'):
+        checkpoint = {'config': {'mode': 'joint', 'history_visibility': mode}}
+        assert checkpoint_history_visibility(checkpoint) == mode
+    for invalid in (None, '', 'dense', 'mask_camera', 1):
+        with pytest.raises(ValueError, match='history visibility'):
+            checkpoint_history_visibility({'config': {'history_visibility': invalid}})
+
+
+@pytest.mark.parametrize('mode', ['dense_semantic', 'mask_lidar', 'mask_lidar_temporal_ground'])
+def test_online_history_matches_cache_encoder_and_keeps_future_out_of_inputs(tmp_path, monkeypatch, mode):
+    from copy import deepcopy
+    import reactoccflow.evaluation.reactflow_generation as evaluation
+    from reactoccflow.data.e0_cache import encode_e0_training_sample
+    from test_e0_cache import RecordingCodec, SmallIndex
+
+    size = 3 if mode == 'mask_lidar_temporal_ground' else 2
+    grid = GridSpec(shape=(size, size, 1), origin=(0, 0, 0), voxel_size=(1, 1, 1))
+    monkeypatch.setattr(evaluation, 'GridSpec', lambda: grid)
+    original_warp = evaluation.warp_occupancy_nearest
+    monkeypatch.setattr(evaluation, 'warp_occupancy_nearest',
+                        lambda *args, **kwargs: original_warp(*args, source_grid=grid, target_grid=grid, **kwargs))
+    index = SmallIndex(history_tokens=('past', 'previous', 'past2', 'current'))
+    index.grids['past2'] = deepcopy(index.grids['previous'])
+    for token, data in index.grids.items():
+        if mode == 'mask_lidar_temporal_ground':
+            data['semantics'] = np.full(grid.shape, 12 if token != 'next' else 4, np.uint8)
+            data['in_bounds'] = np.ones(grid.shape, bool)
+            data['visibility']['mask_lidar'] = np.ones(grid.shape, bool)
+        data['in_bounds'][:] = True
+        if mode == 'mask_lidar_temporal_ground' and token != 'next':
+            data['semantics'][:] = 12
+            data['visibility']['mask_lidar'][1, 1] = token in ('past', 'previous')
+        path = tmp_path/'scene-1'/token/'labels.npz'
+        path.parent.mkdir(parents=True)
+        # Dense mode must work even when labels contain no sensor masks.
+        masks = {'mask_lidar': data['visibility']['mask_lidar']} if mode != 'dense_semantic' and token != 'next' else {}
+        np.savez(path, semantics=data['semantics'], **masks)
+    frame = lambda token: {'scene': 'scene-1', 'token': token, 'e0_to_global': np.eye(4).tolist()}
+    windows = [{'index': 0, 'scene': 'scene-1', 'token': 'current', 'metadata': frame('current'),
+                'history_metadata': [frame(t) for t in index.history_tokens],
+                'future_metadata': [frame('next') for _ in range(6)]}]
+    dataset = evaluation.OnlineEvaluationData(windows, {}, tmp_path, tmp_path, history_visibility=mode)
+    def observed(_):
+        observation, _ = index.build_observation('scene-1', 'current')
+        return observation, np.zeros((6, 2), np.float32)
+    monkeypatch.setattr(dataset, '_labels', observed)
+    online = dataset[0]
+    codec = RecordingCodec()
+    cached = encode_e0_training_sample(index, 'scene-1', 'current', codec, history_visibility=mode)
+    for slot in range(4):
+        np.testing.assert_array_equal(online['history_semantics'][slot], codec.calls[slot][0][0])
+        np.testing.assert_array_equal(online['history_visible'][slot], codec.calls[slot][1][0])
+    encoded = torch.cat([RecordingCodec().encode(torch.from_numpy(labels[None]).long(),
+                                                 torch.from_numpy(visible[None]))
+                         for labels, visible in zip(online['history_semantics'], online['history_visible'])])
+    np.testing.assert_array_equal(encoded.numpy(), cached['observation']['history_latents'][2:])
+    previous = dataset[0]
+    np.savez(tmp_path/'scene-1'/'next'/'labels.npz', semantics=np.full(grid.shape, 10, np.uint8))
+    changed = dataset[0]
+    np.testing.assert_array_equal(previous['history_semantics'], changed['history_semantics'])
+    np.testing.assert_array_equal(previous['history_visible'], changed['history_visible'])
+    assert not np.array_equal(previous['target_original'], changed['target_original'])
 
 
 def test_paper_average_uses_one_two_three_seconds_and_not_six_frame_average():

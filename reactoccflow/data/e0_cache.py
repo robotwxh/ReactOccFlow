@@ -19,11 +19,16 @@ import numpy as np
 import torch
 
 from reactoccflow.geometry import GridSpec
+from .history_visibility import (
+    DEFAULT_HISTORY_VISIBILITY, complete_masked_ground_history, history_visibility_mask, mode_from_visibility_key,
+    visibility_key_from_mode, visibility_metadata,
+)
 
 
 _OBSERVED_HISTORY = 4
 _LATENT_SHAPE = (16, 50, 50)
 _VERSION = 1
+_DEFAULT_VISIBILITY = object()
 
 
 def _validate_options(history_slots, hist_last, source_frame, visibility_key):
@@ -33,8 +38,7 @@ def _validate_options(history_slots, hist_last, source_frame, visibility_key):
         raise ValueError('history_slots must be an integer of at least four')
     if not isinstance(hist_last, int) or isinstance(hist_last, bool) or not 1 <= hist_last <= _OBSERVED_HISTORY:
         raise ValueError('hist_last must be an integer between one and four')
-    if not isinstance(visibility_key, str) or not visibility_key:
-        raise ValueError('visibility_key must name an observed occupancy mask')
+    mode_from_visibility_key(visibility_key)
 
 
 @contextmanager
@@ -51,26 +55,8 @@ def _inference_codec(codec):
             module.training = training
 
 
-def _encode_grid(index, source_token, current_token, codec, *, device, source_frame,
-                 visibility_key=None, return_semantics=False):
-    """Load the raw 3-D warp before passing any semantic grid to the codec."""
-    grid = index.load_occupancy_e0(source_token, current_token, source_frame=source_frame)
-    semantics = np.asarray(grid['semantics'])
-    in_bounds = np.asarray(grid['in_bounds'], dtype=bool)
-    if semantics.ndim != 3 or semantics.dtype.kind not in 'ui' or in_bounds.shape != semantics.shape:
-        raise ValueError('Warped semantics/in_bounds must have matching 3-D integer/bool grid shape')
-    if not np.isin(semantics, [*range(18), 255]).all():
-        raise ValueError('Warped semantics must contain Occ3D18 classes or unknown255')
-    known = in_bounds & (semantics != 255)
-    visibility = known.copy()
-    if visibility_key is not None:
-        masks = grid.get('visibility', {})
-        if not isinstance(masks, dict) or visibility_key not in masks:
-            raise ValueError(f'Missing requested observation visibility mask: {visibility_key}')
-        selected = np.asarray(masks[visibility_key], dtype=bool)
-        if selected.shape != semantics.shape:
-            raise ValueError('Observation visibility mask shape must match the semantic grid')
-        visibility &= selected
+def _encode_arrays(semantics, visibility, codec, *, device):
+    """Shared posterior-mean boundary for original and completed history grids."""
     labels = torch.tensor(semantics[None], dtype=torch.long, device=device)
     visible = torch.tensor(visibility[None], dtype=torch.bool, device=device)
     latent = codec.encode(labels, visible, sample=False)
@@ -79,6 +65,24 @@ def _encode_grid(index, source_token, current_token, codec, *, device, source_fr
     latent = latent[0].detach().to(device='cpu', dtype=torch.float32).numpy().copy()
     if not np.isfinite(latent).all():
         raise ValueError('Codec produced a nonfinite posterior-mean latent')
+    return latent
+
+
+def _encode_grid(index, source_token, current_token, codec, *, device, source_frame,
+                 visibility_key=None, return_semantics=False):
+    """Load the raw 3-D warp before passing any semantic grid to the codec."""
+    grid = index.load_occupancy_e0(source_token, current_token, source_frame=source_frame,
+                                   visibility_keys=() if visibility_key is None else (visibility_key,))
+    semantics = np.asarray(grid['semantics'])
+    in_bounds = np.asarray(grid['in_bounds'], dtype=bool)
+    known = history_visibility_mask(semantics, in_bounds)
+    visibility = known.copy()
+    if visibility_key is not None:
+        masks = grid.get('visibility', {})
+        if not isinstance(masks, dict) or visibility_key not in masks:
+            raise ValueError(f'Missing requested observation visibility mask: {visibility_key}')
+        visibility = history_visibility_mask(semantics, in_bounds, masks[visibility_key])
+    latent = _encode_arrays(semantics, visibility, codec, device=device)
     if return_semantics:
         return latent, known, np.array(semantics, dtype=np.uint8, copy=True)
     return latent, known
@@ -86,7 +90,7 @@ def _encode_grid(index, source_token, current_token, codec, *, device, source_fr
 
 def encode_e0_observation(index, scene, current_token, codec, device='cpu', *,
                           history_slots=6, hist_last=4, source_frame='ego',
-                          visibility_key='mask_lidar'):
+                          visibility_key=_DEFAULT_VISIBILITY, history_visibility=None):
     """Encode only current/past oracle observations; never inspect future data.
 
     Actor/ego histories retain four observed slots. Latent history and its mask,
@@ -95,7 +99,19 @@ def encode_e0_observation(index, scene, current_token, codec, device='cpu', *,
     Every present semantic grid is warped in 3-D into the current ego frame by
     the independent index before deterministic posterior-mean encoding.
     The caller places its codec on ``device``; output values are NumPy arrays.
+    By default use the first-version LiDAR mask without ground completion.
+    An explicit visibility_key=None selects dense known semantics. Explicit
+    history modes retain their recorded meaning for historical reproduction.
     """
+    if visibility_key is _DEFAULT_VISIBILITY:
+        visibility_key = visibility_key_from_mode(
+            DEFAULT_HISTORY_VISIBILITY if history_visibility is None else history_visibility)
+    mode = mode_from_visibility_key(visibility_key) if history_visibility is None else history_visibility
+    if history_visibility is not None:
+        requested_key = visibility_key_from_mode(mode)
+        if visibility_key is not None and visibility_key != requested_key:
+            raise ValueError('history_visibility disagrees with visibility key')
+        visibility_key = requested_key
     _validate_options(history_slots, hist_last, source_frame, visibility_key)
     observed, original_metadata = index.build_observation(
         scene, current_token, history=_OBSERVED_HISTORY, max_actors=8)
@@ -112,15 +128,29 @@ def encode_e0_observation(index, scene, current_token, codec, device='cpu', *,
     history_mask = np.zeros(history_slots, bool)
     history_time = np.zeros(history_slots, np.float64)
     latent_tokens = [''] * history_slots
+    slots = [slot for slot in range(_OBSERVED_HISTORY - hist_last, _OBSERVED_HISTORY)
+             if original_mask[slot]]
     with _inference_codec(codec):
-        for observed_slot in range(_OBSERVED_HISTORY - hist_last, _OBSERVED_HISTORY):
-            if not original_mask[observed_slot]:
-                continue
+        completed = None
+        if mode == 'mask_lidar_temporal_ground':
+            grids = [index.load_occupancy_e0(tokens[slot], current_token, source_frame=source_frame,
+                                            visibility_keys=('mask_lidar',)) for slot in slots]
+            if any('mask_lidar' not in grid.get('visibility', {}) for grid in grids):
+                raise ValueError('Missing requested observation visibility mask: mask_lidar')
+            completed = complete_masked_ground_history(
+                np.stack([grid['semantics'] for grid in grids]),
+                np.stack([grid['in_bounds'] for grid in grids]),
+                np.stack([grid['visibility']['mask_lidar'] for grid in grids]))
+        for position, observed_slot in enumerate(slots):
             latent_slot = history_slots - _OBSERVED_HISTORY + observed_slot
             token = tokens[observed_slot]
-            latents[latent_slot], _ = _encode_grid(
-                index, token, current_token, codec, device=device, source_frame=source_frame,
-                visibility_key=visibility_key)
+            if completed is None:
+                latents[latent_slot], _ = _encode_grid(
+                    index, token, current_token, codec, device=device, source_frame=source_frame,
+                    visibility_key=visibility_key)
+            else:
+                latents[latent_slot] = _encode_arrays(completed[0][position], completed[1][position],
+                                                     codec, device=device)
             history_mask[latent_slot] = True
             history_time[latent_slot] = times[observed_slot]
             latent_tokens[latent_slot] = token
@@ -133,8 +163,7 @@ def encode_e0_observation(index, scene, current_token, codec, device='cpu', *,
         'grid': GridSpec().as_dict(), 'posterior': 'mean', 'latent_scaling': 'unscaled',
         'history_slots': history_slots, 'hist_last': hist_last,
         'history_latent_sample_tokens': latent_tokens,
-        'input_visibility_key': visibility_key,
-        'input_visibility_policy': 'selected_sensor_mask & in_bounds & semantics!=255',
+        **visibility_metadata(visibility_key, history_visibility=mode),
         'unknown_policy': 'hidden_or_unknown_masked_to_empty17_for_pretrained_embedding_only;not_valid_free_evidence',
         'spatial_alignment': 'raw_3d_nearest_warp_before_encoding;no_latent_2d_warp',
         'provenance': 'docs/provenance/e0_cache_sources.json',
@@ -144,8 +173,8 @@ def encode_e0_observation(index, scene, current_token, codec, device='cpu', *,
 
 def encode_e0_training_sample(index, scene, current_token, codec, device='cpu', *,
                               history_slots=6, hist_last=4, future=6,
-                              source_frame='ego', visibility_key='mask_lidar',
-                              include_future_semantics=False):
+                              source_frame='ego', visibility_key=_DEFAULT_VISIBILITY,
+                              include_future_semantics=False, history_visibility=None):
     """Add separate future oracle targets to an observation-only encoding.
 
     Future labels use complete in-bounds known semantics, independent of future
@@ -162,7 +191,8 @@ def encode_e0_training_sample(index, scene, current_token, codec, device='cpu', 
         raise ValueError('future must be a positive integer')
     result = encode_e0_observation(
         index, scene, current_token, codec, device=device, history_slots=history_slots,
-        hist_last=hist_last, source_frame=source_frame, visibility_key=visibility_key)
+        hist_last=hist_last, source_frame=source_frame, visibility_key=visibility_key,
+        history_visibility=history_visibility)
     sample = index.build_sample(scene, current_token, history=_OBSERVED_HISTORY,
                                 future=future, max_actors=8)
     target = {key: np.array(value, copy=True) for key, value in sample['target'].items()}

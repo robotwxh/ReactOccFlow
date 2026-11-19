@@ -11,6 +11,8 @@ from pathlib import Path, PurePosixPath
 
 import numpy as np
 
+from .history_visibility import resolve_history_visibility
+
 CACHE_FORMAT = 'reactoccflow_e0_research_cache'
 CACHE_VERSION = 1
 
@@ -61,6 +63,7 @@ def validate_sample(sample):
         raise ValueError('Duplicate actor instance identities')
     if metadata.get('posterior') != 'mean' or metadata.get('latent_scaling') != 'unscaled':
         raise ValueError('E0 cache requires unscaled posterior means')
+    resolve_history_visibility(metadata)
     obs, target = sample['observation'], sample['target']
     for section, values in (('observation', obs), ('target', target)):
         for key, array in values.items():
@@ -129,7 +132,7 @@ def validate_sample(sample):
         raise ValueError('Full windows cannot contain absent sample identities')
 
 
-def read_record(root, entry, settings_sha256, *, verify_checksum=False):
+def read_record(root, entry, settings_sha256, *, verify_checksum=False, history_visibility=None):
     payload = safe_cache_path(root, entry['file'])
     record_path = safe_cache_path(root, entry['record_file'])
     record = json.loads(record_path.read_text())
@@ -141,6 +144,8 @@ def read_record(root, entry, settings_sha256, *, verify_checksum=False):
     if verify_checksum and payload_sha256(payload) != record['sha256']:
         raise ValueError('Cache payload checksum mismatch')
     metadata = record['metadata']
+    if history_visibility is not None and resolve_history_visibility(metadata) != history_visibility:
+        raise ValueError('Cache record history visibility disagrees with settings/manifest')
     if (metadata.get('scene'), metadata.get('token')) != (entry['scene'], entry['token']):
         raise ValueError('Record metadata identity mismatch')
     sample = {'observation': {}, 'target': {}, 'metadata': metadata}
@@ -189,10 +194,13 @@ class E0ResearchDataset:
             safe_cache_path(self.root, entry['file'])
             safe_cache_path(self.root, entry['record_file'])
         self.normalization = manifest.get('normalization')
+        self.history_visibility = (resolve_history_visibility(manifest)
+                                   if 'history_visibility' in manifest else None)
 
     def __len__(self):
         return len(self.records)
 
     def __getitem__(self, item):
         return read_record(self.root, self.records[item], self.manifest['settings_sha256'],
-                           verify_checksum=self.verify_checksums)
+                           verify_checksum=self.verify_checksums,
+                           history_visibility=self.history_visibility)

@@ -98,10 +98,12 @@ def test_resuming_early_stopped_state_does_not_optimize_again(tmp_path, monkeypa
     output = tmp_path / "run"
 
     main(["--train-cache", str(train), "--tune-cache", str(tune), "--output", str(output),
+          "--history-visibility", "dense_semantic",
           "--resume", "terminal.pt", "--device", "cpu", "--batch-size", "1",
           "--grad-accum", "1", "--workers", "0", "--max-steps", "20", "--warmup-steps", "1", "--patience", "2"])
 
     records = [json.loads(line) for line in (output / "training.jsonl").read_text().splitlines()]
+    assert next(row for row in records if row['event'] == 'started')['config']['history_visibility'] == 'dense_semantic'
     assert records[-1]["event"] == "finished"
     assert records[-1]["global_step"] == 4
 
@@ -162,11 +164,15 @@ def _output_worker(rank, rendezvous, output, results):
         dist.destroy_process_group()
 
 
-def _write_cache(root, *, group, scenes, normalization=None, complete=True):
+def _write_cache(root, *, group, scenes, normalization=None, complete=True,
+                 history_visibility='dense_semantic', legacy=False):
     root.mkdir(parents=True)
     normalization = normalization or {"fit_group": "train", "coordinate_frame": "E0"}
     settings = {"group": group, "normalization": normalization,
+                'visibility_key': None if history_visibility == 'dense_semantic' else history_visibility,
                 "world_size": 1, "expected_count": len(scenes)}
+    if not legacy:
+        settings['history_visibility'] = history_visibility
     canonical = json.dumps(settings, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
     settings_sha256 = hashlib.sha256(canonical).hexdigest()
     (root / "settings.json").write_text(json.dumps({
@@ -203,7 +209,12 @@ def _write_cache(root, *, group, scenes, normalization=None, complete=True):
         payload.parent.mkdir(parents=True, exist_ok=True)
         metadata.parent.mkdir(parents=True, exist_ok=True)
         payload.write_bytes(f"payload-{entry['global_index']}".encode())
-        metadata.write_text(json.dumps({**entry, "metadata": {"scene": entry["scene"], "token": entry["token"]}}))
+        policy = {'input_visibility_key': settings['visibility_key'],
+                  'input_visibility_policy': ('in_bounds & semantics!=255' if history_visibility == 'dense_semantic'
+                                              else 'selected_sensor_mask & in_bounds & semantics!=255')}
+        if not legacy:
+            policy['history_visibility'] = history_visibility
+        metadata.write_text(json.dumps({**entry, "metadata": {"scene": entry["scene"], "token": entry["token"], **policy}}))
     return root
 
 
@@ -214,6 +225,110 @@ def test_runner_accepts_cache_generator_settings_wrapper(tmp_path):
     train_dataset, tune_dataset = validate_cache_pair(train, tune)
 
     assert len(train_dataset) == len(tune_dataset) == 1
+
+
+def test_training_rejects_mixed_cache_modes(tmp_path):
+    train = _write_cache(tmp_path/'train', group='train', scenes=['a'])
+    tune = _write_cache(tmp_path/'tune', group='tune', scenes=['b'], history_visibility='mask_lidar')
+    with pytest.raises(ValueError, match='history visibility must match'):
+        validate_cache_pair(train, tune)
+
+
+def test_explicit_dense_mode_rejects_legacy_mask_cache_before_creating_run(tmp_path):
+    train = _write_cache(tmp_path/'train', group='train', scenes=['a'], history_visibility='mask_lidar', legacy=True)
+    tune = _write_cache(tmp_path/'tune', group='tune', scenes=['b'], history_visibility='mask_lidar', legacy=True)
+    output = tmp_path/'run'
+    with pytest.raises(ValueError, match='differs from requested dense_semantic'):
+        main(['--train-cache', str(train), '--tune-cache', str(tune), '--output', str(output),
+              '--history-visibility', 'dense_semantic', '--device', 'cpu'])
+    assert not output.exists()
+    a, b = validate_cache_pair(train, tune, history_visibility='mask_lidar')
+    assert a.history_visibility == b.history_visibility == 'mask_lidar'
+
+
+def test_training_rejects_record_policy_contradicting_settings(tmp_path):
+    train = _write_cache(tmp_path/'train', group='train', scenes=['a'])
+    tune = _write_cache(tmp_path/'tune', group='tune', scenes=['b'])
+    path = tune/'records/0.json'
+    record = json.loads(path.read_text())
+    record['metadata'].update(history_visibility='mask_lidar', input_visibility_key='mask_lidar',
+                              input_visibility_policy='selected_sensor_mask & in_bounds & semantics!=255')
+    path.write_text(json.dumps(record))
+    with pytest.raises(ValueError, match='history visibility disagrees'):
+        validate_cache_pair(train, tune)
+
+
+@pytest.mark.parametrize('mode', [None, 'mask_lidar', 'dense_semantic', 'mask_lidar_temporal_ground'])
+def test_training_selects_matching_caches_without_starting_training(monkeypatch, mode):
+    import scripts.train_react_flow as runner
+    received = []
+    class StopBeforeModel(Exception):
+        pass
+    def inspect(train, tune, *, history_visibility):
+        received.append((train, tune, history_visibility))
+        raise StopBeforeModel
+    monkeypatch.setattr(runner, 'validate_cache_pair', inspect)
+    with pytest.raises(StopBeforeModel):
+        runner.main([] if mode is None else ['--history-visibility', mode])
+    selected = 'mask_lidar' if mode is None else mode
+    directory = {'mask_lidar': 'e0_full', 'dense_semantic': 'e0_dense_history',
+                 'mask_lidar_temporal_ground': 'e0_mask_lidar_temporal_ground'}[selected]
+    assert received == [(Path(f'data/research/{directory}/train').resolve(),
+                         Path(f'data/research/{directory}/tune').resolve(), selected)]
+
+
+def test_resume_cannot_change_history_input_mode(tmp_path):
+    from scripts.train_react_flow import _load_resume
+    path = tmp_path/'old.pt'
+    torch.save({'config': {'mode': 'joint', 'history_visibility': 'mask_lidar'},
+                'data_fingerprint': {}}, path)
+    with pytest.raises(ValueError, match='config/data identity'):
+        _load_resume(path, {'mode': 'joint', 'history_visibility': 'dense_semantic'}, {},
+                     None, None, None, None, None, torch.device('cpu'), 0, 1)
+
+
+def test_stop_marker_saves_at_validation_boundary_and_keeps_requested_trunk_lr(tmp_path, monkeypatch):
+    import scripts.train_react_flow as runner
+    class TinyModel(nn.Linear):
+        def __init__(self, **kwargs):
+            super().__init__(1, 1)
+        def freeze_trunk(self, **kwargs):
+            return self
+        def load_pretrained(self, *args, **kwargs):
+            return {}
+    class TinyObjective(nn.Module):
+        def __init__(self, flow, codec, **kwargs):
+            super().__init__()
+            self.flow, self.codec = flow, codec.requires_grad_(False)
+        def forward(self, observation, target, candidate, *, generator):
+            return self.flow(observation['history_latents']).square().mean()
+    train = _write_cache(tmp_path/'train', group='train', scenes=['a', 'b'])
+    tune = _write_cache(tmp_path/'tune', group='tune', scenes=['c'])
+    batch = {'observation': {'history_latents': torch.ones(1, 1)},
+             'target': {'ego_future': torch.zeros(1, 1, 2)}}
+    monkeypatch.setattr(runner, 'ReactFlow', TinyModel)
+    monkeypatch.setattr(runner, 'OccupancyCodec', TinyModel)
+    monkeypatch.setattr(runner, 'JointTrainingAdapter', TinyObjective)
+    monkeypatch.setattr(runner, '_make_loader', lambda *args, **kwargs: [batch, batch])
+    monkeypatch.setattr(runner, '_runtime_fingerprint', lambda *args: {})
+    def unexpected(*args, **kwargs):
+        pytest.fail('Stop marker must save before validation, even at its interval boundary')
+    monkeypatch.setattr(runner, '_evaluate', unexpected)
+    marker = tmp_path/'STOP_REQUESTED.json'
+    marker.write_text('{}')
+    output = tmp_path/'run'
+    runner.main(['--train-cache', str(train), '--tune-cache', str(tune), '--output', str(output),
+                 '--history-visibility', 'dense_semantic',
+                 '--device', 'cpu', '--workers', '0', '--batch-size', '1', '--grad-accum', '1',
+                 '--max-steps', '4', '--warmup-steps', '1', '--eval-interval', '1', '--probe-tune-windows', '0',
+                 '--trunk-lr', '2e-5', '--stop-request-file', str(marker)])
+    checkpoint = torch.load(output/'latest.pt', map_location='cpu', weights_only=True)
+    assert checkpoint['global_step'] == 1
+    assert checkpoint['config']['trunk_lr'] == 2e-5
+    assert checkpoint['optimizer_state_dict']['state']
+    rows = [json.loads(line) for line in (output/'training.jsonl').read_text().splitlines()]
+    assert rows[-1]['event'] == 'paused' and rows[-1]['global_step'] == 1
+    assert any(row['event'] == 'stop_requested' for row in rows)
 
 
 def test_runner_refuses_partial_cache_before_creating_output(tmp_path):

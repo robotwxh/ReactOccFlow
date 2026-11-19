@@ -408,8 +408,9 @@ class NuScenesLabelIndex:
         return transform
 
     def load_occupancy_e0(self, source_token, current_token, *, source_frame,
-                          source_grid=GridSpec(), target_grid=GridSpec()):
-        """Load local labels and warp 3-D semantics plus each visibility mask."""
+                          source_grid=GridSpec(), target_grid=GridSpec(),
+                          visibility_keys=('mask_lidar', 'mask_camera')):
+        """Warp local semantics and requested masks; () reads no sensor masks."""
         source = self.samples[source_token]
         scene_name = self.scenes[source['scene_token']]['name']
         path = self.root / 'gts' / scene_name / source_token / 'labels.npz'
@@ -417,7 +418,7 @@ class NuScenesLabelIndex:
             semantics = label['semantics']
             if not np.isin(semantics, np.array([*range(18), 255])).all():
                 raise ValueError('Occupancy contains values outside Occ3D18 and unknown255')
-            masks = {key: label[key].astype(bool) for key in ('mask_lidar', 'mask_camera') if key in label}
+            masks = {key: label[key].astype(bool) for key in visibility_keys if key in label}
         result = warp_occupancy_nearest(
             semantics, self.occupancy_to_e0(source_token, current_token, source_frame=source_frame),
             visibility=masks, source_grid=source_grid, target_grid=target_grid,

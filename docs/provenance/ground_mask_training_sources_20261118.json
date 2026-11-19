@@ -1,0 +1,44 @@
+{
+  "date": "2026-11-18",
+  "task": "Authorized ground-mask10000 training and three-way final-EMA comparison",
+  "reference_searches": [
+    "reuse target-cache history cache conditional encode",
+    "EMA checkpoint fixed-step export",
+    "confusion per-class counts",
+    "controller stage completion history visibility"
+  ],
+  "source_commits": {
+    "OccFM": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+    "IR-WM": "94dbbf44d6c22e50db4080e986b3675eadbb4497"
+  },
+  "reference_source_sha256": {
+    "OccFM/tools/train_utils/train_utils.py": "16e7ea88467b3db368a8836a9fad9f910d2e164ca620bec7b9e53f2c1766c7ee",
+    "OccFM/forecast/utils/eval_utils.py": "11b60285639e569cb6555ba5ce63d999bdbbe19307c74f1c9afdbbf2518c3f68",
+    "IR-WM/projects/mmdet3d_plugin/core/hooks/ema.py": "ee159e82a102fdd1ded032da04160014cdeba3ba8895ef99ce26aeb86db7e8be",
+    "IR-WM/projects/mmdet3d_plugin/datasets/builder.py": "80ba848c2ef86e358ca64a34ace1c6998891d067408165d4474082ec3b50e166"
+  },
+  "reuse_decisions": [
+    "Reuse owned fixed-step EMA exporter, full rank/count/GT/protocol validators, cache encoder, and supervised pipeline.",
+    "Neither reference implements identity-bound reuse of unchanged E0 future targets or this three-way report; add independent owned glue.",
+    "Only observed-history preprocessing changes; retain model/loss/optimizer math and previously completed experiments."
+  ],
+  "run_root": "outputs/history_input_comparison/2026-11-18-ground-mask-seed2026",
+  "frozen_source_sha256": "c6c6664c2fdf0bfe1c12c970aef73caa52f37c2391f47bcfc223326011080c07",
+  "frozen_files": 195,
+  "tests_passed": 183,
+  "two_rank_training_smoke_actual_exit_code": 0,
+  "two_rank_evaluation_smoke": {
+    "rank_exit_codes": [
+      0,
+      0
+    ],
+    "aggregate_exit_code": 0,
+    "formal_result": false
+  },
+  "startup_health": "outputs/history_input_comparison/2026-11-18-ground-mask-seed2026/startup_health.json",
+  "controller_pid": 264199,
+  "training_budget": 10000,
+  "final_evaluation_step": 10000,
+  "model_loss_training_math_changed": false,
+  "pipeline_started": true
+}

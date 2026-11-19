@@ -26,6 +26,10 @@ from reactoccflow.data.e0_dataset import (
     CACHE_FORMAT, CACHE_VERSION, payload_sha256, read_record, safe_cache_path,
     validate_sample,
 )
+from reactoccflow.data.history_visibility import (
+    DEFAULT_HISTORY_VISIBILITY, HISTORY_CACHE_DIRECTORIES, HISTORY_VISIBILITIES,
+    resolve_history_visibility, visibility_key_from_mode, visibility_metadata,
+)
 
 
 def _canonical(value):
@@ -111,7 +115,8 @@ def _record_entry(anchor, settings_sha256):
             'settings_sha256': settings_sha256}
 
 
-def _existing_record(root, anchor, settings_sha256):
+def _existing_record(root, anchor, settings_sha256, *, history_visibility=None,
+                     codec_checkpoint_sha256=None):
     expected = _record_entry(anchor, settings_sha256)
     try:
         record = json.loads(safe_cache_path(root, expected['record_file']).read_text())
@@ -119,14 +124,22 @@ def _existing_record(root, anchor, settings_sha256):
         entry = {**expected, 'sha256': record['sha256']}
         # Resume and complete-manifest assembly apply exactly the reader's full
         # numeric/metadata schema, in addition to hashing actual payload bytes.
-        read_record(root, entry, settings_sha256, verify_checksum=True)
+        if (codec_checkpoint_sha256 is not None
+                and record['metadata'].get('codec_checkpoint_sha256') != codec_checkpoint_sha256):
+            return None
+        read_record(root, entry, settings_sha256, verify_checksum=True, history_visibility=history_visibility)
         return entry
     except (OSError, ValueError, KeyError, TypeError):
         return None
 
 
-def _write_record(root, anchor, settings_sha256, sample):
+def _write_record(root, anchor, settings_sha256, sample, *, history_visibility=None,
+                  codec_checkpoint_sha256=None):
+    if codec_checkpoint_sha256 is not None:
+        sample = {**sample, 'metadata': {**sample['metadata'], 'codec_checkpoint_sha256': codec_checkpoint_sha256}}
     validate_sample(sample)
+    if history_visibility is not None and resolve_history_visibility(sample['metadata']) != history_visibility:
+        raise ValueError('Encoded sample history visibility disagrees with cache settings')
     if (sample['metadata'].get('scene'), sample['metadata'].get('token')) != (anchor['scene'], anchor['token']):
         raise ValueError('Encoded sample anchor identity mismatch')
     entry = _record_entry(anchor, settings_sha256)
@@ -146,7 +159,9 @@ def _write_record(root, anchor, settings_sha256, sample):
 
 
 def _base_manifest(settings_sha256, anchors, settings):
-    return {'version': CACHE_VERSION, 'format': CACHE_FORMAT, 'coordinate_frame': 'E0',
+    policy = ({'history_visibility': resolve_history_visibility(settings, key_field='visibility_key')}
+              if 'history_visibility' in settings or 'visibility_key' in settings else {})
+    return {**policy, 'version': CACHE_VERSION, 'format': CACHE_FORMAT, 'coordinate_frame': 'E0',
             'oracle': True, 'complete': False, 'settings_sha256': settings_sha256,
             'expected_count': len(anchors), 'sample_count': 0, 'records': [],
             'normalization': settings.get('normalization'), 'group': settings.get('group')}
@@ -173,6 +188,9 @@ def _initialize(root, settings, anchors, world_size):
 
 def assemble_manifest(root, settings, anchors, settings_sha256, world_size):
     """Publish complete:true only after every rank commits its exact census."""
+    history_visibility = (resolve_history_visibility(settings, key_field='visibility_key')
+                          if 'history_visibility' in settings or 'visibility_key' in settings else None)
+    codec_sha256 = settings.get('checkpoint_sha256') if 'history_visibility' in settings else None
     with _lock(root, '.assemble.lock'):
         records, all_complete = [], True
         for rank in range(world_size):
@@ -191,7 +209,9 @@ def assemble_manifest(root, settings, anchors, settings_sha256, world_size):
                 if identity not in expected_by_key or identity in seen:
                     raise ValueError('Rank contains duplicate or foreign anchor')
                 anchor = expected_by_key[identity]
-                verified = _existing_record(root, anchor, settings_sha256)
+                verified = _existing_record(root, anchor, settings_sha256,
+                                             history_visibility=history_visibility,
+                                             codec_checkpoint_sha256=codec_sha256)
                 if verified != entry:
                     all_complete = False
                     continue
@@ -220,6 +240,8 @@ def run_cache(root, settings, anchors, encode, *, rank=0, world_size=1, limit=No
     identities = [(row['scene'], row['token']) for row in anchors]
     if len(set(identities)) != len(identities): raise ValueError('Duplicate anchor identities')
     digest = _initialize(root, settings, anchors, world_size)
+    history_visibility = (resolve_history_visibility(settings, key_field='visibility_key')
+                          if 'history_visibility' in settings or 'visibility_key' in settings else None)
     if assemble_only: return assemble_manifest(root, settings, anchors, digest, world_size)
     assigned = [row for row in anchors if row['global_index'] % world_size == rank]
     with _lock(root, f'.rank-{rank:05d}.lock'):
@@ -235,10 +257,14 @@ def run_cache(root, settings, anchors, encode, *, rank=0, world_size=1, limit=No
             manifest = json.loads(manifest_path.read_text()); manifest['complete'] = False
             _atomic_json(manifest_path, manifest)
         for anchor in assigned:
-            entry = _existing_record(root, anchor, digest)
+            entry = _existing_record(root, anchor, digest, history_visibility=history_visibility,
+                                      codec_checkpoint_sha256=(settings.get('checkpoint_sha256')
+                                                               if 'history_visibility' in settings else None))
             if entry is None:
                 if limit is not None and new >= limit: continue
-                entry = _write_record(root, anchor, digest, encode(anchor)); new += 1
+                entry = _write_record(root, anchor, digest, encode(anchor),
+                                      history_visibility=history_visibility,
+                                      codec_checkpoint_sha256=settings.get('checkpoint_sha256')); new += 1
             else: reused += 1
             records.append(entry)
             progress.update(new_records=new, reused_records=reused, seconds=time.monotonic() - started,
@@ -277,6 +303,7 @@ def _runtime_settings(args, split, labels, normalization, source_tables, anchors
     import torch
     project = Path(__file__).resolve().parents[1]
     owned = [Path(__file__), project / 'reactoccflow/data/e0_cache.py', project / 'reactoccflow/data/e0_dataset.py',
+             project / 'reactoccflow/data/history_visibility.py', project / 'reactoccflow/data/history_recache.py',
              project / 'reactoccflow/data/research.py', project / 'reactoccflow/models/codec.py',
              project / 'reactoccflow/models/_utils.py', project / 'reactoccflow/provenance.py']
     owned += sorted((project / 'reactoccflow/geometry').rglob('*.py'))
@@ -292,7 +319,10 @@ def _runtime_settings(args, split, labels, normalization, source_tables, anchors
         'version': 1, 'group': args.group, 'metadata_version': args.version,
         'coordinate_frame': 'E0', 'history': 4, 'history_slots': 6, 'hist_last': 4, 'future': 6,
         'anchor_selection': 'official_scene_chain_i=3..n-7_inclusive;sorted_scene_name',
-        'source_frame': 'ego', 'visibility_key': 'mask_lidar', 'posterior': 'mean',
+        'source_frame': 'ego', 'history_visibility': args.history_visibility,
+        'visibility_key': visibility_key_from_mode(args.history_visibility), 'posterior': 'mean',
+        'input_visibility_policy': visibility_metadata(visibility_key_from_mode(args.history_visibility),
+                                                      history_visibility=args.history_visibility)['input_visibility_policy'],
         'include_future_semantics': True, 'dtype': 'float32', 'gpu_model': gpu_model,
         'gpu_capability': capability, 'torch_version': torch.__version__, 'cuda_version': torch.version.cuda,
         'numpy_version': np.__version__, 'intraop_threads': torch.get_num_threads(),
@@ -368,35 +398,53 @@ def main(argv=None):
     parser.add_argument('--normalization', type=Path, default=Path('data/research/normalization.json'))
     parser.add_argument('--source-manifest', type=Path, default=Path('data/research/source_manifest.json'))
     parser.add_argument('--checkpoint', type=Path, default=Path('assets/checkpoints/occfm_vae.ckpt'))
-    parser.add_argument('--output', type=Path, default=Path('data/research/e0_full/train'))
+    parser.add_argument('--history-visibility', choices=HISTORY_VISIBILITIES, default=DEFAULT_HISTORY_VISIBILITY)
+    parser.add_argument('--output', type=Path, help='Defaults to data/research/e0_full/<group>; explicit history modes select matching directories')
     parser.add_argument('--device', default='cuda:0')
     parser.add_argument('--rank', type=int, default=0)
     parser.add_argument('--world-size', type=int, default=2)
     parser.add_argument('--limit', type=int, default=None, help='Maximum NEW records this invocation; existing verified records do not count')
     parser.add_argument('--assemble-only', action='store_true')
+    parser.add_argument('--reuse-target-cache', type=Path,
+                        help='Verified complete cache with identical future targets/actor data; recode history only')
     args = parser.parse_args(argv)
+    if args.output is None:
+        cache_name = HISTORY_CACHE_DIRECTORIES[args.history_visibility]
+        args.output = Path('data/research') / cache_name / args.group
     if args.world_size < 1 or not 0 <= args.rank < args.world_size or (args.limit is not None and args.limit < 0):
         parser.error('world-size must be positive, rank in range, and limit nonnegative')
     import torch
     torch.set_num_threads(4)
     anchors, settings = _prepare(args)
+    reuse_dataset = None
+    if args.reuse_target_cache is not None:
+        from reactoccflow.data.history_recache import verify_reuse_cache
+        reuse_dataset, settings['target_reuse'] = verify_reuse_cache(args.reuse_target_cache, settings, anchors)
     print(json.dumps({'stage': 'census', 'expected_count': len(anchors), 'rank': args.rank,
                       'world_size': args.world_size, 'assigned': sum(a['global_index'] % args.world_size == args.rank for a in anchors)}), flush=True)
     state = {}
     def encode(anchor):
         if not state:
             from reactoccflow.data.research import NuScenesLabelIndex
-            from reactoccflow.data.e0_cache import encode_e0_training_sample
+            from reactoccflow.data.e0_cache import encode_e0_training_sample, encode_e0_observation
             from reactoccflow.models import OccupancyCodec
             scenes = sorted(settings['source_split_groups'][args.group])
             state['index'] = NuScenesLabelIndex(args.root, args.version, scenes=scenes)
             state['codec'] = OccupancyCodec().to(args.device).eval()
             state['codec'].load_pretrained(args.checkpoint)
-            state['encode'] = encode_e0_training_sample
+            state['encode'] = encode_e0_observation if reuse_dataset is not None else encode_e0_training_sample
             for parameter in state['codec'].parameters(): parameter.requires_grad_(False)
-        return state['encode'](state['index'], anchor['scene'], anchor['token'], state['codec'], args.device,
-                               history_slots=6, hist_last=4, future=6, source_frame='ego',
-                               visibility_key='mask_lidar', include_future_semantics=True)
+        extra = {} if reuse_dataset is not None else {'future': 6, 'include_future_semantics': True}
+        sample = state['encode'](state['index'], anchor['scene'], anchor['token'], state['codec'], args.device,
+                               history_slots=6, hist_last=4, source_frame='ego',
+                               visibility_key=visibility_key_from_mode(args.history_visibility),
+                               history_visibility=args.history_visibility, **extra)
+        if reuse_dataset is not None:
+            from reactoccflow.data.history_recache import reuse_targets
+            ordinal = anchor['global_index']
+            sample = reuse_targets(reuse_dataset[ordinal], sample,
+                                   source_record_sha256=reuse_dataset.records[ordinal]['sha256'])
+        return sample
     manifest = run_cache(args.output, settings, anchors, encode, rank=args.rank, world_size=args.world_size,
                          limit=args.limit, assemble_only=args.assemble_only)
     return 0

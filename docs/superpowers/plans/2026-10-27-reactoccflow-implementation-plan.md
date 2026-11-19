@@ -1,6 +1,30 @@
+> 2026-11-19 最新恢复：已按用户要求将默认历史输入恢复第一版`mask_lidar`，采用原始可见性mask、不做地面补全；默认缓存/训练均回到`e0_full`。三轮历史权重与结果保留，未启动新训练。见[恢复说明](../../implementation/2026-11-19-mask-v1-restored.md)。下方为历史状态。
+
+> 2026-11-19 完成：新mask已完成10,000步训练与完整评测，三组Avg mIoU为密集27.8944%、原mask27.9574%、新mask27.7821%；新mask未达到other_flat改进目标。固定最终EMA、计数和协议已复核，原始产物保留。见[完整三组对比](../../implementation/2026-11-19-ground-mask-three-way-evaluation.md)。下方状态按日期保留。
+
+> 2026-11-18 最新恢复：已按用户“训练继续进行”指令恢复新mask流程。11,027条缓存完整核验通过，沿用原冻结源码和10,000步总预算，随后自动正式评测并与前两轮比较；raw STOP保持原位。见[恢复记录](../../implementation/2026-11-18-ground-mask-training-resumed.md)。下方为历史状态。
+
+> 2026-11-18 最新暂停：新mask流程已按用户要求停止于缓存阶段，保留11,027/17,468条训练缓存；正式训练尚未开始（0/10,000步）。控制器及双rank已退出，后续训练和评测不自动启动。见[暂停记录](../../implementation/2026-11-18-ground-mask-training-paused.md)。下方为历史状态。
+
+> 2026-11-18 新训练：已按用户授权启动新mask `mask_lidar_temporal_ground` 的独立缓存→双卡10,000步训练→全量评测→与前两轮对比流程。当前阶段以运行目录 `pipeline.json` 为准，既有权重和结果保留。详见[启动记录与核验](../../implementation/2026-11-18-ground-mask-training-started.md)。
+
+> 2026-11-18：密集/mask两轮10,000步训练与完整评测已完成。按用户要求增加`mask_lidar_temporal_ground`可选模式，缓存和在线评测共享仅观测历史的地面补全，旧输入协议及结果保留。已完成训练子集覆盖/VAE重建检查，收益较小且仍有误补；本次未启动新训练，未来预测增益待独立固定step10000评测。见[实施与证据](../../implementation/2026-11-18-mask-lidar-ground-completion.md)。下方为历史状态。
+
 > 2026-11-15：已按用户要求撤回原始 LiDAR 输入及其后续改造，恢复 **语义 occupancy → 冻结原 VAE → latent／actor 状态缓存 → U形 CFM 或标准 DiT512**。新增点云感知/actor 检测/从头分阶段训练路线已移出活动代码，历史产物保留。**全部训练继续暂停，不自动恢复。**详见 [回退记录](../../implementation/2026-11-15-rollback-raw-input.md)。下文运行状态按日期保留为历史。
 
+> 2026-11-16：执行“第一个问题”的代码修复。新编码/缓存/训练入口默认`dense_semantic`，历史有效区域为`in_bounds & semantics!=255`；在线评测按检查点输入模式运行，无新字段的旧joint权重仍使用`mask_lidar`。新目录`data/research/e0_dense_history/{train,tune}`尚未生成，旧缓存和权重不覆盖，未来目标/actor/E0/CFG/损失不变。**仅代码与合成数据验证，不生成真实缓存、不训练、不重测mIoU。**详见[修复说明](../../implementation/2026-11-16-dense-semantic-history.md)。
+
 # ReactOccFlow 独立工程详细实施计划
+
+> 2026-11-17 后续恢复：用户明确要求继续训练。对照运行已严格恢复6,842步完整模型/EMA/优化器/scheduler/双rank RNG/游标，保留总预算10,000步，随后继续已授权的完整评测/对比。见[恢复记录](../../implementation/2026-11-17-history-input-comparison-resumed.md)。
+
+> 2026-11-17 最新指令：用户要求暂停。mask/dense对照流程停在mask训练6,842/10,000步，完整模型/EMA/优化器/scheduler/双rank RNG/游标已保存。后续正式评测和对比保持暂停，不自动恢复。详见[暂停记录](../../implementation/2026-11-17-history-input-comparison-paused.md)。
+
+> 2026-11-17 执行：密集历史10,000步训练已完成。用户新授权`mask_lidar`输入同预算训练及两种输入的完整评测/对比；控制初始化、seed、batch、学习率、优化预算和评测协议，预先固定第10,000步EMA。运行及证据见[对照实验记录](../../implementation/2026-11-17-history-input-comparison-started.md)。
+
+> 2026-11-16 最新预算：用户指定本次密集历史实验训练上限为**10,000步**。模型尚未开始优化时完成配置变更与控制器重启，已有缓存保留并断点校验复用；旧100,000步预算不再适用。warmup1,000、验证间隔2,000及其余参数不变。
+
+> 2026-11-16 后续执行：用户明确授权密集语义历史训练。已启动独立冻结源码流程`cache_train → cache_tune → U形CFM＋actor`，不恢复旧实验或raw训练；新运行、初始权重、预算和ETA依据见[启动记录](../../implementation/2026-11-16-dense-history-training-started.md)。
 
 > 2026-11-11 差距诊断：hidden512输出秩已满400；8个固定tune场景的actor→occupancy注入移除干预得到17.3353%→20.5856%，U形没有对应退化；NFE40仍保留两模型约11.07个百分点原生E0差距。语义敏感误差、目标覆盖不足与注入设计是当前排查重点，预训练和表示细节的贡献仍需受控重训。本轮只诊断，未更改权重或官方成绩。证据与后续优先级见 [差距分析](../../implementation/2026-11-11-dit512-cfm-gap-analysis.md)。
 

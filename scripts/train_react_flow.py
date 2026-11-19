@@ -26,6 +26,10 @@ from torch.utils.data import DataLoader, Dataset, Sampler, Subset
 from torch.utils.data.distributed import DistributedSampler
 
 from reactoccflow.data.e0_dataset import E0ResearchDataset, payload_sha256, read_record, safe_cache_path
+from reactoccflow.data.history_visibility import (
+    DEFAULT_HISTORY_VISIBILITY, HISTORY_CACHE_DIRECTORIES, HISTORY_VISIBILITIES, resolve_history_visibility,
+)
+from reactoccflow.data.loader import shutdown_data_loaders
 from reactoccflow.models import OccupancyCodec
 from reactoccflow.models.react_flow import ReactFlow
 from reactoccflow.provenance import sha256_file
@@ -51,7 +55,8 @@ class NumericE0Dataset(Dataset):
     def __getitem__(self, index):
         if index not in self.verified:
             sample = read_record(self.dataset.root, self.dataset.records[index],
-                                 self.dataset.manifest["settings_sha256"], verify_checksum=True)
+                                 self.dataset.manifest["settings_sha256"], verify_checksum=True,
+                                 history_visibility=self.dataset.history_visibility)
             self.verified.add(index)
             return sample
         return self.dataset[index]
@@ -84,7 +89,7 @@ class RankPartitionSampler(Sampler[int]):
         return max(0, (self.length - self.rank + self.world_size - 1) // self.world_size)
 
 
-def validate_cache_pair(train_cache, tune_cache):
+def validate_cache_pair(train_cache, tune_cache, *, history_visibility=None):
     train = E0ResearchDataset(train_cache, verify_checksums=False)
     tune = E0ResearchDataset(tune_cache, verify_checksums=False)
     for dataset in (train, tune):
@@ -102,6 +107,17 @@ def validate_cache_pair(train_cache, tune_cache):
         if (settings.get("group") != dataset.manifest.get("group")
                 or settings.get("normalization") != dataset.normalization):
             raise ValueError("Cache manifest group/normalization disagrees with settings.json")
+        mode = resolve_history_visibility(settings, key_field='visibility_key')
+        if mode not in HISTORY_VISIBILITIES:
+            raise ValueError(f'Unsupported cache history visibility: {mode}')
+        if dataset.history_visibility is not None and dataset.history_visibility != mode:
+            raise ValueError('Cache manifest history visibility disagrees with settings.json')
+        dataset.history_visibility = mode
+        if history_visibility is not None and mode != history_visibility:
+            raise ValueError(f'Cache history visibility {mode} differs from requested {history_visibility}; '
+                             'select matching caches and --history-visibility explicitly')
+    if train.history_visibility != tune.history_visibility:
+        raise ValueError('Train and tune cache history visibility must match')
     if train.manifest.get("group") != "train" or tune.manifest.get("group") != "tune":
         raise ValueError("Training requires group=train and group=tune E0 caches")
     if train.manifest.get("oracle") is not True or tune.manifest.get("oracle") is not True:
@@ -134,6 +150,8 @@ def _verify_cache_payloads(dataset):
         metadata = record.get("metadata", {})
         if (metadata.get("scene"), metadata.get("token")) != (entry["scene"], entry["token"]):
             raise ValueError("Cache record metadata identity disagrees with manifest")
+        if resolve_history_visibility(metadata) != dataset.history_visibility:
+            raise ValueError('Cache record history visibility disagrees with settings/manifest')
         if payload_sha256(payload) != entry["sha256"]:
             raise ValueError(f"Cache payload checksum mismatch: {entry['scene']}/{entry['token']}")
 
@@ -358,13 +376,18 @@ def _prepare_output(output, *, resume, rank, world_size, device):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--train-cache", default="data/research/e0_full/train")
-    parser.add_argument("--tune-cache", default="data/research/e0_full/tune")
+    parser.add_argument("--train-cache", help="Defaults to the selected history mode's train cache (original mask: e0_full)")
+    parser.add_argument("--tune-cache", help="Defaults to the selected history mode's tune cache (original mask: e0_full)")
+    parser.add_argument("--history-visibility", choices=HISTORY_VISIBILITIES, default=DEFAULT_HISTORY_VISIBILITY)
     parser.add_argument("--backbone", choices=["occfm_unet", "dit"], default="occfm_unet")
     parser.add_argument("--dit-config", type=Path, help="Optional flat YAML of standard DiT architecture options")
     parser.add_argument("--unet-config", type=Path, help="Optional flat YAML of restored U-shaped DiT options")
     parser.add_argument("--trunk-checkpoint", type=Path, help="Explicit OccFM U-shaped trunk initialization; not resume")
     parser.add_argument("--trunk-weights", choices=["state_dict", "ema_model"], default="state_dict")
+    parser.add_argument("--trunk-lr", type=float, default=1e-4,
+                        help="Trunk learning rate; use 2e-5 to match the historical U-CFM fine-tuning")
+    parser.add_argument("--stop-request-file", type=Path,
+                        help="A run-specific marker requests a checkpoint and pause after a synchronized step")
     parser.add_argument("--codec-checkpoint", default="assets/checkpoints/occfm_vae.ckpt")
     parser.add_argument("--output", help="Fresh run directory; defaults to outputs/reactflow_<backbone>/seed_<seed>")
     parser.add_argument("--resume", default=None)
@@ -389,6 +412,11 @@ def main(argv=None):
     parser.add_argument("--seed", type=int, default=2026)
     parser.add_argument("--device", choices=("cuda", "cpu"), default="cuda")
     args = parser.parse_args(argv)
+    cache_directory = HISTORY_CACHE_DIRECTORIES[args.history_visibility]
+    if args.train_cache is None:
+        args.train_cache = f'data/research/{cache_directory}/train'
+    if args.tune_cache is None:
+        args.tune_cache = f'data/research/{cache_directory}/tune'
     if args.dit_config is not None and args.backbone != 'dit':
         parser.error('--dit-config requires --backbone dit')
     if (args.unet_config is not None or args.trunk_checkpoint is not None) and args.backbone != 'occfm_unet':
@@ -418,9 +446,12 @@ def main(argv=None):
         parser.error("stop-after-steps must be in [1, max-steps]")
     if args.probe_tune_windows < 0 or args.probe_nfe < 1:
         parser.error("probe window count must be nonnegative and probe NFE positive")
+    if not math.isfinite(args.trunk_lr) or args.trunk_lr <= 0:
+        parser.error('trunk-lr must be finite and positive')
 
     train_cache, tune_cache = Path(args.train_cache).resolve(), Path(args.tune_cache).resolve()
-    train_dataset, tune_dataset = validate_cache_pair(train_cache, tune_cache)
+    train_dataset, tune_dataset = validate_cache_pair(train_cache, tune_cache,
+                                                     history_visibility=args.history_visibility)
     normalization = train_dataset.normalization
     train_dataset, tune_dataset = _diagnostic_datasets(
         train_dataset, tune_dataset, args.diagnostic_train_windows, args.diagnostic_tune_windows)
@@ -446,6 +477,7 @@ def main(argv=None):
     if not 0 <= rank < world_size:
         raise RuntimeError("Invalid distributed rank configuration")
 
+    train_loader = tune_loader = None
     try:
         _prepare_output(output, resume=args.resume, rank=rank, world_size=world_size, device=device)
         seed = args.seed + rank
@@ -481,7 +513,7 @@ def main(argv=None):
         codec.load_pretrained(args.codec_checkpoint, weights="state_dict")
         objective = JointTrainingAdapter(flow, codec, decode_chunk=args.decode_chunk,
                                          require_frozen_trunk=False, record_components=False).to(device)
-        trunk_lr = 1e-4
+        trunk_lr = args.trunk_lr
         optimizer = build_react_flow_optimizer(flow, trunk_lr=trunk_lr, new_lr=1e-4, weight_decay=0.01)
         scheduler = build_warmup_cosine_scheduler(optimizer, total_steps=args.max_steps,
                                                   warmup_steps=args.warmup_steps, min_lr_ratio=0.01)
@@ -505,6 +537,7 @@ def main(argv=None):
                   "minimum_lr_ratio": 0.01, "seed": args.seed, "world_size": world_size,
                   "device_type": args.device, "condition": "logged_ego_action_supervision",
                   "observation_representation": "oracle_E0",
+                  "history_visibility": args.history_visibility,
                   "run_scope": "diagnostic_subset" if args.diagnostic_train_windows is not None else "full_training",
                   "diagnostic_train_windows": args.diagnostic_train_windows,
                   "diagnostic_tune_windows": args.diagnostic_tune_windows,
@@ -603,9 +636,11 @@ def main(argv=None):
         log({"event": "started", "global_step": progress["global_step"], "config": config,
              "train_windows": len(train_dataset), "tune_windows": len(tune_dataset),
              "trainable_parameter_tensors": sum(p.requires_grad for p in flow.parameters()),
-             "stop_after_steps": args.stop_after_steps})
+             "stop_after_steps": args.stop_after_steps,
+             "stop_request_file": str(args.stop_request_file) if args.stop_request_file else None})
         initial_step = progress["global_step"]
         stop_step = args.max_steps if args.stop_after_steps is None else args.stop_after_steps
+        stopped_by_request = False
         if device.type == "cuda":
             torch.cuda.reset_peak_memory_stats(device)
         flow.train()
@@ -645,6 +680,15 @@ def main(argv=None):
                          "loss": mean_loss, "lr_trunk": optimizer.param_groups[0]["lr"],
                          "lr_new_branches": optimizer.param_groups[-1]["lr"],
                          "rank0_peak_cuda_bytes": torch.cuda.max_memory_allocated(device) if device.type == "cuda" else None})
+                if args.stop_request_file is not None:
+                    requested = torch.tensor(int(args.stop_request_file.exists()), device=device)
+                    if world_size > 1:
+                        dist.all_reduce(requested, op=dist.ReduceOp.MAX)
+                    if requested.item():
+                        stopped_by_request = True
+                        stop_step = progress['global_step']
+                        log({'event': 'stop_requested', 'global_step': progress['global_step']})
+                        break
                 if progress["global_step"] % args.eval_interval == 0:
                     best, bad, evaluations = evaluate_and_checkpoint(
                         next_epoch, next_batch, progress["best_tune_loss"],
@@ -661,7 +705,7 @@ def main(argv=None):
                 break
 
         paused = progress["global_step"] < args.max_steps and progress["bad_evaluations"] < args.patience
-        if paused and progress["global_step"] > initial_step and progress["global_step"] % args.eval_interval != 0:
+        if paused and progress["global_step"] > initial_step and (progress["global_step"] % args.eval_interval != 0 or stopped_by_request):
             save_latest(progress["epoch"], progress["next_batch"], progress["best_tune_loss"],
                         progress["bad_evaluations"], progress["evaluations"])
             log_generation_probe()
@@ -683,8 +727,13 @@ def main(argv=None):
         if log_stream is not None:
             log_stream.close()
     finally:
-        if dist.is_initialized():
-            dist.destroy_process_group()
+        try:
+            shutdown_data_loaders(train_loader, tune_loader)
+        finally:
+            if dist.is_initialized():
+                if device.type == 'cuda':
+                    torch.cuda.synchronize(device)
+                dist.destroy_process_group()
 
 
 if __name__ == "__main__":

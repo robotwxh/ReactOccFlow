@@ -1,0 +1,98 @@
+{
+  "date": "2026-11-17",
+  "task": "Matched mask_lidar10000 training followed by dense/masked fixed-step paired full evaluation",
+  "source_commits": {
+    "OccFM": "64959840a9a4cb54d5b0f6cd4bc6779bb242a853",
+    "IR-WM": "94dbbf44d6c22e50db4080e986b3675eadbb4497"
+  },
+  "reference_source_sha256": {
+    "OccFM/tools/train_utils/train_utils.py": "16e7ea88467b3db368a8836a9fad9f910d2e164ca620bec7b9e53f2c1766c7ee",
+    "OccFM/forecast/utils/eval_utils.py": "11b60285639e569cb6555ba5ce63d999bdbbe19307c74f1c9afdbbf2518c3f68",
+    "IR-WM/projects/mmdet3d_plugin/core/hooks/ema.py": "ee159e82a102fdd1ded032da04160014cdeba3ba8895ef99ce26aeb86db7e8be",
+    "IR-WM/projects/mmdet3d_plugin/datasets/builder.py": "80ba848c2ef86e358ca64a34ace1c6998891d067408165d4474082ec3b50e166"
+  },
+  "reference_searches": [
+    "persistent_workers _shutdown_workers loader cleanup",
+    "EMA state_dict checkpoint export",
+    "mIoU confusion counts and per-class report"
+  ],
+  "reuse_decisions": [
+    "Reuse owned architecture_report full-rank/count/protocol/GT auditors and owned EMA helpers; their source closures and notices already exist.",
+    "Neither reference provides this project-specific matched-history configuration/export/controller protocol; add independent owned glue.",
+    "Add explicit persistent DataLoader cleanup before distributed teardown; reference frameworks do not supply an independent equivalent.",
+    "Do not modify the completed dense source archive or any reference repository."
+  ],
+  "run_root": "outputs/history_input_comparison/2026-11-17-seed2026",
+  "frozen_source_sha256": "ef94fdfa820d9f2043c6e464b020c4ab038e3cf925ef53f13a6d91acdd2742c8",
+  "test_result": {
+    "targeted_tests": 73,
+    "exit_code": 0,
+    "seconds": 4.21
+  },
+  "cuda_training_smoke": {
+    "steps": 2,
+    "complete_tune_and_probe": true,
+    "actual_exit_code": 0
+  },
+  "cuda_evaluation_smoke": {
+    "windows": 4,
+    "rank_exit_codes": [
+      0,
+      0
+    ],
+    "aggregation_exit_code": 0,
+    "not_formal_metric": true
+  },
+  "actual_training_config_audit": {
+    "matched_training_fields": [
+      "backbone",
+      "batch_size_per_rank",
+      "condition",
+      "decode_chunk",
+      "device_type",
+      "diagnostic_train_windows",
+      "diagnostic_tune_windows",
+      "dit",
+      "dropped_tail_microbatches_per_rank",
+      "effective_batch_size",
+      "ema_decay",
+      "epoch_tail_policy",
+      "eval_interval",
+      "gradient_accumulation",
+      "max_grad_norm",
+      "max_steps",
+      "minimum_lr_ratio",
+      "mode",
+      "new_branch_lr",
+      "numerical_settings",
+      "observation_representation",
+      "patience",
+      "precision",
+      "run_scope",
+      "seed",
+      "train_batches_per_rank",
+      "trunk_lr",
+      "tune_generation_probe",
+      "unet",
+      "validation_reduction",
+      "warmup_steps",
+      "weight_decay",
+      "workers",
+      "world_size"
+    ],
+    "differing_field": "history_visibility"
+  },
+  "protected_original_sha256_unchanged": 13,
+  "reference_differences": {
+    "OccFM": [],
+    "IR-WM": []
+  },
+  "isolated_package_verification": {
+    "passed": true,
+    "cwd": "/tmp",
+    "installed_package": "/home/lthpc/wxh/envs/ReactOccFlow/lib/python3.10/site-packages/reactoccflow",
+    "matched_python_files": 118,
+    "forbidden_read_attempts": [],
+    "wheel_sha256": "b4a11c6fe0227293a50d0b43e74dceaf99588457f0243cdd6c65136603540705"
+  }
+}
